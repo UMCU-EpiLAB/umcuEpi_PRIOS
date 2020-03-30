@@ -1,0 +1,4 @@
+Mime-Types: txt=text/plain m=text/x-matlab
+Bagging-Date: 2019-08-12
+Bag-Size: 13.5 kB.5
+Payload-Oxum: 13859
