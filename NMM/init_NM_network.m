@@ -10,7 +10,6 @@
 % This code is part of the simulation code of the manuscript 'Pathological responses to single pulse electrical stimuli in epilepsy: the role of feedforward inhibition'
 % (c) 2019 Jurgen Hebbink (University of Twente, University Medical Centre Utrecht)
 %%
-clear all; close all; clc;
 tic;            % Start measuring computation time
 %% Simulation settings
 deltat=0.0001;  % Timestep for ODE solving
