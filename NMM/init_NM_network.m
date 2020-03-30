@@ -11,10 +11,12 @@
 % (c) 2019 Jurgen Hebbink (University of Twente, University Medical Centre Utrecht)
 %%
 tic;            % Start measuring computation time
+
 %% Simulation settings
 deltat=0.0001;  % Timestep for ODE solving
 Tend=60;         % End time of the simulation
 Np=5;           % Save every Np-th datapoint
+
 %% Stimulation settings
 Tin=3;          % Time before the first stimulation
 Tinterstim=5;   % Time between stimulations
