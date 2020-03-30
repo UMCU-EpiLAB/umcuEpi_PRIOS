@@ -16,8 +16,8 @@ function strout=create_NM_network(nodes, conmat, constrength)
 % This code is part of the simulation code of the manuscript 'Pathological responses to single pulse electrical stimuli in epilepsy: the role of feedforward inhibition'
 % (c) 2019 Jurgen Hebbink (University of Twente, University Medical Centre Utrecht)
 
-strout.nodes=nodes;
-strout.conmat=conmat;
-strout.constrength=constrength;
+strout.nodes=nodes;                 % Stimulation at NM 1
+strout.conmat=conmat;               % Connectivity matrix, cm(i,j) is connection j->i.
+strout.constrength=constrength;     % Connectivity strength
 end
 
