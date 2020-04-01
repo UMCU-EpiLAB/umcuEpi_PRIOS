@@ -26,25 +26,39 @@ for i=1:size(files,1)
 end
  
 %% load electrodes positions (xlsx/electrodes.tsv)
-cfg.proj_dirinput = '/home/dorien/Desktop/bulkstorage/db/respect-leijten/Electrodes/';
+%cfg.proj_dirinput = '/home/dorien/Desktop/bulkstorage/db/respect-leijten/Electrodes/';
+cfg.proj_dirinput = '/home/sifra/Desktop/db/Electrodes/';
 
 subj = cfg.sub_labels{1}(5:end);
 
-if exist(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xlsx']),'file')
-    elec = readcell(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xlsx']),'Sheet','matlabsjabloon','Range',[1 1 100 100]);
-elseif exist(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xls']),'file')
-    elec = readcell(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xls']),'Sheet','matlabsjabloon','Range',[1 1 100 100]);
-end
+% if exist(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xlsx']),'file')
+%     elec = readcell(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xlsx']),'Sheet','matlabsjabloon','Range',[1 1 100 100]);
+% elseif exist(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xls']),'file')
+%     elec = readcell(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xls']),'Sheet','matlabsjabloon','Range',[1 1 100 100]);
+% end
     
+if exist(fullfile(cfg.proj_dirinput,[subj,'_elektroden.xlsx']),'file')
+    elec = readcell(fullfile(cfg.proj_dirinput,[subj,'_elektroden.xlsx']),'Sheet','matlabsjabloon','Range',[1 1 100 100]);
+elseif exist(fullfile(cfg.proj_dirinput,[subj,'_elektroden.xls']),'file')
+    elec = readcell(fullfile(cfg.proj_dirinput,[subj,'_elektroden.xls']),'Sheet','matlabsjabloon','Range',[1 1 100 100]);
+end
+
 % localize electrodes in grid
-x = NaN(size(ccep(1).ch)); y = NaN(size(ccep(1).ch));elecmat = NaN(size(elec));topo=struct;
+x = NaN(size(ccep(1).ch)); 
+y = NaN(size(ccep(1).ch));
+elecmat = NaN(size(elec));
+topo=struct;
+%%
 for i=1:size(elec,1)
     for j=1:size(elec,2)
         if ~ismissing(elec{i,j})
+            
             letter = regexp(elec{i,j},'[a-z,A-Z]');
             number = regexp(elec{i,j},'[1-9]');
+            
             test1 = elec{i,j}([letter,number:end]);
             test2 = [elec{i,j}(letter),'0',elec{i,j}(number:end)];
+            
             if sum(strcmp(ccep(1).ch,test1))==1
                 elecmat(i,j) = find(strcmp(ccep(1).ch,test1));
                 y(strcmp(ccep(1).ch,test1),1) = i;
@@ -59,6 +73,32 @@ for i=1:size(elec,1)
         end
     end
 end
+%%
+% for i=1:size(elec,1)
+%     for j=1:size(elec,2)
+%         if ~ismissing(elec{i,j})
+%                     
+%             letter = regexp(string(elec{i,j}),'[a-z,A-Z]');
+%             number = regexp(string(elec{i,j}),'[1-9]');
+%             
+%             test1 = elec{i,j}([letter,number:end]);
+%             test2 = [elec{i,j}(letter),'0',elec{i,j}(number:end)];
+%             
+%             if sum(strcmp(ccep(1).ch,test1))==1
+%                 elecmat(i,j) = find(strcmp(ccep(1).ch,test1));
+%                 y(strcmp(ccep(1).ch,test1),1) = i;
+%                 x(strcmp(ccep(1).ch,test1),1)= j;
+%             elseif sum(strcmp(ccep(1).ch,test2))==1
+%                 elecmat(i,j) = find(strcmp(ccep(1).ch,test2));
+%                 y(strcmp(ccep(1).ch,test2),1) = i; 
+%                 x(strcmp(ccep(1).ch,test2),1)= j;
+%             else
+%                 error('Electrode is not found')
+%             end
+%         end
+%     end
+% end
+%%
 
 topo.x =x;
 topo.y=y;
