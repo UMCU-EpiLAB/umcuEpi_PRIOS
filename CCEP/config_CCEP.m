@@ -1,8 +1,9 @@
 %% config_CCEP
 
-addpath(genpath('git_rep/BasicCode_ECoG_DvB'))
-addpath(genpath('git_rep/eeglab/'))     
-addpath('git_rep/fieldtrip/')
+%addpath(genpath('git_rep/BasicCode_ECoG_DvB'))
+addpath(genpath('/home/sifra/git_repositories/CCEP_NMM/CCEP'))
+addpath(genpath('/home/sifra/git_repositories/eeglab/'))     
+addpath('/home/sifra/git_repositories/fieldtrip')
 ft_defaults
 
 %% patient characteristics
@@ -31,6 +32,6 @@ if contains(cfg.sub_labels,'REC2Stim')
     cfg.dataPath = '/Fridge/REC2Stimstudy/';
 elseif contains(cfg.sub_labels,'RESP')
     % RESPect database
-    cfg.CCEPpath = '/Fridge/users/dorien/derivatives/CCEP/';
+    cfg.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/';
     cfg.dataPath = '/Fridge/chronic_ECoG/';
 end
