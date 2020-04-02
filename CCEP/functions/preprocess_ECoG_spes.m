@@ -72,6 +72,7 @@ for subj = 1:size(dataBase,2)
         for chan =1:2
             cc_stimchans{stimp,chan} = dataBase(subj).ch{cc_stimsets(stimp,chan)};
         end
+        stimpnames{stimp} = [cc_stimchans{stimp,1} '-' cc_stimchans{stimp,2}]; 
         
     end
     
@@ -79,6 +80,7 @@ for subj = 1:size(dataBase,2)
     
     dataBase(subj).cc_stimsets = cc_stimsets;
     dataBase(subj).cc_stimchans = cc_stimchans;
+    dataBase(subj).stimpnames = stimpnames;
     dataBase(subj).max_stim = max_stim;
     
     stimdif = find(n ~= max_stim);
@@ -88,6 +90,8 @@ for subj = 1:size(dataBase,2)
     
     %% select epochs
     t = round(epoch_length*dataBase(subj).ccep_header.Fs);
+    tt = (1:epoch_length*dataBase(subj).ccep_header.Fs)/dataBase(subj).ccep_header.Fs - epoch_prestim;
+
     
     % allocation
     cc_epoch_sorted = NaN(size(dataBase(subj).data,1),dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets,1),t);
@@ -127,6 +131,7 @@ for subj = 1:size(dataBase,2)
     
     dataBase(subj).cc_epoch_sorted = cc_epoch_sorted;
     dataBase(subj).tt_epoch_sorted = tt_epoch_sorted;
+    dataBase(subj).tt = tt;
     dataBase(subj).cc_epoch_sorted_avg = cc_epoch_sorted_avg;
     
     fprintf('...%s has been epoched and averaged... \n',dataBase(subj).sub_label)

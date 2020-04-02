@@ -2,9 +2,9 @@
 % author: Dorien van Blooijs
 % date: June 2019
 
-function dataBase = load_ECoGdata(cfg)
+function dataBase = load_ECoGdata(cfg,myDataPath)
 
-dataPath = cfg.dataPath;
+dataPath = myDataPath.dataPath;
 sub_labels = cfg.sub_labels;
 ses_label = cfg.ses_label;
 task_label = cfg.task_label;
@@ -75,7 +75,7 @@ for i=1:size(sub_labels,2)
     tb_channels = tb_channels(log_ch_incl,:);
     ch_incl = tb_channels.name;
     
-    data = -1*ccep_data(log_ch_incl,:);
+    data = ccep_data(log_ch_incl,:);
     
     dataBase(i).sub_label = sub_labels{i};
     dataBase(i).ses_label = ses_label;
