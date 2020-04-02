@@ -61,7 +61,7 @@ for i=1:size(sub_labels,2)
     
     tb_electrodes = readtable(elecsName,'FileType','text','Delimiter','\t');
     log_elec_incl = ~strcmp(tb_electrodes.group,'other');
-    tb_electrodes = tb_electrodes(log_elec_incl,:);
+    tb_electrodes = tb_electrodes(log_elec_incl,:);                         % remove all the electrodes with comment other in column group
     
     % load channels
     D = dir(fullfile(dataPath,[sub_labels{i}], ses_label,'ieeg',...
@@ -70,7 +70,8 @@ for i=1:size(sub_labels,2)
     channelsName = fullfile(D(1).folder, D(1).name);
     
     tb_channels = readtable(channelsName,'FileType','text','Delimiter','\t');
-    log_ch_incl = strcmp(tb_channels.type,'ECOG')|strcmp(tb_channels.type,'SEEG');
+    log_ch_incl = strcmp(tb_channels.type,'ECOG')|strcmp(tb_channels.type,'SEEG'); % remove all the electrodes without comment ECOG or SEEG
+    % log_ch_incl =strcmp(tb_channels.type,'ECOG');             % remove all electrodes without ECOG
     
     tb_channels = tb_channels(log_ch_incl,:);
     ch_incl = tb_channels.name;

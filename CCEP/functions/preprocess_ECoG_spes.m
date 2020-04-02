@@ -54,14 +54,13 @@ for subj = 1:size(dataBase,2)
     n = histcounts(IC,'BinMethod','integers');
     
     if any(diff(n) ~= 0)
-        stimremove = find(n<minstim); % remove al stimulation pairs that are stimulated less than 5 times
-        
+        stimremove = find(n<minstim);               % remove al stimulation pairs that are stimulated less then 5 times        
         stimelek(any(IC==stimremove,2),:) = [];
         
         [cc_stimsets,~,IC] = unique(stimelek,'rows');
         n = histcounts(IC,'BinMethod','integers');
         if any(diff(n) ~= 0)
-            fprintf('ERROR: %s some stimulation pairs are stimulated less/more than all others\n',dataBase(subj).sub_label)
+            fprintf('ERROR: %s some stimulation pairs are stimulated less/more than all others, these are removed',dataBase(subj).sub_label)
         end
         
     end
@@ -100,8 +99,9 @@ for subj = 1:size(dataBase,2)
     for elec = 1:size(dataBase(subj).data,1) % for all channels
         for ll = 1:size(dataBase(subj).cc_stimsets,1) % for all epochs with >4 stimuli
             if strcmp(cfg.dir,'no')
-                eventnum1 = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans{ll,1}, '-',dataBase(subj).cc_stimchans{ll,2}]));
-                eventnum2 = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans{ll,2}, '-',dataBase(subj).cc_stimchans{ll,1}]));
+                % Find the stimulationnumbers on which a stimulation pair is stimulated. 
+                eventnum1 = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans{ll,1}, '-',dataBase(subj).cc_stimchans{ll,2}])); % Positive stimulation
+                eventnum2 = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans{ll,2}, '-',dataBase(subj).cc_stimchans{ll,1}])); % Negative stimulation
                 eventnum = [eventnum1;eventnum2];
             elseif strcmp(cfg.dir,'yes')
                 eventnum = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans{ll,1}, '-',dataBase(subj).cc_stimchans{ll,2}]));
@@ -116,7 +116,7 @@ for subj = 1:size(dataBase,2)
             for n=1:events
                 
                 if dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1< 0
-                    % do nothing
+                    % do nothing, (samplestartnumber - Fs)+1 <1 means that????
                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact)
                     % do nothing, because part of artefact
                 else
