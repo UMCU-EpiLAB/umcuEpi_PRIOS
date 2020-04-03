@@ -89,9 +89,9 @@ for subj = 1:length(dataBase)
             size(dataBase(subj).cc_epoch_sorted_avg,2),2);
 
         % for every averaged stimulation
-        for jj = 1:size(dataBase(subj).cc_epoch_sorted_avg,2)
+        for jj = 1:size(dataBase(subj).cc_epoch_sorted_avg,2)       % for every averaged stimulation
             % for every channel
-            for ii = 1:size(dataBase(subj).cc_epoch_sorted_avg,1)
+            for ii = 1:size(dataBase(subj).cc_epoch_sorted_avg,1)   % for every channel
 
                 % create time struct 
                 tt = (1:epoch_length*dataBase(subj).ccep_header.Fs) / ...
@@ -132,7 +132,8 @@ for subj = 1:length(dataBase)
                     % As tt use first sample after timepoint 0  
                     % till first sample after 0,5 seconds (rougly 1000 samples)
                     % sel = 20 , which is how many samples around a peak not considered as another peak
-                    [all_sampneg, all_amplneg] = ccep_peakfinder(new_signal(find(tt>0,1):find(tt>0.5,1)),20,[],-1);
+                    % ccep_peakfinder(x0, sel, thresh, extrema)
+                    [all_sampneg, all_amplneg] = ccep_peakfinder(new_signal(find(tt>0,1):find(tt>0.5,1)),20,[],-1); % yet no threshold
 
                     % If the first selected sample is a peak, this is not a real peak,
                     % so delete

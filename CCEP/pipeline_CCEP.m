@@ -26,7 +26,7 @@ disp('Detection of ERs is completed')
 
 %% visually check detected cceps
 
-dataBase = visualRating_ccep(dataBase,cfg);
+%dataBase = visualRating_ccep(dataBase,cfg);
 
 %% save ccep
 
