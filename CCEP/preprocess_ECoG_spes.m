@@ -133,6 +133,7 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).tt_epoch_sorted = tt_epoch_sorted;
     dataBase(subj).tt = tt;
     dataBase(subj).cc_epoch_sorted_avg = cc_epoch_sorted_avg;
+    dataBase(subj).stimpnames = stimpnames;
     
     fprintf('...%s has been epoched and averaged... \n',dataBase(subj).sub_label)
     
