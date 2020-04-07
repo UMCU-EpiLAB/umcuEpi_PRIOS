@@ -1,12 +1,9 @@
 %% config_CCEP
 
 %% patient characteristics
-cfg.sub_labels = {['sub-' input('Patient number (RESPXXXX: ','s')]};
+cfg.sub_labels = {['sub-' input('Patient number (RESPXXXX or REC2StimXX): ','s')]};
 cfg.ses_label = input('Session number (ses-X): ','s');
 cfg.task_label = 'task-SPESclin';
-%cfg.run_label = input('Runlabel(run-XXXXXX): ','s');
-cfg.run_label = {[input('Runlabel (run-XXXXXX): ','s')]};
-
 
 %% pre-allocation
 % preprocessing step

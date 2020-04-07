@@ -24,26 +24,27 @@ if isempty(varargin)
     
     % add localDataPath default
     localDataPath = fullfile(ccepRepoPath,'data');
+    
 elseif ~isempty(varargin)
     % add path to data
     if isstruct(varargin)
-        localDataPath = personalDataPath(varargin);
-    else
-        if varargin{1}==1 && exist('personalDataPath','file')
-            
-            localDataPath = personalDataPath();
-            
-        elseif varargin{1}==1 && ~exist('personalDataPath','file')
-            
-            sprintf(['add personalDataPath function to add your localDataPath:\n'...
-                '\n'...
-                'function localDataPath = personalDataPath()\n'...
-                'localDataPath.input = [/my/path/to/data];\n'...
-                'localDataPath.output = [/my/path/to/output];\n'...
-                '\n'...
-                'this function is ignored in .gitignore'])
-            return
-        end
+        localDataPath = personalPath(varargin);
+%     else
+%         if varargin{1}==1 && exist('personalDataPath','file')
+%             
+%             localDatapath = personalDataPath();
+%             
+%         elseif varargin{1}==1 && ~exist('personalDataPath','file')
+%             
+%             sprintf(['add personalDataPath function to add your localDataPath:\n'...
+%                 '\n'...
+%                 'function localDataPath = personalDataPath()\n'...
+%                 'localDataPath.input = [/my/path/to/data];\n'...
+%                 'localDataPath.output = [/my/path/to/output];\n'...
+%                 '\n'...
+%                 'this function is ignored in .gitignore'])
+%             return
+%         end
     end
     % add path to functions
     rootPath = which('setLocalDataPath');

@@ -9,17 +9,9 @@ config_CCEP
 
 %% set paths
 
-%myDataPath = setLocalDataPath(cfg);
-myDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/' ;
-myDataPath.dataPath = '/Fridge/chronic_ECoG/';
+myDataPath = setLocalDataPath(cfg);
 
-% set paths
-addpath(genpath('/home/sifra/git_repositories/eeglab/')) ;    
-addpath('/home/sifra/git_repositories/fieldtrip');
-ft_defaults
 
-localDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/'; % /Fridge/users/sifra/derivatives/CCEP
-localDataPath.dataPath = '/Fridge/chronic_ECoG/';
 %% select run
 
 % choose between available runs
@@ -29,7 +21,7 @@ names = {files.name};
 strings = cellfun(@(x) x(strfind(names{1},'run-'):strfind(names{1},'run-')+9), names, 'UniformOutput', false);
 stringsz = [repmat('%s, ',1,size(strings,2)-1),'%s'];
 
-cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')}; % Chosen run is in cfg.run_label
+cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')};
 
 clear files names strings stringsz
 
@@ -54,14 +46,12 @@ disp('Detection of ERs is completed')
 %% visualize CCEPs per electrode
 cfg.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
 
-plot_ccep_av(dataBase,cfg);
+plot_ccep_av(dataBase,cfg)
 
 
 %% visually check detected ccepsyy
 
 dataBase = visualRating_ccep(dataBase);
-% correct: y
-% incorrect: n or enter
 
 %% save ccep
 
