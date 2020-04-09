@@ -49,6 +49,8 @@ dataBase.ccep.n1_peak_range = cfg.n1_peak_range;
 dataBase.ccep.cc_stimsets = dataBase.cc_stimsets;
 dataBase.ccep.ch = dataBase.ch;
 dataBase.ccep.stimpnames = dataBase.stimpnames;
+dataBase.ccep.stimchans = dataBase.cc_stimchans;
+    
 disp('Detection of ERs is completed')
 
 %% visualize CCEPs per electrode
