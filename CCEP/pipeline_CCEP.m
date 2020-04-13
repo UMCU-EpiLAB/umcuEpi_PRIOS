@@ -8,7 +8,6 @@ clear
 config_CCEP
 
 %% set paths
-
 %myDataPath = setLocalDataPath(cfg);
 myDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/' ;
 myDataPath.dataPath = '/Fridge/chronic_ECoG/';

@@ -18,7 +18,7 @@ localDataPath.dataPath = '/Fridge/chronic_ECoG/';
 %% pre-allocation
 config_CCEP
 
-%% choose CCEP file
+%% Load Multiple runs
 files = dir(fullfile(localDataPath.CCEPpath,cfg.sub_labels{1}, cfg.ses_label,'run-*',...
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_CCEP.mat']));
 
@@ -57,7 +57,8 @@ else
    stimnames = runs{:}.ccep.stimpnames;    
 end
 
-%%
+
+%% Compare runs
 run = 1:length(runs)
 [row,col] = find(ismember(runs(run).ccep.n1_peak_sample  , runs(run+1).ccep.n1_peak_sample))
 
