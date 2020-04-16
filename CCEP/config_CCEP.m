@@ -10,7 +10,7 @@ cfg.task_label = 'task-SPES*';
 %% pre-allocation
 % preprocessing step
 cfg.dir = 'yes'; % if you want to take negative/positive stimulation into account
-cfg.amp = 'no'; % if you want to take stimulation current into account
+cfg.amp = 'no';  % if you want to take stimulation current into account
 
 % epoch length
 cfg.epoch_length = 4; % in seconds

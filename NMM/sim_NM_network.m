@@ -40,22 +40,25 @@ function [ uout,xout,xextout,yout,yextout] = sim_NM_network(Ttot,deltat,Nout,NM_
 NTST=ceil(Ttot/deltat);             %number of timestepes
 Nnodes=size(NM_network.nodes,1);    %number of nodes
 
+
 %% Pre-allocate state variables
-x=zeros(4*Nnodes,1);        % xout --> PSPs originating from py, ex, is, if
-y=zeros(4*Nnodes,1);        % yout --> derivatives of PSPs 
-xext=zeros(Nnodes,1);       % xextout --> PSP originating from timevarying input and noise.
-yext=zeros(Nnodes,1);       % yextout --> derivatives of xext
+x=zeros(4*Nnodes,1);
+y=zeros(4*Nnodes,1);
+xext=zeros(Nnodes,1);
+yext=zeros(Nnodes,1);
 
 %% Write DVs of the derivatives of the PSPs (y's) in quasi-linear representation dy=Q1x+Q2y+Q3*sigm(u)
 % Due to the specific form of the ODE's Q1, Q2 and Q3 are diagonal
 % matrices. We represent these as vectors and do elementwise multiplication
 % rather than matrix multiplication as matrix multiplication is
 % computationally more expensive.
-Q1 = -deltat * reshape([NM_network.nodes.a; NM_network.nodes.a; NM_network.nodes.b; NM_network.nodes.g].^2, 4*Nnodes, 1);
-Q2 = 1-deltat * reshape(2 * [NM_network.nodes.a; NM_network.nodes.a; NM_network.nodes.b; NM_network.nodes.g], 4*Nnodes, 1);
-tvA = [NM_network.nodes.A].*[NM_network.nodes.a];
-tvB = [NM_network.nodes.B].*[NM_network.nodes.b];
-Q3 = deltat * reshape([tvA; tvA; tvB; tvG], 4*Nnodes, 1);
+Q1=-deltat*reshape([NM_network.nodes.a;NM_network.nodes.a;NM_network.nodes.b;NM_network.nodes.g].^2,4*Nnodes,1);
+Q2=1-deltat*reshape(2*[NM_network.nodes.a;NM_network.nodes.a;NM_network.nodes.b;NM_network.nodes.g],4*Nnodes,1);
+tvA=[NM_network.nodes.A].*[NM_network.nodes.a];
+tvB=[NM_network.nodes.B].*[NM_network.nodes.b];
+tvG=[NM_network.nodes.G].*[NM_network.nodes.g];
+Q3=deltat*reshape([tvA;tvA;tvB;tvG],4*Nnodes,1);
+
 %% External input
 %same matrices as for the state variables
 Q1ext=-deltat*([NM_network.nodes.a].^2)';
@@ -67,11 +70,11 @@ beta=[NM_network.nodes.beta]';
 gamma=[NM_network.nodes.gamma]';
 
 % Vector containing time varying input
-fvar=deltat*repmat(tvA',1,NTST).* cell2mat(cellfun(@(c) c(deltat:deltat:Ttot), {NM_network.nodes.Ivar}','UniformOutput',false));
+fvar=deltat*repmat(tvA',1,NTST).*cell2mat(cellfun(@(c) c(deltat:deltat:Ttot),{NM_network.nodes.Ivar}','UniformOutput',false));
 
 %% Stochastic input
 % normal situation independent noise
-fs = sqrt(deltat)*repmat((tvA.*[NM_network.nodes.sd])',1,NTST).*randn(Nnodes,NTST);
+fs=sqrt(deltat)*repmat((tvA.*[NM_network.nodes.sd])',1,NTST).*randn(Nnodes,NTST);
 
 % comment or uncomment following lines for same noise on neural masses 2:end
 % disp('Warning: channels 2:end receive same noise and noise is init from seed');

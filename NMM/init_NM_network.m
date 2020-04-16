@@ -33,7 +33,7 @@ NM(2)=create_NM(4.5,100,7,10,25,300,135,1,0,1,0.7);
 
 %Add stimulation
 NM(1).Ivar=@(t) (mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);    % Stimulation at NM 1
-% NM(2).Ivar=@(t)(mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);   % Uncomment to add stimulation to NM2
+%NM(2).Ivar=@(t)(mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);   % Uncomment to add stimulation to NM2
 
 %% Network architecture
 k=20;           % Connectivity strength

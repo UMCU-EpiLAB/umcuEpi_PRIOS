@@ -11,3 +11,4 @@
 %     eventnum = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans{ll,1}, '-',dataBase(subj).cc_stimchans{ll,2}]));
 % end          
 
+%cc_epoch_sorted(elec,n,ll,:)  --> change the n, so not the n in eventnum(n)
