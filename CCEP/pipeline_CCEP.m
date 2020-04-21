@@ -37,7 +37,7 @@ clear files names strings stringsz
 dataBase = load_ECoGdata(cfg,myDataPath);
 
 %% preprocess ccep
-
+% eventnum(1)
 dataBase = preprocess_ECoG_spes(dataBase,cfg);
 
 %% detect ccep
@@ -76,7 +76,7 @@ end
 start_filename = strfind(dataBase(1).dataName,'/');
 stop_filename = strfind(dataBase(1).dataName,'_ieeg');
 
-fileName=[dataBase(1).dataName(start_filename(end)+1:stop_filename-1),'_CCEP.mat'];
+fileName=[dataBase(1).dataName(start_filename(end)+1:stop_filename-1),'_CCEP_2stims.mat'];
 
 ccep = dataBase.ccep;
 ccep.dataName = dataBase(1).dataName;
