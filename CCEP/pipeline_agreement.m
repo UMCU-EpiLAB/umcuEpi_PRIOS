@@ -29,11 +29,11 @@ cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],st
 clear files names strings stringsz
 
 %% load data
-
+tic;
 dataBase = load_ECoGdata(cfg,myDataPath);
 
 %% CCEP for 2 and 10 stimulations
-stimulations = [2,5];
+stimulations = [1,5];
 for K = 1:length(stimulations)
     [stim_dataBase(K)] = preprocess_ECoG_spes_test(dataBase,cfg,stimulations(K));
 
@@ -61,7 +61,7 @@ start_filename = strfind(stim_database(1).dataName,'/');
 stop_filename = strfind(stim_database(1).dataName,'_ieeg');
 
     
-if stim_database(1).stimnum == 2
+if stim_database(1).stimnum == 1
     fileName2=[stim_database(1).dataName(start_filename(end)+1:stop_filename-1),'_CCEP_2stims.mat'];
 
     ccep = stim_database(1).ccep;
@@ -105,3 +105,4 @@ save([targetFolder,Agreements], 'agreement');
 
 fprintf('Agreemtents are saved in %s%s \n',targetFolder);
 
+toc
