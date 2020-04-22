@@ -1,8 +1,13 @@
-function agreement = determine_agreement(localDataPath,cfg)
-files = dir(fullfile(localDataPath.CCEPpath, cfg.sub_labels{1}, 'ses-*' ,'run-*',...
+function [OA, PA, NA] = determine_agreement(localDataPath,cfg,~)
+files = dir(fullfile(localDataPath.CCEPpath, cfg.sub_labels{1}, 'ses-*' ,cfg.run_label{1},...
     [cfg.sub_labels{1} '_ses-*_' cfg.task_label '_*'  '_CCEP_*.mat']));
 
-if length(files) == 0
+% Use the function below when >2 SPES sessions have to be compared, be
+% aware that the values for W, Z and XandY have to be changed.
+% files = dir(fullfile(localDataPath.CCEPpath, cfg.sub_labels{1}, 'ses-*' ,'run-*',...
+%    [cfg.sub_labels{1} '_ses-*_' cfg.task_label '_*'  '_CCEP_*.mat']));
+
+if isempty(files)
     fprintf('WARNING: No runs are found');
 else
     for i = 1:size(files,1)
@@ -11,8 +16,7 @@ else
     end
 end
 
-%% Compare the electrodes which show a N1 in different networks.
-
+% Compare the electrodes which show a N1 in different networks.
 if length(runs) > 1
     % for the number of files to compare
     for n = 1:(length(runs)-1)    
@@ -39,7 +43,7 @@ if length(runs) > 1
         end
                       
             for Q = 1:length(runs)
-                correct_stimpairs{Q,1} = find(ismember(stimnames{Q,1}, same_stimpair2));  
+                correct_stimpairs{Q,1} = find(ismember(runs(Q).ccep.stimpnames, same_stimpair2));  
                 correct_chans{Q,1} = find(ismember(runs(Q).ccep.ch', same_chan2));        
                 % does not matter whether same_chan1 or 2, should be the same
                 
@@ -61,18 +65,12 @@ if length(runs) > 1
                 else
                     fprintf('WARNING: The matrices of >2 runs cannot be added up');
                 end   
-        %end
-    end  
-     
-   end
-else
-   N1_peak = runs.ccep.n1_peak_sample;
-   stimnames = runs{:}.ccep.stimpnames;    
+    end   
 end
 
 % Overall, positive and negative agreement between the matrices. 
-OA = (W + Z) / (W + XandY + Z)
-PA = (2 * W) / (2 * W + XandY)
-NA = (2 * Z) / (2 * Z + XandY)
+OA = (W + Z) / (W + XandY + Z);
+PA = (2 * W) / (2 * W + XandY);
+NA = (2 * Z) / (2 * Z + XandY);
 
 end
