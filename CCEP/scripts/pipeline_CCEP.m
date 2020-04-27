@@ -8,17 +8,17 @@ clear
 config_CCEP
 
 %% set paths
-%myDataPath = setLocalDataPath(cfg);
-myDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/' ;
-myDataPath.dataPath = '/Fridge/chronic_ECoG/';
-
-% set paths
-addpath(genpath('/home/sifra/git_repositories/eeglab/')) ;    
-addpath('/home/sifra/git_repositories/fieldtrip');
-ft_defaults
-
-localDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/'; % /Fridge/users/sifra/derivatives/CCEP
-localDataPath.dataPath = '/Fridge/chronic_ECoG/';
+myDataPath = setLocalDataPath(cfg);
+% myDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/' ;
+% myDataPath.dataPath = '/Fridge/chronic_ECoG/';
+% 
+% % set paths
+% addpath(genpath('/home/sifra/git_repositories/eeglab/')) ;    
+% addpath('/home/sifra/git_repositories/fieldtrip');
+% ft_defaults
+% 
+% localDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/'; % /Fridge/users/sifra/derivatives/CCEP
+% localDataPath.dataPath = '/Fridge/chronic_ECoG/';
 %% select run
 
 % choose between available runs

@@ -5,7 +5,6 @@ cfg.sub_labels = {['sub-' input('Patient number (RESPXXXX): ','s')]};
 cfg.ses_label = input('Session number (ses-X): ','s');
 cfg.task_label = 'task-SPES*';
 %cfg.run_label = input('Runlabel(run-XXXXXX): ','s');
-%cfg.run_label = {[input('Runlabel (run-XXXXXX): ','s')]};
 
 %% pre-allocation
 % preprocessing step
