@@ -1,10 +1,10 @@
-function [OA, PA, NA] = determine_agreement(localDataPath,cfg,~)
-files = dir(fullfile(localDataPath.CCEPpath, cfg.sub_labels{1}, 'ses-*' ,cfg.run_label{1},...
+function [OA, PA, NA] = determine_agreement(myDataPath,cfg,~)
+files = dir(fullfile(myDataPath.CCEPpath, cfg.sub_labels{1}, 'ses-*' ,cfg.run_label{1},...
     [cfg.sub_labels{1} '_ses-*_' cfg.task_label '_*'  '_CCEP_*.mat']));
 
 % Use the function below when >2 SPES sessions have to be compared, be
 % aware that the values for W, Z and XandY have to be changed.
-% files = dir(fullfile(localDataPath.CCEPpath, cfg.sub_labels{1}, 'ses-*' ,'run-*',...
+% files = dir(fullfile(myDataPath.CCEPpath, cfg.sub_labels{1}, 'ses-*' ,'run-*',...
 %    [cfg.sub_labels{1} '_ses-*_' cfg.task_label '_*'  '_CCEP_*.mat']));
 
 if isempty(files)

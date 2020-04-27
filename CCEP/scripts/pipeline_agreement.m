@@ -4,19 +4,9 @@ clear;
 config_CCEP
 
 %% set paths
-%myDataPath = setLocalDataPath(cfg);
-myDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/' ;
-myDataPath.dataPath = '/Fridge/chronic_ECoG/';
+myDataPath = setLocalDataPath(cfg);
 
-% set paths
-addpath(genpath('/home/sifra/git_repositories/eeglab/')) ;    
-addpath('/home/sifra/git_repositories/fieldtrip');
-ft_defaults
-
-localDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/'; % /Fridge/users/sifra/derivatives/CCEP
-localDataPath.dataPath = '/Fridge/chronic_ECoG/';
 %% select run
-
 % choose between available runs
 files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg',...
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
@@ -35,7 +25,7 @@ dataBase = load_ECoGdata(cfg,myDataPath);
 %% CCEP for 2 and 10 stimulations
 stimulations = [1,5];
 for K = 1:length(stimulations)
-    [stim_dataBase(K)] = preprocess_ECoG_spes_test(dataBase,cfg,stimulations(K));
+    [stim_dataBase(K)] = preprocess_ECoG_spes(dataBase,cfg,stimulations(K));
 
     % detect ccep
     [stim_database(K)] = detect_n1peak_ECoG_ccep(stim_dataBase(K), cfg);
@@ -86,7 +76,7 @@ fprintf('CCEPs is saved in %s%s \n',targetFolder);
 % when 2 sessions are compared. It coule be possible to compare more, but
 % then the values for W, Z and XandY should be changed. 
 
-[overall_agr, positive_agr, negative_agr] = determine_agreement(localDataPath,cfg,stim_database);
+[overall_agr, positive_agr, negative_agr] = determine_agreement(myDataPath,cfg,stim_database);
 agreement.OA = overall_agr;
 agreement.PA = positive_agr;
 agreement.NA = negative_agr; 

@@ -1,24 +1,21 @@
-%% THIS IS AN EXAMPLE FILE
-% copy this one and fill in your own
-
-function localDataPath = personalDataPath(varargin)
+function localDataPath = personalDataPath(cfg)
 
 % function that contains local data path, is ignored in .gitignore
 
-if ~isempty(varargin)
-    if isstruct(varargin)
-        if sum(contains(fieldnames(varargin),'sub_labels'))
-            localDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/'; % /Fridge/users/sifra/derivatives/CCEP
-            localDataPath.dataPath = '/Fridge/chronic_ECoG/';
+if ~isempty(cfg(1))
+    if isstruct(cfg(1))
+        if sum(contains(fieldnames(cfg(1)),'sub_labels'))
+            if contains(cfg(1).sub_labels,'RESP')
+                localDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/'; 
+                localDataPath.dataPath = '/Fridge/chronic_ECoG/';
+            end
         end
     end
 end
 
-% set paths
+
+% % set paths
 addpath(genpath('/home/sifra/git_repositories/eeglab/'))     
 addpath('/home/sifra/git_repositories/fieldtrip')
 ft_defaults
-
-disp('This worked')
-
 end

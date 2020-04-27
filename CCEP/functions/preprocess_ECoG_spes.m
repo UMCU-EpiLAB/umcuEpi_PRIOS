@@ -1,4 +1,4 @@
-function dataBase = preprocess_ECoG_spes(dataBase,cfg)
+function dataBase = preprocess_ECoG_spes(dataBase,cfg,stimulations)
 epoch_length = cfg.epoch_length;
 epoch_prestim = cfg.epoch_prestim;
 
@@ -113,7 +113,7 @@ for subj = 1:size(dataBase,2)
                 events = size(eventnum,1);
             end
             
-            for n=1:events
+            for n = 1:stimulations % n=1:events
                 
                 if dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1< 0
                     % do nothing, (samplestartnumber - Fs)+1 <1 means that????
@@ -133,7 +133,7 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).tt_epoch_sorted = tt_epoch_sorted;
     dataBase(subj).tt = tt;
     dataBase(subj).cc_epoch_sorted_avg = cc_epoch_sorted_avg;
-    
-    fprintf('...%s has been epoched and averaged... \n',dataBase(subj).sub_label)
-    
+    dataBase(subj).stimpnames = stimpnames;
+    dataBase(subj).stimnum = stimulations;
+       
 end
