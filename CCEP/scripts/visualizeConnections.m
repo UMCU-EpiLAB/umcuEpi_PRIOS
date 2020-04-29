@@ -4,22 +4,22 @@
 clear
 config_CCEP
 
+%% set paths
+myDataPath = setLocalDataPath(cfg);
+
 %% load all CCEP set
 
-cfg.CCEPpath = fullfile('/Fridge/users/dorien/derivatives/CCEP/',cfg.sub_labels{:},cfg.ses_label);
-
-files = dir(cfg.CCEPpath);
+files = dir(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label));
 n=1; runs = cell(1);
-
 
 for i=1:size(files,1)
     if contains(files(i).name ,'run-') && n==1
-        loadfile = load(fullfile(cfg.CCEPpath,files(i).name,[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',files(i).name,'_CCEP.mat']));
+        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,files(i).name,[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',files(i).name,'_CCEP.mat']));
         ccep = loadfile.ccep;
         runs{n} = files(i).name;
         n=n+1;
     elseif contains(files(i).name ,'run-') && n>1
-        loadfile = load(fullfile(cfg.CCEPpath,files(i).name,[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',files(i).name,'_CCEP.mat']));
+        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,files(i).name,[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',files(i).name,'_CCEP.mat']));
         ccep(n) = loadfile.ccep;
         runs{n} = files(i).name;
         n=n+1;
@@ -27,14 +27,13 @@ for i=1:size(files,1)
 end
 
 %% load electrodes positions (xlsx/electrodes.tsv)
-cfg.proj_dirinput = '/home/dorien/Desktop/bulkstorage/db/respect-leijten/Electrodes/';
 
 subj = cfg.sub_labels{1}(5:end);
 
-if exist(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xlsx']),'file')
-    elec = readcell(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xlsx']),'Sheet','matlabsjabloon','Range',[1 1 100 100]);
-elseif exist(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xls']),'file')
-    elec = readcell(fullfile(cfg.proj_dirinput,[subj,'_',cfg.ses_label,'_elektroden.xls']),'Sheet','matlabsjabloon');
+if exist(fullfile(myDataPath.elec_input,[subj,'_',cfg.ses_label,'_elektroden.xlsx']),'file')
+    elec = readcell(fullfile(myDataPath.elec_input,[subj,'_',cfg.ses_label,'_elektroden.xlsx']),'Sheet','matlabsjabloon','Range',[1 1 100 100]);
+elseif exist(fullfile(myDataPath.elec_input,[subj,'_',cfg.ses_label,'_elektroden.xls']),'file')
+    elec = readcell(fullfile(myDataPath.elec_input,[subj,'_',cfg.ses_label,'_elektroden.xls']),'Sheet','matlabsjabloon');
 end
 
 % localize electrodes in grid
@@ -106,7 +105,7 @@ for run = 1:size(ccep,2)
         outlabel=sprintf('Stimpair%s-%s.jpg',...
             ccep(run).ch{stimnum(1)},ccep(run).ch{stimnum(2)});
         
-        path = fullfile(cfg.CCEPpath,runs{run});
+        path = fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,runs{run});
         if ~exist([path,'/figures/'], 'dir')
             mkdir([path,'/figures/']);
         end

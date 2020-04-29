@@ -16,7 +16,10 @@ myDataPath = setLocalDataPath(cfg);
 files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg',...
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
-strings = cellfun(@(x) x(strfind(names{1},'run-'):strfind(names{1},'run-')+9), names, 'UniformOutput', false);
+strings = cell(size(names));
+for i=1:size(names,2)
+    strings{i} = names{i}(strfind(names{i},'run-'):strfind(names{i},'run-')+9);
+end
 stringsz = [repmat('%s, ',1,size(strings,2)-1),'%s'];
 
 cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')}; % Chosen run is in cfg.run_label

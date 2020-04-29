@@ -5,9 +5,9 @@
 function localDataPath = personalDataPath_example(varargin)
 
 % function that contains local data path, is ignored in .gitignore
-
-localDataPath.input = 'bla/CCEP/';
-localDataPath.output = '/bla/users/dorien/';
+localDataPath.elec_input = '/bla/respect-leijten/Electrodes/';
+localDataPath.dataPath = 'bla/CCEP/';
+localDataPath.CCEPpath = '/bla/users/dorien/';
 
 % % set paths
 fieldtrip_folder  = '/bla/fieldtrip/';

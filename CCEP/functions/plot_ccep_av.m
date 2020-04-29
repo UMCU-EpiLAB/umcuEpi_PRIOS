@@ -72,7 +72,7 @@ for ll = 1:length(elnrs_plot)                   % For the number of electrodes
         end
 
         % filename
-        figureName = fullfile(myDataPath.output,'derivatives','av_ccep_figures',dataBase.sub_label,dataBase.ses_label,dataBase.run_label,...
+        figureName = fullfile(myDataPath.CCEPpath,'av_ccep_figures',dataBase.sub_label,dataBase.ses_label,dataBase.run_label,...
             [dataBase.sub_label '_' dataBase.ses_label '_' dataBase.task_label '_' dataBase.run_label '_incomingCCEP_el' dataBase.ch{el_plot}]);
         set(gcf,'PaperPositionMode','auto')
         print('-dpng','-r300',figureName)
