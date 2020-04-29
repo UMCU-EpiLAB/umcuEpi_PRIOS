@@ -10,7 +10,8 @@ myDataPath = setLocalDataPath(cfg);
 %% load all CCEP set
 
 files = dir(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label));
-n=1; runs = cell(1);
+n=1; 
+runs = cell(1);
 
 for i=1:size(files,1)
     if contains(files(i).name ,'run-') && n==1
@@ -19,7 +20,7 @@ for i=1:size(files,1)
         runs{n} = files(i).name;
         n=n+1;
     elseif contains(files(i).name ,'run-') && n>1
-        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,files(i).name,[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',files(i).name,'_CCEP.mat']));
+        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,files(i).name,[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',files(i).name,'_CCEP_2stims.mat']));
         ccep(n) = loadfile.ccep;
         runs{n} = files(i).name;
         n=n+1;
