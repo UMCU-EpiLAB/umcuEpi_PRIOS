@@ -10,7 +10,8 @@ myDataPath = setLocalDataPath(cfg);
 %% load all CCEP set
 
 files = dir(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label));
-n=1; runs = cell(1);
+n=1; 
+runs = cell(1);
 
 for i=1:size(files,1)
     if contains(files(i).name ,'run-') && n==1
