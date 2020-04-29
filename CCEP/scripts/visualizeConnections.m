@@ -20,7 +20,7 @@ for i=1:size(files,1)
         runs{n} = files(i).name;
         n=n+1;
     elseif contains(files(i).name ,'run-') && n>1
-        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,files(i).name,[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',files(i).name,'_CCEP_2stims.mat']));
+        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,files(i).name,[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',files(i).name,'_CCEP.mat']));
         ccep(n) = loadfile.ccep;
         runs{n} = files(i).name;
         n=n+1;
