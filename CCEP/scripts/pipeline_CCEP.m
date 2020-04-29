@@ -9,16 +9,7 @@ config_CCEP
 
 %% set paths
 myDataPath = setLocalDataPath(cfg);
-% myDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/' ;
-% myDataPath.dataPath = '/Fridge/chronic_ECoG/';
-% 
-% % set paths
-% addpath(genpath('/home/sifra/git_repositories/eeglab/')) ;    
-% addpath('/home/sifra/git_repositories/fieldtrip');
-% ft_defaults
-% 
-% localDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/'; % /Fridge/users/sifra/derivatives/CCEP
-% localDataPath.dataPath = '/Fridge/chronic_ECoG/';
+
 %% select run
 
 % choose between available runs
@@ -49,14 +40,12 @@ dataBase.ccep.cc_stimsets = dataBase.cc_stimsets;
 dataBase.ccep.ch = dataBase.ch;
 dataBase.ccep.stimpnames = dataBase.stimpnames;
 dataBase.ccep.stimchans = dataBase.cc_stimchans;
-    
+
 disp('Detection of ERs is completed')
 
 %% visualize CCEPs per electrode
 cfg.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
-
 plot_ccep_av(dataBase,cfg);
-
 
 %% visually check detected ccepsyy
 

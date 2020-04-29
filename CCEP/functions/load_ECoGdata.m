@@ -9,6 +9,7 @@ sub_labels = cfg.sub_labels;
 ses_label = cfg.ses_label;
 task_label = cfg.task_label;
 if isfield(cfg,'run_label')
+
     if size(cfg.run_label{:},2)>4               % if label is more than run-
         run_label = cfg.run_label;
     else
@@ -29,6 +30,7 @@ for i=1:size(sub_labels,2)
     end
     
     % determine run_label
+
     if ~isfield(cfg,'run_label') || size(cfg.run_label{:},2)<=4             % || means or
         if size(D,1) == 1
             run_label{i} = D(1).name(strfind(D(1).name,'run-'):strfind(D(1).name,'_ieeg')-1);
@@ -70,12 +72,14 @@ for i=1:size(sub_labels,2)
     channelsName = fullfile(D(1).folder, D(1).name);
     
     tb_channels = readtable(channelsName,'FileType','text','Delimiter','\t');
-    log_ch_incl = strcmp(tb_channels.type,'ECOG')|strcmp(tb_channels.type,'SEEG');  % remove all the electrodes without comment ECOG or SEEG
+    log_ch_incl = strcmp(tb_channels.type,'ECOG')|strcmp(tb_channels.type,'SEEG'); % remove all the electrodes without comment ECOG or SEEG
+    % log_ch_incl =strcmp(tb_channels.type,'ECOG');             % remove all electrodes without ECOG
+
     
     tb_channels = tb_channels(log_ch_incl,:);
     ch_incl = tb_channels.name;
-    
-    data = ccep_data(log_ch_incl,:);       
+
+    data = ccep_data(log_ch_incl,:);
     
     dataBase(i).sub_label = sub_labels{i};
     dataBase(i).ses_label = ses_label;

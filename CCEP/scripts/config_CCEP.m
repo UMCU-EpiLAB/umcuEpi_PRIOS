@@ -11,6 +11,7 @@ cfg.task_label = 'task-SPES*';
 cfg.dir = 'yes'; % if you want to take negative/positive stimulation into account
 cfg.amp = 'no';  % if you want to take stimulation current into account
 
+
 % epoch length
 cfg.epoch_length = 4; % in seconds
 cfg.epoch_prestim = 2; % in seconds, with 4 seconds total resulting in -2:2

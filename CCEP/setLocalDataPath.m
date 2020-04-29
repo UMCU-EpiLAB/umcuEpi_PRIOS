@@ -1,4 +1,6 @@
-function localDataPath = setLocalDataPath(cfg)
+
+function localDataPath = setLocalDataPath(varargin)
+
 % function LocalDataPath = setLocalDataPath(varargin)
 % Return the path to the root CCEP  directory and add paths in this repo
 %
@@ -15,7 +17,8 @@ function localDataPath = setLocalDataPath(cfg)
 %
 % dhermes, 2020, Multimodal Neuroimaging Lab
 
-if isempty(cfg)
+if isempty(varargin)
+
     rootPath = which('setLocalDataPath');
     ccepRepoPath = fileparts(rootPath);
     
@@ -24,26 +27,27 @@ if isempty(cfg)
     
     % add localDataPath default
     localDataPath = fullfile(ccepRepoPath,'data');
-elseif ~isempty(cfg)
+
+elseif ~isempty(varargin)
     % add path to data
-    if isstruct(cfg)
-        localDataPath = personalDataPath(cfg);
-%     else
-%         if varargin{1}==1 && exist('personalDataPath','file')
-%             
-%             localDataPath = personalDataPath();
-%             
-%         elseif varargin{1}==1 && ~exist('personalDataPath','file')
-%             
-%             sprintf(['add personalDataPath function to add your localDataPath:\n'...
-%                 '\n'...
-%                 'function localDataPath = personalDataPath()\n'...
-%                 'localDataPath.input = [/my/path/to/data];\n'...
-%                 'localDataPath.output = [/my/path/to/output];\n'...
-%                 '\n'...
-%                 'this function is ignored in .gitignore'])
-%             return
-%         end
+    if isstruct(varargin{1})
+        localDataPath = personalDataPath(varargin{1});
+    else
+        if varargin{1}==1 && exist('personalDataPath','file')
+            
+            localDataPath = personalDataPath();
+            
+        elseif varargin{1}==1 && ~exist('personalDataPath','file')
+            
+            sprintf(['add personalDataPath function to add your localDataPath:\n'...
+                '\n'...
+                'function localDataPath = personalDataPath()\n'...
+                'localDataPath.input = [/my/path/to/data];\n'...
+                'localDataPath.output = [/my/path/to/output];\n'...
+                '\n'...
+                'this function is ignored in .gitignore'])
+            return
+        end
     end
     % add path to functions
     rootPath = which('setLocalDataPath');

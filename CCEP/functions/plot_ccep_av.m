@@ -24,9 +24,6 @@ function plot_ccep_av(dataBase,cfg)
 % Dora Hermes, 2020, Multimodal Neuroimaging Lab, Mayo Clinic
 % Dorien van Blooijs, 2020, UMC Utrecht
 
-myDataPath.CCEPpath = '/Fridge/users/sifra/derivatives/CCEP/' ;
-myDataPath.dataPath = '/Fridge/chronic_ECoG/';
-
 if isempty(dataBase.ccep.n1_peak_sample)
     n1_peak_sample = NaN(size(dataBase.cc_epoch_sorted_avg,1),size(dataBase.cc_epoch_sorted_avg,2));
     n1_peak_amplitude =  NaN(size(dataBase.cc_epoch_sorted_avg,1),size(dataBase.cc_epoch_sorted_avg,2));
@@ -39,9 +36,10 @@ tt = dataBase.tt;
 
 elnrs_plot = 1:size(dataBase.ch,1);
 
+
 for ll = 1:length(elnrs_plot)                   % For the number of electrodes
     el_plot = elnrs_plot(ll);
-    %figure('Position',[0 0 700 700]),hold on
+    figure('Position',[0 0 700 700]),hold on
     figure, hold on
     for kk = 1:length(dataBase.cc_stimchans)    % For the number of stimulation pairs
         this_ccep_plot = squeeze(dataBase.cc_epoch_sorted_avg(el_plot,kk,:));
@@ -53,6 +51,7 @@ for ll = 1:length(elnrs_plot)                   % For the number of electrodes
             plot(tt(n1_peak_sample(el_plot,kk)),dataBase.cc_epoch_sorted_avg(el_plot,kk,n1_peak_sample(el_plot,kk))+kk*500,'o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',2)
         end
     end
+
     xlim([-.2 1.5])
     ylim([-500,(kk+2)*500])
     set(gca,'YTick',500*(1:length(dataBase.stimpnames)),'YTickLabel',dataBase.stimpnames)
@@ -67,13 +66,14 @@ for ll = 1:length(elnrs_plot)                   % For the number of electrodes
     
     if cfg.save_fig==1
         % create folder to save figures
-        if ~exist(fullfile(myDataPath.CCEPpath,'av_ccep_figures',dataBase.sub_label,dataBase.ses_label,dataBase.run_label),'dir')
+        if ~ exist(fullfile(myDataPath.CCEPpath,'av_ccep_figures',dataBase.sub_label,dataBase.ses_label,dataBase.run_label),'dir')
+
             mkdir(fullfile(myDataPath.CCEPpath,'av_ccep_figures',dataBase.sub_label,dataBase.ses_label,dataBase.run_label));
         end
 
         % filename
-        figureName = fullfile(myDataPath.CCEPpath,'av_ccep_figures',dataBase.sub_label,dataBase.ses_label,dataBase.run_label,...
-            [dataBase.sub_label '_' dataBase.ses_label '_' dataBase.run_label '_incomingCCEP_el' dataBase.ch{el_plot}]);
+        figureName = fullfile(myDataPath.output,'derivatives','av_ccep_figures',dataBase.sub_label,dataBase.ses_label,dataBase.run_label,...
+            [dataBase.sub_label '_' dataBase.ses_label '_' dataBase.task_label '_' dataBase.run_label '_incomingCCEP_el' dataBase.ch{el_plot}]);
         set(gcf,'PaperPositionMode','auto')
         print('-dpng','-r300',figureName)
         print('-depsc','-r300',figureName)

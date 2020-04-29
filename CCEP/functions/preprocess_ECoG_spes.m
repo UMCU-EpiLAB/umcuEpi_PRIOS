@@ -1,4 +1,6 @@
+
 function dataBase = preprocess_ECoG_spes(dataBase,cfg,stimulations)
+
 epoch_length = cfg.epoch_length;
 epoch_prestim = cfg.epoch_prestim;
 
@@ -54,7 +56,8 @@ for subj = 1:size(dataBase,2)
     n = histcounts(IC,'BinMethod','integers');
     
     if any(diff(n) ~= 0)
-        stimremove = find(n<minstim);               % remove al stimulation pairs that are stimulated less than 5 times        
+
+        stimremove = find(n<minstim);               % remove al stimulation pairs that are stimulated less then 5 times        
         stimelek(any(IC==stimremove,2),:) = [];
         
         [cc_stimsets,~,IC] = unique(stimelek,'rows');
@@ -113,10 +116,11 @@ for subj = 1:size(dataBase,2)
                 events = size(eventnum,1);
             end
             
-            for n = 1:stimulations % n=1:events
-                
+
+            for n = 1:stimulations % n=1:events              
                 if dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1< 0
                     % do nothing, (samplestartnumber - Fs)+1 <1 means what????
+
                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact)
                     % do nothing, because part of artefact
                 else
@@ -135,5 +139,8 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).cc_epoch_sorted_avg = cc_epoch_sorted_avg;
     dataBase(subj).stimpnames = stimpnames;
     dataBase(subj).stimnum = stimulations;
-       
+           
+    fprintf('...%s has been epoched and averaged... \n',dataBase(subj).sub_label)
+    
+
 end
