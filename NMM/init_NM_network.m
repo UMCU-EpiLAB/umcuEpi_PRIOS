@@ -33,7 +33,7 @@ NM(2)=create_NM(4.5,100,7,10,25,300,135,1,0,1,0.7);
 
 %Add stimulation
 NM(1).Ivar=@(t) (mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);    % Stimulation at NM 1
-% NM(2).Ivar=@(t)(mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);   % Uncomment to add stimulation to NM2
+NM(2).Ivar=@(t)(mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);   % Uncomment to add stimulation to NM2
 
 %% Network architecture
 k=20;           % Connectivity strength
@@ -56,5 +56,31 @@ xlabel ('Time (s)')
 ylabel ('Potential')
 legend('NM1','NM2')
 title('Simulated Potential of Pyramidal cells of NM1 and NM2')
+
+%% Show multiple plos
+% Excitatory cells
+figure(2);
+plot(tvec,u2([2,6],:)') 
+xlabel ('Time (s)')
+ylabel ('Potential')
+legend('NM1','NM2')
+title('Simulated Potential Excitatory cells of NM1 and NM2')
+
+% Slow inhibitory
+figure(3);
+plot(tvec,u2([3,7],:)') 
+xlabel ('Time (s)')
+ylabel ('Potential')
+legend('NM1','NM2')
+title('Simulated Potential Slow Inhibitory cells of NM1 and NM2')
+
+% Fast inhibitory
+figure(4);
+plot(tvec,u2([4,8],:)') 
+xlabel ('Time (s)')
+ylabel ('Potential')
+legend('NM1','NM2')
+title('Simulated Potential Fast Inhibitory cells of NM1 and NM2')
+
 %%
 toc;    % Stop measuring computation time

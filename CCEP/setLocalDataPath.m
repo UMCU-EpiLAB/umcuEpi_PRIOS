@@ -1,4 +1,6 @@
+
 function localDataPath = setLocalDataPath(varargin)
+
 % function LocalDataPath = setLocalDataPath(varargin)
 % Return the path to the root CCEP  directory and add paths in this repo
 %
@@ -16,6 +18,7 @@ function localDataPath = setLocalDataPath(varargin)
 % dhermes, 2020, Multimodal Neuroimaging Lab
 
 if isempty(varargin)
+
     rootPath = which('setLocalDataPath');
     ccepRepoPath = fileparts(rootPath);
     
@@ -24,6 +27,7 @@ if isempty(varargin)
     
     % add localDataPath default
     localDataPath = fullfile(ccepRepoPath,'data');
+
 elseif ~isempty(varargin)
     % add path to data
     if isstruct(varargin{1})

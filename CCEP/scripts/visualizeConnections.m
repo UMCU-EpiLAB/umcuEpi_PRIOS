@@ -11,6 +11,7 @@ cfg.CCEPpath = fullfile('/Fridge/users/dorien/derivatives/CCEP/',cfg.sub_labels{
 files = dir(cfg.CCEPpath);
 n=1; runs = cell(1);
 
+
 for i=1:size(files,1)
     if contains(files(i).name ,'run-') && n==1
         loadfile = load(fullfile(cfg.CCEPpath,files(i).name,[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',files(i).name,'_CCEP.mat']));
