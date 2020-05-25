@@ -1,4 +1,4 @@
-function [OA, PA, NA] = determine_agreement(myDataPath,cfg,~)
+function [OA, PA, NA, compare_mat] = determine_agreement(myDataPath,cfg,~)
 files = dir(fullfile(myDataPath.CCEPpath, cfg.sub_labels{1}, 'ses-*' ,cfg.run_label{1},...
     [cfg.sub_labels{1} '_ses-*_' cfg.task_label '_*'  '_CCEP_*.mat']));
 
@@ -66,7 +66,7 @@ if length(runs) > 1
                     fprintf('WARNING: The matrices of >2 runs cannot be added up');
                 end   
     end   
-end
+%end
 
 % Overall, positive and negative agreement between the matrices. 
 OA = (W + Z) / (W + XandY + Z);

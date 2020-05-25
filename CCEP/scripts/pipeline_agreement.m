@@ -76,12 +76,12 @@ fprintf('CCEPs is saved in %s%s \n',targetFolder);
 % when 2 sessions are compared. It coule be possible to compare more, but
 % then the values for W, Z and XandY should be changed. 
 
-[overall_agr, positive_agr, negative_agr] = determine_agreement(myDataPath,cfg,stim_database);
+[overall_agr, positive_agr, negative_agr,compare_mat] = determine_agreement(myDataPath,cfg,stim_database);
 agreement.OA = overall_agr;
 agreement.PA = positive_agr;
 agreement.NA = negative_agr; 
 
-% Save the values for the agreement per run (2 and 10 stims)
+%% Save the values for the agreement per run (2 and 10 stims)
 targetFolder = [myDataPath.CCEPpath, stim_database(1).sub_label,'/',stim_database(1).ses_label,'/', stim_database(1).run_label,'/'];
 
 % Create the folder if it doesn't exist already.
