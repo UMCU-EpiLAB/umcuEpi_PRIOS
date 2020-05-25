@@ -92,6 +92,7 @@ topo.y=y;
 %     ccep(run).adj_matrix = adj_matrix{run,1};
 % end
 
+<<<<<<< HEAD
 for stimp = 1:size(compare_mat,2)      % Number of stimulation pairs (columns)
     stimnum = ccep(run).cc_stimsets(stimp,:);       % Stimulation pair numbers for column number (stimp)
     resp = ccep(run).adj_matrix(:,stimp);           % matrix with one and zero for ER and non ER, respectively
@@ -104,6 +105,54 @@ for stimp = 1:size(compare_mat,2)      % Number of stimulation pairs (columns)
     for chan=1:2
         plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
             'MarkerFaceColor','y','MarkerEdgeColor','k')
+=======
+for run = 1:size(ccep,2)
+    for stimp = 1:size(ccep(run).checked,2)
+        stimnum = ccep(run).cc_stimsets(stimp,:);
+        resp = ccep(run).checked(:,stimp);
+        
+        figure(1),
+        % plot all electrodes
+        plot(topo.x,topo.y,'ok','MarkerSize',15)
+        hold on
+        % plot stimulation pair in yellow
+        for chan=1:2
+            plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
+                'MarkerFaceColor','y','MarkerEdgeColor','k')
+        end
+        
+        % plot electrodes showing CCEPs in green
+        chan = find(resp==1);
+        plot(topo.x(chan),topo.y(chan),'o','MarkerSize',15,...
+            'MarkerFaceColor','g','MarkerEdgeColor','k')
+        hold off
+        
+        % add electrode names
+        text(topo.x,topo.y,ccep(run).ch)
+        
+        ax = gca;
+        xlim([min(topo.x)-2, max(topo.x)+2])
+        ylim([min(topo.y)-2, max(topo.y)+2])
+        title(sprintf('CCEP responses after stimulating %s-%s', ccep(run).ch{stimnum(1)}, ccep(run).ch{stimnum(2)}))
+        
+        ax.YDir = 'reverse';
+        ax.YTick = [];
+        ax.XTick = [];
+        ax.XColor = 'none';
+        ax.YColor = 'none';
+        ax.Units = 'normalized';
+        ax.Position = [0.1 0.1 0.8 0.8];
+        outlabel=sprintf('Stimpair%s-%s.jpg',...
+            ccep(run).ch{stimnum(1)},ccep(run).ch{stimnum(2)});
+        
+        path = fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,runs{run});
+        if ~exist([path,'/figures/'], 'dir')
+            mkdir([path,'/figures/']);
+        end
+        
+        saveas(gcf,[path,'/figures/',outlabel],'jpg')
+        
+>>>>>>> 09f316b4bd6b8daac65e808afa4d627ec0fcd26e
     end
 
     % plot electrodes showing CCEPs in green
