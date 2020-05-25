@@ -94,7 +94,7 @@ for run = 1:size(ccep,2)
         ax = gca;
         xlim([min(topo.x)-2, max(topo.x)+2])
         ylim([min(topo.y)-2, max(topo.y)+2])
-        title(sprintf('CCEP responses after stimulating %s-%s',ccep(run).ch{stimnum(1)},ccep(run).ch{stimnum(2)}))
+        title(sprintf('CCEP responses after stimulating %s-%s', ccep(run).ch{stimnum(1)}, ccep(run).ch{stimnum(2)}))
         
         ax.YDir = 'reverse';
         ax.YTick = [];
