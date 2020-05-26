@@ -19,7 +19,7 @@ cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],st
 clear files names strings stringsz
 
 %% load data
-tic;
+
 dataBase = load_ECoGdata(cfg,myDataPath);
 
 %% CCEP for 2 and 10 stimulations
@@ -95,4 +95,3 @@ save([targetFolder,Agreements], 'agreement');
 
 fprintf('Agreemtents are saved in %s%s \n',targetFolder);
 
-toc

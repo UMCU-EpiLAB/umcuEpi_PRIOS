@@ -92,7 +92,7 @@ topo.y=y;
 %     ccep(run).adj_matrix = adj_matrix{run,1};
 % end
 
-<<<<<<< HEAD
+%<<<<<<< HEAD
 for stimp = 1:size(compare_mat,2)      % Number of stimulation pairs (columns)
     stimnum = ccep(run).cc_stimsets(stimp,:);       % Stimulation pair numbers for column number (stimp)
     resp = ccep(run).adj_matrix(:,stimp);           % matrix with one and zero for ER and non ER, respectively
@@ -105,7 +105,7 @@ for stimp = 1:size(compare_mat,2)      % Number of stimulation pairs (columns)
     for chan=1:2
         plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
             'MarkerFaceColor','y','MarkerEdgeColor','k')
-=======
+
 for run = 1:size(ccep,2)
     for stimp = 1:size(ccep(run).checked,2)
         stimnum = ccep(run).cc_stimsets(stimp,:);
@@ -152,7 +152,6 @@ for run = 1:size(ccep,2)
         
         saveas(gcf,[path,'/figures/',outlabel],'jpg')
         
->>>>>>> 09f316b4bd6b8daac65e808afa4d627ec0fcd26e
     end
 
     % plot electrodes showing CCEPs in green
