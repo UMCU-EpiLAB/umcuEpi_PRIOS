@@ -61,38 +61,49 @@ stop_filename = strfind(dataBase(1).dataName,'_ieeg');
 % save 2 stims
 fileName=[dataBase2stim.dataName(start_filename(end)+1:stop_filename-1),'_CCEP_2stims.mat'];
 ccep = dataBase2stim.ccep;
+ccep.stimchans = dataBase2stim.cc_stimchans;
+ccep.stimpnames = dataBase2stim.stimpnames;
 ccep.dataName = dataBase2stim.dataName;
+ccep.ch = dataBase2stim.ch;
 save([targetFolder,fileName], 'ccep');
 
 % save all stims
 fileName5=[dataBaseallstim.dataName(start_filename(end)+1:stop_filename-1),'_CCEP_10stims.mat'];
 ccep = dataBaseallstim.ccep;
+ccep.stimchans = dataBaseallstim.cc_stimchans;
+ccep.stimpnames = dataBaseallstim.stimpnames;
 ccep.dataName = dataBaseallstim.dataName;
+ccep.ch = dataBaseallstim.ch;
 save([targetFolder,fileName5], 'ccep');
 
 fprintf('CCEPs 2stims and 10stims is saved in %s \n',targetFolder);
 
 %% determine the agreement between 2 and 10 stims per run
 % The determine_agreement function is not only determining the agreement
-% when 2 sessions are compared. It coule be possible to compare more, but
+% when 2 sessions are compared. It could be possible to compare more, but
 % then the values for W, Z and XandY should be changed. 
+clc
+close all
 
-[overall_agr, positive_agr, negative_agr,compare_mat] = determine_agreement(myDataPath,cfg,database);
-agreement.OA = overall_agr;
-agreement.PA = positive_agr;
-agreement.NA = negative_agr; 
+[agreement_run, agreement_stim,compare_mat] = determine_agreement(myDataPath,cfg);
+
+fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
+    agreement_run.OA, agreement_run.PA, agreement_run.NA)
+
+fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
+    agreement_stim.OA, agreement_stim.PA, agreement_stim.NA)
 
 %% Save the values for the agreement per run (2 and 10 stims)
-targetFolder = [myDataPath.CCEPpath, database(1).sub_label,'/',database(1).ses_label,'/', database(1).run_label,'/'];
+targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
 
 % Create the folder if it doesn't exist already.
 if ~exist(targetFolder, 'dir')
     mkdir(targetFolder);
 end
 
-Agreements = [database(2).sub_label, '_', database(2).run_label,'_agreement2_versus10.mat'];
+Agreements = [dataBase(1).sub_label, '_', dataBase(1).run_label,'_agreement2_versus10.mat'];
 
-save([targetFolder,Agreements], 'agreement');
+save([targetFolder,Agreements], 'agreement_run','agreement_stim');
 
-fprintf('Agreemtents are saved in %s%s \n',targetFolder);
+fprintf('Agreements are saved in %s \n',targetFolder);
 
