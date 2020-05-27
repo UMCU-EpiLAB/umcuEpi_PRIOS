@@ -9,6 +9,7 @@
 %
 % This code is part of the simulation code of the manuscript 'Pathological responses to single pulse electrical stimuli in epilepsy: the role of feedforward inhibition'
 % (c) 2019 Jurgen Hebbink (University of Twente, University Medical Centre Utrecht)
+
 %%
 tic;            % Start measuring computation time
 
@@ -33,7 +34,7 @@ NM(2)=create_NM(4.5,100,7,10,25,300,135,1,0,1,0.7);
 
 %Add stimulation
 NM(1).Ivar=@(t) (mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);    % Stimulation at NM 1
-NM(2).Ivar=@(t)(mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);   % Uncomment to add stimulation to NM2
+%NM(2).Ivar=@(t)(mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);   % Uncomment to add stimulation to NM2
 
 %% Network architecture
 k=20;           % Connectivity strength
