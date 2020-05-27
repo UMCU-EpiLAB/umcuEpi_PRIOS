@@ -16,6 +16,10 @@ stringsz = [repmat('%s, ',1,size(strings,2)-1),'%s'];
 
 cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')}; % Chosen run is in cfg.run_label
 
+if ~contains(cfg.run_label,'run-')
+   error('"run-" is missing in run_label') 
+end
+
 clear files names strings stringsz
 
 %% load data
@@ -23,73 +27,70 @@ clear files names strings stringsz
 dataBase = load_ECoGdata(cfg,myDataPath);
 
 %% CCEP for 2 and 10 stimulations
-stimulations = [1,5];
-for K = 1:length(stimulations)
-    [stim_dataBase(K)] = preprocess_ECoG_spes(dataBase,cfg,stimulations(K));
 
-    % detect ccep
-    [stim_database(K)] = detect_n1peak_ECoG_ccep(stim_dataBase(K), cfg);
-    stim_database(K).ccep.amplitude_thresh = cfg.amplitude_thresh;
-    stim_database(K).ccep.n1_peak_range = cfg.n1_peak_range;
-    stim_database(K).ccep.cc_stimsets = stim_dataBase(K).cc_stimsets;
-    stim_database(K).ccep.ch = stim_dataBase(K).ch;
-    stim_database(K).ccep.stimpnames = stim_dataBase(K).stimpnames;
-    stim_database(K).ccep.stimchans = stim_dataBase(K).cc_stimchans; 
-    stim_database(K).ccep.stimnum = stim_dataBase(K).stimnum;
-end
- disp('Detection of ERs is completed')
+% avg_stim = 1: we only want to use the first stimulation of all stimuli 
+% in one stimulation pair. So instead of averaging all stimuli in one 
+% stimulation pair, we only 'average' the first stimulus. If you want to 
+% use all stimuli, use avg_stim = [];
+
+% save only first stimulus in both directions
+avg_stim = 1;
+dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
+
+% save all stimuli
+avg_stim = [];
+dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
+
+% detect ccep in only first stimulus in both directions and all stimuli
+dataBase2stim = detect_n1peak_ECoG_ccep(dataBase2stim,cfg);
+dataBaseallstim = detect_n1peak_ECoG_ccep(dataBaseallstim,cfg);
+
+disp('Detection of ERs is completed')
 
 %% save ccep
-targetFolder = [myDataPath.CCEPpath, stim_database(1).sub_label,'/',stim_database(1).ses_label,'/', stim_database(1).run_label,'/'];
+targetFolder = [fullfile(myDataPath.CCEPpath, dataBase(1).sub_label,dataBase(1).ses_label,dataBase(1).run_label),'/'];
 
 % Create the folder if it doesn't exist already.
 if ~exist(targetFolder, 'dir')
     mkdir(targetFolder);
 end
 
-start_filename = strfind(stim_database(1).dataName,'/');
-stop_filename = strfind(stim_database(1).dataName,'_ieeg');
+start_filename = strfind(dataBase(1).dataName,'/');
+stop_filename = strfind(dataBase(1).dataName,'_ieeg');
 
-    
-if stim_database(1).stimnum == 1
-    fileName2=[stim_database(1).dataName(start_filename(end)+1:stop_filename-1),'_CCEP_2stims.mat'];
+% save 2 stims
+fileName=[dataBase2stim.dataName(start_filename(end)+1:stop_filename-1),'_CCEP_2stims.mat'];
+ccep = dataBase2stim.ccep;
+ccep.dataName = dataBase2stim.dataName;
+save([targetFolder,fileName], 'ccep');
 
-    ccep = stim_database(1).ccep;
-    ccep.dataName = stim_database(1).dataName;
+% save all stims
+fileName5=[dataBaseallstim.dataName(start_filename(end)+1:stop_filename-1),'_CCEP_10stims.mat'];
+ccep = dataBaseallstim.ccep;
+ccep.dataName = dataBaseallstim.dataName;
+save([targetFolder,fileName5], 'ccep');
 
-    save([targetFolder,fileName2], 'ccep');
-end
+fprintf('CCEPs 2stims and 10stims is saved in %s \n',targetFolder);
 
-if stim_database(2).stimnum == 5
-    fileName5=[stim_database(2).dataName(start_filename(end)+1:stop_filename-1),'_CCEP_10stims.mat'];
-
-    ccep = stim_database(2).ccep;
-    ccep.dataName = stim_database(1).dataName;
-
-    save([targetFolder,fileName5], 'ccep');
-end
-
-fprintf('CCEPs is saved in %s%s \n',targetFolder);
-
-%% detmine the agreement between 2 and 10 stims per run
+%% determine the agreement between 2 and 10 stims per run
 % The determine_agreement function is not only determining the agreement
 % when 2 sessions are compared. It coule be possible to compare more, but
 % then the values for W, Z and XandY should be changed. 
 
-[overall_agr, positive_agr, negative_agr,compare_mat] = determine_agreement(myDataPath,cfg,stim_database);
+[overall_agr, positive_agr, negative_agr,compare_mat] = determine_agreement(myDataPath,cfg,database);
 agreement.OA = overall_agr;
 agreement.PA = positive_agr;
 agreement.NA = negative_agr; 
 
 %% Save the values for the agreement per run (2 and 10 stims)
-targetFolder = [myDataPath.CCEPpath, stim_database(1).sub_label,'/',stim_database(1).ses_label,'/', stim_database(1).run_label,'/'];
+targetFolder = [myDataPath.CCEPpath, database(1).sub_label,'/',database(1).ses_label,'/', database(1).run_label,'/'];
 
 % Create the folder if it doesn't exist already.
 if ~exist(targetFolder, 'dir')
     mkdir(targetFolder);
 end
 
-Agreements = [stim_database(2).sub_label, '_', stim_database(2).run_label,'_agreement2_versus10.mat'];
+Agreements = [database(2).sub_label, '_', database(2).run_label,'_agreement2_versus10.mat'];
 
 save([targetFolder,Agreements], 'agreement');
 
