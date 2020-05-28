@@ -38,7 +38,7 @@ function [ uout,xout,xextout,yout,yextout] = sim_NM_network(Ttot,deltat,Nout,NM_
 
 
 NTST=ceil(Ttot/deltat);             %number of timestepes
-Nnodes=size(NM_network.nodes,1);    %number of nodes
+Nnodes=2 ;                           %size(NM_network.nodes,1);    %number of nodes
 
 
 %% Pre-allocate state variables

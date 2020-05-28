@@ -25,6 +25,9 @@ Tinterstim=5;   % Time between stimulations
 Tstim=0.005;    % Length of the blockpulse
 Amp=1500;       % Amplitude of the blockpulse
 
+B_gain = [0, 12, 25, 50, 75, 100];
+%values_B = adapt_gain(B_gain, Tend, deltat, Np, Tinterstim, Tin, Tstim, Amp);
+
 %% Initialize neural masses
 
 % Create parameter structs
