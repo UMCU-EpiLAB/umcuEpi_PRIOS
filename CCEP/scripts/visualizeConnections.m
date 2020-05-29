@@ -19,20 +19,20 @@ cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],st
 
 clear files names strings stringsz
 
-%% load all CCEP set LOOK AT THE NAME!! 2 VERSUS 10 STIMS!!!
+%% load all CCEP set LOOK AT THE NAME!! 2 or 10 STIMS!!!
 
 files = dir(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1}));
 n=1; 
 runs = cell(1);
 
 for i=1:size(files,1)
-    if contains(files(i).name ,'run-') && n==1
-        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1},files(i).name,[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',files(i).name,'_CCEP_10stims.mat']));
+    if contains(files(i).name ,'CCEP_') && n==1
+        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1},[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',cfg.run_label{:},'_CCEP_10stims.mat']));
         ccep = loadfile.ccep;
         runs{n} = files(i).name;
         n=n+1;
-    elseif contains(files(i).name ,'run-') && n>1
-        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,files(i).name,[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',files(i).name,'_CCEP_10stims.mat']));
+    elseif contains(files(i).name ,'CCEP_') && n>1
+        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1},[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',cfg.run_label{:},'_CCEP_10stims.mat']));
         ccep(n) = loadfile.ccep;
         runs{n} = files(i).name;
         n=n+1;
@@ -42,7 +42,7 @@ end
 
 %% load all CCEP detected by automatic detector
 
-[OA, PA, NA, compare_mat] = determine_agreement(myDataPath,cfg);
+[agreement_run, agreement_stim,compare_mat] = determine_agreement(myDataPath,cfg);
 
 %% load electrodes positions (xlsx/electrodes.tsv)
 
@@ -87,53 +87,48 @@ topo.y=y;
 
 
 %% CCEP responses to specific stimulus
-% for run = 1:size(ccep,2)
-%     adj_matrix{run,1} = ~isnan(ccep(run).n1_peak_sample);
-%     ccep(run).adj_matrix = adj_matrix{run,1};
-% end
 
-%<<<<<<< HEAD
-for stimp = 1:size(compare_mat,2)      % Number of stimulation pairs (columns)
-    stimnum = ccep(run).cc_stimsets(stimp,:);       % Stimulation pair numbers for column number (stimp)
-    resp = ccep(run).adj_matrix(:,stimp);           % matrix with one and zero for ER and non ER, respectively
+for stimp = 1:size(compare_mat,2)                   % Number of stimulation pairs (columns)
+    stimnum = ccep(1).stimsets(stimp,:);            % Stimulation pair numbers for column number (stimp)
+    resp = compare_mat(:,stimp);             % matrix with one and zero for ER and non ER, respectively
 
-    figure(1),
-    % plot all electrodes
-    plot(topo.x,topo.y,'ok','MarkerSize',15)
-    hold on
-    % plot stimulation pair in yellow
-    for chan=1:2
-        plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
-            'MarkerFaceColor','y','MarkerEdgeColor','k')
-
-for run = 1:size(ccep,2)
-    for stimp = 1:size(ccep(run).checked,2)
-        stimnum = ccep(run).cc_stimsets(stimp,:);
-        resp = ccep(run).checked(:,stimp);
         
         figure(1),
         % plot all electrodes
         plot(topo.x,topo.y,'ok','MarkerSize',15)
         hold on
+        
+        
+        % plot electrodes showing CCEPs in green (CCEP = 2 because 2 and 10 stimulations are compared)
+        chan = find(resp==2);
+        plot(topo.x(chan),topo.y(chan),'o','MarkerSize',15,...
+            'MarkerFaceColor','g','MarkerEdgeColor','k')
+        
+        % plot electrodes showing CCEPs in green (CCEP = 2 because 2 and 10 stimulations are compared)
+        chan = find(resp==0);
+        plot(topo.x(chan),topo.y(chan),'o','MarkerSize',15,...
+            'MarkerFaceColor','g','MarkerEdgeColor','k')
+                
+        % plot electrodes showing CCEPs in one of the two stimulations in red 
+        chan = find(resp==1);
+        plot(topo.x(chan),topo.y(chan),'o','MarkerSize',15,...
+            'MarkerFaceColor','r','MarkerEdgeColor','k')
+       
         % plot stimulation pair in yellow
         for chan=1:2
             plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
                 'MarkerFaceColor','y','MarkerEdgeColor','k')
         end
         
-        % plot electrodes showing CCEPs in green
-        chan = find(resp==1);
-        plot(topo.x(chan),topo.y(chan),'o','MarkerSize',15,...
-            'MarkerFaceColor','g','MarkerEdgeColor','k')
         hold off
         
         % add electrode names
-        text(topo.x,topo.y,ccep(run).ch)
+        text(topo.x,topo.y,ccep(1).ch)
         
         ax = gca;
         xlim([min(topo.x)-2, max(topo.x)+2])
         ylim([min(topo.y)-2, max(topo.y)+2])
-        title(sprintf('CCEP responses after stimulating %s-%s', ccep(run).ch{stimnum(1)}, ccep(run).ch{stimnum(2)}))
+        title(sprintf('CCEP responses after stimulating %s-%s', ccep(1).ch{stimnum(1)}, ccep(1).ch{stimnum(2)}))
         
         ax.YDir = 'reverse';
         ax.YTick = [];
@@ -143,46 +138,13 @@ for run = 1:size(ccep,2)
         ax.Units = 'normalized';
         ax.Position = [0.1 0.1 0.8 0.8];
         outlabel=sprintf('Stimpair%s-%s.jpg',...
-            ccep(run).ch{stimnum(1)},ccep(run).ch{stimnum(2)});
+            ccep(1).ch{stimnum(1)},ccep(1).ch{stimnum(2)});
         
-        path = fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,runs{run});
+        path = fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label, cfg.run_label{:});
         if ~exist([path,'/figures/'], 'dir')
             mkdir([path,'/figures/']);
         end
         
         saveas(gcf,[path,'/figures/',outlabel],'jpg')
         
-    end
-
-    % plot electrodes showing CCEPs in green
-    chan = find(resp==1);
-    plot(topo.x(chan),topo.y(chan),'o','MarkerSize',15,...
-        'MarkerFaceColor','g','MarkerEdgeColor','k')
-    hold off
-
-    % add electrode names
-    text(topo.x,topo.y,ccep(run).ch)
-
-    ax = gca;
-    xlim([min(topo.x)-2, max(topo.x)+2])
-    ylim([min(topo.y)-2, max(topo.y)+2])
-    title(sprintf('CCEP responses after stimulating %s-%s',ccep(run).ch{stimnum(1)},ccep(run).ch{stimnum(2)}))
-
-    ax.YDir = 'reverse';
-    ax.YTick = [];
-    ax.XTick = [];
-    ax.XColor = 'none';
-    ax.YColor = 'none';
-    ax.Units = 'normalized';
-    ax.Position = [0.1 0.1 0.8 0.8];
-    outlabel=sprintf('Stimpair%s-%s.jpg',...
-        ccep(run).ch{stimnum(1)},ccep(run).ch{stimnum(2)});
-
-    path = fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,runs{run});
-    if ~exist([path,'/figures/'], 'dir')
-        mkdir([path,'/figures/']);
-    end
-
-    saveas(gcf,[path,'/figures/',outlabel],'jpg')
-
 end

@@ -63,6 +63,7 @@ fileName=[dataBase2stim.dataName(start_filename(end)+1:stop_filename-1),'_CCEP_2
 ccep = dataBase2stim.ccep;
 ccep.stimchans = dataBase2stim.cc_stimchans;
 ccep.stimpnames = dataBase2stim.stimpnames;
+ccep.stimsets = dataBase2stim.cc_stimsets;
 ccep.dataName = dataBase2stim.dataName;
 ccep.ch = dataBase2stim.ch;
 save([targetFolder,fileName], 'ccep');
@@ -72,6 +73,7 @@ fileName5=[dataBaseallstim.dataName(start_filename(end)+1:stop_filename-1),'_CCE
 ccep = dataBaseallstim.ccep;
 ccep.stimchans = dataBaseallstim.cc_stimchans;
 ccep.stimpnames = dataBaseallstim.stimpnames;
+ccep.stimsets = dataBaseallstim.cc_stimsets;
 ccep.dataName = dataBaseallstim.dataName;
 ccep.ch = dataBaseallstim.ch;
 save([targetFolder,fileName5], 'ccep');
