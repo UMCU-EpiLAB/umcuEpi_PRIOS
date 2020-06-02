@@ -19,7 +19,10 @@ cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],st
 
 clear files names strings stringsz
 
-%% load all CCEP set LOOK AT THE NAME!! 2 or 10 STIMS!!!
+%% Load all CCEP set 
+% Does not matter whether you take the 10 stims or the 2 stims
+% Only the channels and stimpairs are used, which should be similar in both
+% stimulation protocols.
 
 files = dir(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1}));
 n=1; 
@@ -27,12 +30,12 @@ runs = cell(1);
 
 for i=1:size(files,1)
     if contains(files(i).name ,'CCEP_') && n==1
-        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1},[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',cfg.run_label{:},'_CCEP_10stims.mat']));
+        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1},[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',cfg.run_label{:},'_CCEP_2stims.mat']));
         ccep = loadfile.ccep;
         runs{n} = files(i).name;
         n=n+1;
     elseif contains(files(i).name ,'CCEP_') && n>1
-        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1},[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',cfg.run_label{:},'_CCEP_10stims.mat']));
+        loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1},[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',cfg.run_label{:},'_CCEP_2stims.mat']));
         ccep(n) = loadfile.ccep;
         runs{n} = files(i).name;
         n=n+1;
@@ -90,7 +93,7 @@ topo.y=y;
 
 for stimp = 1:size(compare_mat,2)                   % Number of stimulation pairs (columns)
     stimnum = ccep(1).stimsets(stimp,:);            % Stimulation pair numbers for column number (stimp)
-    resp = compare_mat(:,stimp);             % matrix with one and zero for ER and non ER, respectively
+    resp = compare_mat(:,stimp);                    % matrix with one and zero for ER and non ER, respectively
 
         
         figure(1),
