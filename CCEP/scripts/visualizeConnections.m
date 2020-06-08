@@ -110,7 +110,7 @@ for stimp = 1:size(compare_mat,2)                   % Number of stimulation pair
         % plot electrodes showing CCEPs in green (CCEP = 2 because 2 and 10 stimulations are compared)
         chan = find(resp==0);
         plot(topo.x(chan),topo.y(chan),'o','MarkerSize',15,...
-            'MarkerFaceColor','g','MarkerEdgeColor','k')
+            'MarkerFaceColor',[0 0.5 0],'MarkerEdgeColor','k')
                 
         % plot electrodes showing CCEPs in one of the two stimulations in red 
         chan = find(resp==1);
