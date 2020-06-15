@@ -14,16 +14,19 @@ Tinterstim=5;   % Time between stimulations
 Tstim=0.005;    % Length of the blockpulse
 Amp=1500;       % Amplitude of the blockpulse
 
-FI_gain = [0, 12, 25, 50, 75, 100];
-SI_gain = [-7, 0, 7, 14, 21, 28];
+FI_gain = [0, 12, 25, 50, 75, 100];     % Fast inhibitory synaptic gain (norm = 25 mV)
+SI_gain = [-7, 0, 7, 14, 21, 28];       % Slow inhibitory synaptic gain (norm = 7 mV)
+SI_reci = [0, 5, 10, 20];               % Reciprocal of slow inhibitory time constant (norm = 10 s-1)
+FI_reci = [0, 150, 300, 600];           % Reciprocal of fast inhibitory time constant (norm = 300 s-1)
+
 
 %% Varying the Fast Inhibitory Gain value
 % Simulating the potential of the pyramidal cells of NM1 and NM2
 
-for i = FI_gain
+for i = FI_reci
 
-        NM(1)=create_NM(4.5,100,7,10,i,300,135,1,0,1,0.7);          % This is NMM 1
-        NM(2)=create_NM(4.5,100,7,10,i,300,135,1,0,1,0.7);        % This is NMM 2
+        NM(1)=create_NM(4.5,100,7,10,25,i,135,1,0,1,0.7);          % This is NMM 1
+        NM(2)=create_NM(4.5,100,7,10,25,i,135,1,0,1,0.7);          % This is NMM 2
 
         %Add stimulation
         NM(1).Ivar=@(t) (mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);    % Stimulation at NM 1
@@ -48,23 +51,23 @@ for i = FI_gain
         xlabel ('Time (s)')
         ylabel ('Potential')
         legend('NM1','NM2')
-        title(['Simulated Potential PY, G-gain = ',sprintf('%d',i)])
+        title(['Simulated Potential PY, FI time constant = ',sprintf('%d',i)])
         %title('Simulated Potential of Pyramidal cells of NM1 and NM2')
         outlabel=sprintf('Simulated Potential PY %d.jpg',...
         i);
 
-        path = 'C:\Users\Sifraaaaa\Documents\utwente\M3\NMM\GandB_changes\';
-        saveas(gcf,[path,'/FI_gain_(G)/',outlabel],'jpg')
-        saveas(gcf,[path,'/FI_gain_(G)/',outlabel])
+        path = 'C:\Users\Sifraaaaa\Documents\utwente\M3\NMM\g_and_b_changes\';
+        saveas(gcf,[path,'/FI_reci(g)/',outlabel],'jpg')
+        saveas(gcf,[path,'/FI_reci(g)/',outlabel])
 end
 
 %% Varying the Slow Inhibitory Gain value
 % Simulating the potential of the pyramidal cells of NM1 and NM2
 
-for i = SI_gain
+for i = SI_reci
 
-        NM(1)=create_NM(4.5,100,i,10,25,300,135,1,0,1,0.7);          % This is NMM 1
-        NM(2)=create_NM(4.5,100,i,10,25,300,135,1,0,1,0.7);        % This is NMM 2
+        NM(1)=create_NM(4.5,100,7,i,25,300,135,1,0,1,0.7);          % This is NMM 1
+        NM(2)=create_NM(4.5,100,7,i,25,300,135,1,0,1,0.7);        % This is NMM 2
 
         %Add stimulation
         NM(1).Ivar=@(t) (mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);    % Stimulation at NM 1
@@ -89,13 +92,14 @@ for i = SI_gain
         xlabel ('Time (s)')
         ylabel ('Potential')
         legend('NM1','NM2')
-        title(['Simulated Potential PY, B-gain = ',sprintf('%d',i)])
+        title(['Simulated Potential PY, SI time constant = ',sprintf('%d',i)])
         %title('Simulated Potential of Pyramidal cells of NM1 and NM2')
         outlabel=sprintf('Simulated Potential PY %d.jpg',...
         i);
 
-        path = 'C:\Users\Sifraaaaa\Documents\utwente\M3\NMM\GandB_changes\';
-        saveas(gcf,[path,'/SI_gain_(B)/',outlabel],'jpg')
+        path = 'C:\Users\Sifraaaaa\Documents\utwente\M3\NMM\g_and_b_changes\';
+        saveas(gcf,[path,'/SI_reci(b)/',outlabel],'jpg')
+        saveas(gcf,[path,'/SI_reci(b)/',outlabel])
 
 end
 
