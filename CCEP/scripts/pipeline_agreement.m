@@ -44,6 +44,8 @@ dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 % detect ccep in only first stimulus in both directions and all stimuli
 dataBase2stim = detect_n1peak_ECoG_ccep(dataBase2stim,cfg);
 dataBaseallstim = detect_n1peak_ECoG_ccep(dataBaseallstim,cfg);
+dataBase2stim.NmbrofStims = '2_stims';
+dataBaseallstim.NmbrofStims = '10_stims';
 
 disp('Detection of ERs is completed')
 
@@ -94,6 +96,25 @@ fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreeme
 
 fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
     agreement_stim.OA, agreement_stim.PA, agreement_stim.NA)
+
+for i = 1:size(compare_mat,2)
+    TotOnesStim(i,1) = sum(compare_mat(:,i) == 1) ; 
+end
+
+%% Determine the location of the ones (ER vs. No-ER)
+
+[FindOnes, LocOnes, stimchans] = find_ones(dataBaseallstim,agreement_run);
+ 
+% All stims (10)
+dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
+plot_ccep_av_stimp(dataBaseallstim,myDataPath, stimchans, LocOnes, TotOnesStim);
+
+
+% 2 stims
+dataBase2stim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
+plot_ccep_av_stimp(dataBase2stim,myDataPath, stimchans, LocOnes, TotOnesStim);
+
+fprintf('All CCEPS average are saved');
 
 %% Save the values for the agreement per run (2 and 10 stims)
 targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];

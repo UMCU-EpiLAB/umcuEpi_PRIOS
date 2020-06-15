@@ -66,7 +66,7 @@ if size(runs,2) >1
                             
                         end
                         
-                        [indegreenorm, outdegreenorm, BCnorm] = agreement_parameters(Amat2,ccep);
+                        %[indegreenorm, outdegreenorm, BCnorm] = agreement_parameters(Amat2,ccep);
                         
                     else
                         error('Size of adjacency matrices is not equal!')
@@ -79,9 +79,9 @@ if size(runs,2) >1
         agreement_run(countnum).PA = PA;
         agreement_run(countnum).NA = NA;
         agreement_run(countnum).compare_mat = compare_mat;
-        agreement_run(countnum).indegree = indegreenorm;
-        agreement_run(countnum).outdegree = outdegreenorm;
-        agreement_run(countnum).BC = BCnorm;
+%         agreement_run(countnum).indegree = indegreenorm;
+%         agreement_run(countnum).outdegree = outdegreenorm;
+%         agreement_run(countnum).BC = BCnorm;
         
         figure('Position',[680 137 1036 794]),
         subplot(2,3,1), imagesc(Amat1), xlabel('Stimpairs'), ylabel('Channels'), title(sprintf('%s in run %s',title1{:},run_label{:}))
