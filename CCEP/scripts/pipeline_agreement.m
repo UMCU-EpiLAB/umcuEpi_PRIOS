@@ -116,6 +116,9 @@ plot_ccep_av_stimp(dataBase2stim,myDataPath, stimchans, LocOnes, TotOnesStim);
 
 fprintf('All CCEPS average are saved');
 
+%% Plot the all 10 stimuli per stimulation pair
+plot_all_ccep(dataBaseallstim, myDataPath, stimchans);
+
 %% Save the values for the agreement per run (2 and 10 stims)
 targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
 
