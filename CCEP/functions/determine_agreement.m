@@ -1,4 +1,4 @@
-function [agreement_run, agreement_stim, compare_mat] = determine_agreement(myDataPath,cfg)
+function [agreement_run, agreement_stim, compare_mat, dif_mat, TotERs10, TotERs2, TotOnesStim] = determine_agreement(myDataPath,cfg)
 
 files = dir(fullfile(myDataPath.CCEPpath, cfg.sub_labels{1}, 'ses-*' ,cfg.run_label{1},...
     [cfg.sub_labels{1} '_ses-*_' cfg.task_label '_*'  '_CCEP_*.mat']));
@@ -35,24 +35,42 @@ if size(runs,2) >1
                 if ~strcmp( extractBetween(runs(i).name,'_CCEP_','.mat'), extractBetween(runs(i+j).name,'_CCEP_','.mat')) % if stim num is not equal
                     if all(size(runs(i).ccep.n1_peak_amplitude) == size(runs(i+j).ccep.n1_peak_amplitude)) % if size of adjacency matrix is equal
                         
-                        title1 = extractBetween(runs(i).name,'_CCEP_','.mat');
-                        title2 = extractBetween(runs(i+j).name,'_CCEP_','.mat');
+                        title1 = extractBetween(runs(i).name,'_CCEP_','.mat');      % 10 stims
+                        title2 = extractBetween(runs(i+j).name,'_CCEP_','.mat');    % 2 stims    
                         run_label = extractBetween(runs(i).name,'_run-','_CCEP');
                         Amat1 = runs(i).ccep.n1_peak_amplitude;
                         Amat2 = runs(i+j).ccep.n1_peak_amplitude;
                         
-                        Amat1(~isnan(Amat1)) = 1; % all non-NaNs are amplitudes, so N1s --> 1
-                        Amat1(isnan(Amat1)) = 0; % all NaNs are no N1s --> 0
-                        
+                        Amat1(~isnan(Amat1)) = 1;                   % all non-NaNs are amplitudes, so N1s --> 1
+                        Amat1(isnan(Amat1)) = 0;                    % all NaNs are no N1s --> 0
+            
                         Amat2(~isnan(Amat2)) = 1;
                         Amat2(isnan(Amat2)) = 0;
                         
                         compare_mat = Amat1 + Amat2;
+                        dif_mat = Amat1-Amat2;                      % 1 = ER in 10stims, -1 = ER in 2stims
                         truetrue = sum(compare_mat(:) == 2);
                         truefalse = sum(compare_mat(:) == 1);
                         falsefalse = sum(compare_mat(:) == 0);
                         
                         total = truetrue + truefalse + falsefalse;
+                        
+                        % total number of ones in the compare matrix (1 = ER versus non-ER)
+                        for i = 1:size(compare_mat,2)
+                            TotOnesStim(i,1) = sum(compare_mat(:,i) == 1) ;         % Number of ones detected per stimulation pair
+                        end
+
+                        % number of ERs detected with 10 stims
+                        for i = 1:size(Amat1,2)
+                            Tot10(i,1) = sum(Amat1(:,i) == 1) ;      % ERs detected per stimulation pair    
+                        end
+                        TotERs10 = sum(Tot10);
+
+                        % number of ERs detected with 2 stims
+                        for i = 1:size(Amat2,2)
+                            Tot2(i,1) = sum(Amat2(:,i) == 1) ;       % ERs detected per stimulation pair   
+                        end
+                        TotERs2 = sum(Tot2);
                         
                         if total ~= size(compare_mat,1) * size(compare_mat,2)
                             error('Summation of all values is not equal to size of adjacency matrix')
