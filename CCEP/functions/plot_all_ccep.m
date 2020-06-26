@@ -14,7 +14,7 @@ for i = 1:size(ER_in10(:,2))                            % For the number of ones
 end
 
 
-set(groot,'defaultFigureVisible','on') % 'on' to turn back on.  
+set(groot,'defaultFigureVisible','on') % 'on' to turn figures showing on, 'off' to not show the figures.  
 
 [indivstimp,~,stimprow] = unique(sort(dataBase.cc_stimsets,2),'rows');
 
