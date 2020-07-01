@@ -18,8 +18,11 @@ tt = dataBase.tt;
          counter_10 = 0;
          nmbr_of_ones = TotOnesStim(stimp);
          name = cell(1,nmbr_of_ones);
-            
-       
+         ccep_plot = zeros(length(tt),1);
+         ccep_plot2 = zeros(length(tt),1);
+         NameER = cell(1,nmbr_of_ones);
+              
+         
         for elec = 1:size(dataBase.cc_epoch_sorted_avg,1)            % for all electrodes
              elecnm = dataBase.ch{elec};
              
@@ -32,7 +35,7 @@ tt = dataBase.tt;
                     ccep_plot2(:,counter) = squeeze(dataBase2.cc_epoch_sorted_avg(elec,stimp,:));       % stimulations of the 2 stims
                     ccep_plot(tt>-0.010 & tt<0.010) = NaN;
                     ccep_plot2(tt>-0.010 & tt<0.010) = NaN;
-                end            
+                          
                     figure('Position',[1400 0 700 700])
                     %hold on
                     xlim([-.2 1.5])
@@ -40,37 +43,35 @@ tt = dataBase.tt;
                     xlabel('time (s)') 
                        
                     subplot(2,1,1);
-                    plot(tt,  ccep_plot + [0:500:counter*500-1]);   
+                    plot(tt,  ccep_plot + [500:500:counter*500]);   
                     str = sprintf('Stimulation pair %s for 10 stimps', stimchans{stimp,1});
                     title(str)
                     xlim([-.2 1.5])
                     ylabel('Average per electrodes (mV)')
                     xlabel('time (s)') 
                     set(gca,'YTick',500*(1:counter),'YTickLabel',name(:)) ;
-                    hold  on
+                    %hold  on
 
                     subplot(2,1,2);
-                    plot(tt,  ccep_plot2 + [0:500:counter*500-1]);   
+                    plot(tt,  ccep_plot2 + [500:500:counter*500]);   
                     str2 = sprintf('Stimulation pair %s for 2 stimps', stimchans{stimp,1});
                     title(str2)
                     xlim([-.2 1.5])
                     ylabel('Average per electrodes (mV)')
                     xlabel('time (s)') 
                     set(gca,'YTick',500*(1:counter),'YTickLabel',name(:)) ;
-                    hold on
-                 
+                    %hold off
+                
+                
                  for j = 1:length(ER_in10st)
                     if ismember({Stimpnm}, ER_in10st{j,1}) && ismember(dataBase.ch{elec}, ER_in10st(j,2))   
                         counter_10 = counter_10+1;
                         NameER(:,counter_10) =  [ER_in10st(j,2)];
-                        str_main = sprintf('10 stims evoke ER in %s,%s,%s,%s,%,%s,%s,%s',NameER{:});        
+                        str_main = sprintf('10 stims evoke ER in %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s',NameER{:});        
                         sgtitle(str_main)
                     end
                  end
-                         
-            end
-            
-     %hold off
+                
 
     % Save the figures
         if dataBase.save_fig==1
@@ -88,12 +89,14 @@ tt = dataBase.tt;
         else
             pause
         end
-          
+          end
             
             
     close all
-   
-            end        
+         
+
+            end
+     end              
     end
 end
 
