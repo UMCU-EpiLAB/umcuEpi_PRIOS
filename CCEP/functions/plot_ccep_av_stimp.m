@@ -1,4 +1,10 @@
 function plot_ccep_av_stimp(dataBase,dataBase2, myDataPath, stimchans, LocOnes, TotOnesStim, dif_mat)
+%
+% Function based on plot_ccep_av.m
+% Function plots average CCEPs across conditions per electrode.
+%
+% Dora Hermes, 2020, Multimodal Neuroimaging Lab, Mayo Clinic
+% Dorien van Blooijs, 2020, UMC Utrecht
 
 LocaOnes = LocOnes{:,:};             % Create matrix of table
 
@@ -37,7 +43,6 @@ tt = dataBase.tt;
                     ccep_plot2(tt>-0.010 & tt<0.010) = NaN;
                           
                     figure('Position',[1400 0 700 700])
-                    %hold on
                     xlim([-.2 1.5])
                     ylabel('Average per electrodes (mV)')
                     xlabel('time (s)') 
@@ -50,7 +55,7 @@ tt = dataBase.tt;
                     ylabel('Average per electrodes (mV)')
                     xlabel('time (s)') 
                     set(gca,'YTick',500*(1:counter),'YTickLabel',name(:)) ;
-                    %hold  on
+                   
 
                     subplot(2,1,2);
                     plot(tt,  ccep_plot2 + [500:500:counter*500]);   
@@ -60,7 +65,6 @@ tt = dataBase.tt;
                     ylabel('Average per electrodes (mV)')
                     xlabel('time (s)') 
                     set(gca,'YTick',500*(1:counter),'YTickLabel',name(:)) ;
-                    %hold off
                 
                 
                  for j = 1:length(ER_in10st)
@@ -89,15 +93,14 @@ tt = dataBase.tt;
         else
             pause
         end
-          end
-            
-            
+        
+     end
+     
     close all
-         
 
-            end
-     end              
     end
+   end              
+  end
 end
 
           

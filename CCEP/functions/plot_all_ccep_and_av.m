@@ -41,6 +41,8 @@ for stimp = 1:length(indivstimp)                            %1:max(indivstimp)
                     test2(:,tt>-0.01 & tt<0.02) = NaN;
                     
                     % Plot the average of the 10 or 2 stimulations per electrode
+                    % cc_epoch_sorted_avg(:,ll,:) =  squeeze(nanmean(squeeze(nanmean(cc_epoch_sorted(:,avg_stim,IC==ll,:),2)),2));
+
                     ccep_plot = squeeze(dataBase.cc_epoch_sorted_avg(elec,stimp,:));
                     ccep_plot2 = squeeze(dataBase2.cc_epoch_sorted_avg(elec,stimp,:));       % stimulations of the 2 stims
                     ccep_plot(tt>-0.010 & tt<0.010) = NaN;
@@ -77,7 +79,7 @@ for stimp = 1:length(indivstimp)                            %1:max(indivstimp)
                     set(gca,'YTick',500,'YTickLabel',elecnm) ;
                     
                     % Standard is an ER evoked in 2 stims and not in 10
-                    % stims (random choice)
+                    % stims (random choise)
                     str_main = sprintf('ER evoked by 2 stims in %s',elecnm);        
                     sgtitle(str_main) 
                 
