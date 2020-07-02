@@ -49,8 +49,9 @@ for stimp = 1:length(indivstimp)                            %1:max(indivstimp)
                     end
                     
 
-                    set(gca,'YTick',500*(0:size(ccep_plot)-1))
-                    
+                    %set(gca,'YTick',500*(0:size(ccep_plot)-1))
+                    set(gca,'YTick',2500,'YTickLabel',elecnm) ;                  
+
                     xlim([-.2 1.5])
                     ylabel('All stimuli of this stimulation pair' )
                     xlabel('time (s)') 
@@ -59,13 +60,13 @@ for stimp = 1:length(indivstimp)                            %1:max(indivstimp)
         % Save the figures
             if dataBase.save_fig==1
                 % create folder to save figures
-                if ~ exist(fullfile(myDataPath.CCEPpath,'ccep_figures',dataBase.sub_label,Stimpnm),'dir')
+                if ~ exist(fullfile(myDataPath.CCEPpath,'all_ccep_figures',dataBase.sub_label,Stimpnm),'dir')
 
-                    mkdir(fullfile(myDataPath.CCEPpath,'ccep_figures',dataBase.sub_label,Stimpnm));
+                    mkdir(fullfile(myDataPath.CCEPpath,'all_ccep_figures',dataBase.sub_label,Stimpnm));
                 end
 
                 % filename
-                figureName = fullfile(myDataPath.CCEPpath,'ccep_figures',dataBase.sub_label,Stimpnm,...
+                figureName = fullfile(myDataPath.CCEPpath,'all_ccep_figures',dataBase.sub_label,Stimpnm,...
                     [dataBase.sub_label '_stimp_' Stimpnm '_elec_' elecnm ]);
                 set(gcf,'PaperPositionMode','auto');
                 print('-dpng','-r300',figureName);

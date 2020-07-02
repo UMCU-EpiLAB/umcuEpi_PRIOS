@@ -100,6 +100,8 @@ fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreeme
 
 [FindOnes, LocOnes, stimchans] = find_ones(dataBaseallstim,agreement_run);
  
+%% Plot the average signal of the 2 stims or 10 stims
+
 dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
 plot_ccep_av_stimp(dataBaseallstim,dataBase2stim, myDataPath, stimchans, LocOnes, TotOnesStim, dif_mat)
 
@@ -108,6 +110,11 @@ fprintf('All CCEPS average are saved');
 %% Plot the all 10 stimuli per stimulation pair
 dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
 plot_all_ccep(dataBaseallstim, myDataPath, LocOnes, stimchans, dif_mat);
+
+
+%% Plot all 10 stimuli and the average for the 10 stims and the 2 stims
+dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
+plot_all_ccep_and_av(dataBaseallstim,dataBase2stim, myDataPath, LocOnes, stimchans, dif_mat, TotOnesStim);
 
 
 %% Save the values for the agreement per run (2 and 10 stims)
