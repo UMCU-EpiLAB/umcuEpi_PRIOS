@@ -13,7 +13,7 @@ for i = 1:size(ER_in10(:,2))                            % For the number of ones
 end
 
 
-set(groot,'defaultFigureVisible','off') % 'on' to turn figures showing on, 'off' to not show the figures.  
+set(groot,'defaultFigureVisible','on') % 'on' to turn figures showing on, 'off' to not show the figures.  
 
 [indivstimp,~,stimprow] = unique(sort(dataBase.cc_stimsets,2),'rows');
 
@@ -23,7 +23,7 @@ for stimp = 1:length(indivstimp)                            %1:max(indivstimp)
         Stimpnm = stimchans{stimp};     
         stimpnm = find(stimprow == stimp);
 
-       for elec = 1:size(dataBase.cc_epoch_sorted_avg,1)                     % for every electrode
+       for elec = 1:size(dataBase.cc_epoch_sorted_avg,1)    % for every electrode
             elecnm = dataBase.ch{elec};
             
             ccep_plot = zeros(length(tt),1);

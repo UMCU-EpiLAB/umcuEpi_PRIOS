@@ -88,7 +88,7 @@ fprintf('CCEPs 2stims and 10stims is saved in %s \n',targetFolder);
 % then the values for W, Z and XandY should be changed. 
 close all
 
-[agreement_run, agreement_stim, compare_mat, dif_mat, TotERs10, TotERs2, TotOnesStim] = determine_agreement(myDataPath,cfg);
+[agreement_run, agreement_stim, compare_mat, dif_mat, TotERs10, TotERs2, TotOnesStim, Amat10, Amat2] = determine_agreement(myDataPath,cfg);
 
 fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
     agreement_run.OA, agreement_run.PA, agreement_run.NA)
@@ -116,6 +116,15 @@ plot_all_ccep(dataBaseallstim, myDataPath, LocOnes, stimchans, dif_mat);
 dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
 plot_all_ccep_and_av(dataBaseallstim,dataBase2stim, myDataPath, LocOnes, stimchans, dif_mat, TotOnesStim);
 
+
+%% Calculate agreement parameters
+[indegree, outdegree, BC] = agreement_parameters(Amat10);
+
+
+[indegree_2, outdegree_2, BC_2] = agreement_parameters(Amat2);
+
+
+%[indegreenorm, outdegreenorm, BCnorm] = agreement_parameters(Amat1,dataBaseallstim);
 
 %% Save the values for the agreement per run (2 and 10 stims)
 targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];

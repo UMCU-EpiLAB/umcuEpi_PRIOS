@@ -1,4 +1,4 @@
-function [agreement_run, agreement_stim, compare_mat, dif_mat, TotERs10, TotERs2, TotOnesStim] = determine_agreement(myDataPath,cfg)
+function [agreement_run, agreement_stim, compare_mat, dif_mat, TotERs10, TotERs2, TotOnesStim, Amat1, Amat2] = determine_agreement(myDataPath,cfg)
 
 files = dir(fullfile(myDataPath.CCEPpath, cfg.sub_labels{1}, 'ses-*' ,cfg.run_label{1},...
     [cfg.sub_labels{1} '_ses-*_' cfg.task_label '_*'  '_CCEP_*.mat']));
