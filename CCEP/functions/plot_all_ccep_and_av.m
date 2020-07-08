@@ -36,7 +36,7 @@ for stimp = 1:length(indivstimp)                            %1:max(indivstimp)
                 if ismember({Stimpnm}, LocaOnes{i,1}) && ismember(dataBase.ch{elec}, LocaOnes(i,2)) 
 
                     % Plot all 10 stimulations
-                    test = squeeze(dataBase.cc_epoch_sorted(elec,:,stimpnm,:));
+                    test = squeeze(dataBase.cc_epoch_sorted(elec,:,stimpnm,:));             % stimpnm is [1;2]!
                     test2 = reshape(test, size(test,1)*size(test,2), size(test,3));
                     test2(:,tt>-0.01 & tt<0.02) = NaN;
                     

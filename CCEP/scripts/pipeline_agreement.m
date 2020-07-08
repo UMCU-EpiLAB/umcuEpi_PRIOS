@@ -82,6 +82,7 @@ save([targetFolder,fileName5], 'ccep');
 
 fprintf('CCEPs 2stims and 10stims is saved in %s \n',targetFolder);
 
+
 %% determine the agreement between 2 and 10 stims per run
 % The determine_agreement function is not only determining the agreement
 % when 2 sessions are compared. It could be possible to compare more, but
@@ -100,6 +101,28 @@ fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreeme
 
 [FindOnes, LocOnes, stimchans] = find_ones(dataBaseallstim,agreement_run);
  
+%% visually check detected ccepsyy
+
+dataBase10 = visualRating_ccep(dataBaseallstim, stimchans);
+dataBase2stim = visualRating_ccep(dataBase2stim, stimchans);
+% correct: y
+% incorrect: n or enter
+
+% Save the values for the agreement per run (2 and 10 stims)
+targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
+
+checked_all = [dataBaseallstim.sub_label, '_', dataBaseallstim.NmbrofStims ,'_checked.mat'];
+check_all = dataBaseallstim.ccep;
+save([targetFolder,checked_all], 'check_all')
+
+checked_2 = [dataBase2stim(1).sub_label, '_', dataBase2stim.NmbrofStims ,'_checked.mat'];
+check_2 = dataBase2stim.ccep;
+save([targetFolder,checked_e], 'check_2')
+
+
+
+fprintf('Checked files are saved in %s \n',targetFolder);
+
 %% Plot the average signal of the 2 stims or 10 stims
 
 dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
@@ -118,25 +141,24 @@ plot_all_ccep_and_av(dataBaseallstim,dataBase2stim, myDataPath, LocOnes, stimcha
 
 
 %% Calculate agreement parameters
-[indegree, outdegree, BC] = agreement_parameters(Amat10);
+close all;
+[indegree, outdegree, BC, rank_stimp, rank_elec]  = agreement_parameters(Amat10, dataBaseallstim, stimchans);
 
+[indegree_2, outdegree_2, BC_2, rank_stimp_2, rank_elec_2] = agreement_parameters(Amat2, dataBase2stim, stimchans);
 
-[indegree_2, outdegree_2, BC_2] = agreement_parameters(Amat2);
-
-
-%[indegreenorm, outdegreenorm, BCnorm] = agreement_parameters(Amat1,dataBaseallstim);
-
-%% Save the values for the agreement per run (2 and 10 stims)
 targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
+fileName = ['degrees_',dataBase(1).sub_label,'.xlsx'];
+sheet = 'Indegree all';
+writetable(rank_elec,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
 
-% Create the folder if it doesn't exist already.
-if ~exist(targetFolder, 'dir')
-    mkdir(targetFolder);
-end
+sheet =  'Indegree 2';
+writetable(rank_elec_2,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
+ 
+sheet = 'Outdegree all';
+writetable(rank_stimp,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
 
-Agreements = [dataBase(1).sub_label, '_', dataBase(1).run_label,'_agreement2_versus10.mat'];
+sheet =  'Outdegree 2';
+writetable(rank_stimp_2,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
 
-save([targetFolder,Agreements], 'agreement_run','agreement_stim');
 
-fprintf('Agreements are saved in %s \n',targetFolder);
 

@@ -1,28 +1,49 @@
-function [indegree, outdegree, BC] = agreement_parameters(Amat2)
+function [indegree, outdegree, BC, rank_stimp, rank_elec] = agreement_parameters(Amat2, dataBase, stimchans)
 
     wantedAmat = Amat2';                                    % Stimparen are the source nodes (rows) elektrodes are the target nodes (columns)                 
-    Amat = zeros(size(wantedAmat,1)+size(wantedAmat,2)); % Matrix with 4 quadrants, left under must be filled with the adjecency matrix            
+    Amat = zeros(size(wantedAmat,1)+size(wantedAmat,2));    % Matrix with 4 quadrants, left under must be filled with the adjecency matrix            
     rowStart = size(wantedAmat,2)+1;
     columnEnd = size(wantedAmat,2);
-    
+    ElecName = dataBase.ch;
+    StimName = stimchans;
+       
     Amat((rowStart:end),(1:columnEnd)) = wantedAmat;
     
     G = digraph(Amat);                         % Matrix must have same length and width
     plot(G,'Layout','force')
+    % plot(G,'NodeLabel',{'alpha','beta','gamma','delta','epsilon','zeta'})
 
         % NETWERKMATEN
-        BC = centrality(G,'betweenness','Cost',G.Edges.Weight);
+        % BC IS ALWAYS ZERO BECAUSE ALL THE WEIGHTS ARE THE SAME = 1
+        % THEREFORE NO ELECTRODE OR STIMPAIR IS MORE IMPORTANT. 
+        
+        BC = centrality(G,'betweenness','Cost',G.Edges.Weight);    % Weighted betweenness centrality
+        n = numnodes(G);                                        
+        p.NodeCData = 2*BC./((n-2)*(n-1));                         % normalised WBC
+        colormap(flip(autumn,1));                                   % Plot
+        title('Betweenness Centrality Scores - Weighted')
+
 
         for stimPair = size(wantedAmat,2)+1:size(Amat,1)
-            outdegree(stimPair-60,1) = sum(Amat(stimPair,:));                % total number of ERs evoked by a stimulation pair 
+            outdegree((stimPair-(rowStart-1)),1) = sum(Amat(stimPair,:));                % total number of ERs evoked by a stimulation pair 
             %T = minspantree(minnGraph)                                %minimum graph thats connects all of the nodes.
             % [tree,d] =shortstpathtree(minnGraph,1561)
         end
         
+        ColN = {'number of ERs'};
+        rowNames = StimName;
+        rank_stimp = array2table(outdegree,'RowNames',rowNames,'VariableNames',ColN);   % Outdegree
+        rank_stimp = sortrows(rank_stimp,1,'descend');
+        
         for elec = 1:size(wantedAmat,2)
             indegree(1,elec) = sum(Amat(:,elec));                            % total number of ERs evoked in an electrode (el) 
         end
-    
+        
+        indegree = indegree';
+        RowNames = ElecName;
+        rank_elec = array2table(indegree,'RowNames',RowNames,'VariableNames',ColN);   % Indegree
+        rank_elec = sortrows(rank_elec,1,'descend');
+      
 end
 
 
