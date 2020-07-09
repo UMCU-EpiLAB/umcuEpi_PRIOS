@@ -78,6 +78,12 @@ n1_peak_range = cfg.n1_peak_range;
 epoch_prestim = cfg.epoch_prestim;
 epoch_length = cfg.epoch_length;
 
+sort_stimsets = sort(dataBase.cc_stimsets,2);
+[stimpsets,~,stimprow] = unique(sort_stimsets,'rows');
+stimpNames = dataBase.ch(stimpsets);  
+StimNames =  strcat(stimpNames(:,1),'-' ,stimpNames(:,2));
+    
+    
 %% Script
 % iterate over all subjects in database
 for subj = 1:length(dataBase)
@@ -90,9 +96,12 @@ for subj = 1:length(dataBase)
 
         % for every averaged stimulation
         for jj = 1:size(dataBase(subj).cc_epoch_sorted_avg,2)       % for every averaged stimulation
+            stimpnames = StimNames{jj} ;
+            stimpnmr = find(stimprow == jj);
+             
             % for every channel
             for ii = 1:size(dataBase(subj).cc_epoch_sorted_avg,1)   % for every channel
-
+                chanName = dataBase.ch{ii};
                 % create time struct 
                 tt = (1:epoch_length*dataBase(subj).ccep_header.Fs) / ...
                     dataBase(subj).ccep_header.Fs - epoch_prestim;
@@ -117,6 +126,8 @@ for subj = 1:length(dataBase)
                 end
 
                 % when the electrode is stimulated
+                %%% DIT GAAT FOUT!! CC_STIMSETS IS 2 KEER ZO VEEL
+                %%% STIMPAREN ALS DE AVERAGE WAARIN JJ BEPAALT IS.
                 if ii == dataBase(subj).cc_stimsets(jj,1) || ...
                         ii == dataBase(subj).cc_stimsets(jj,2)
                     n1_peak_sample = NaN;

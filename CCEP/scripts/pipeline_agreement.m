@@ -102,9 +102,10 @@ fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreeme
 [FindOnes, LocOnes, stimchans] = find_ones(dataBaseallstim,agreement_run);
  
 %% visually check detected ccepsyy
+%% Er zijn ERs gedetecteerd op de electroden die gestimuleerd worden! Hier gaat dus eerder al iets fout!
 
 dataBase10 = visualRating_ccep(dataBaseallstim, stimchans);
-dataBase2stim = visualRating_ccep(dataBase2stim, stimchans);
+%dataBase2stim = visualRating_ccep(dataBase2stim, stimchans);
 % correct: y
 % incorrect: n or enter
 
@@ -115,9 +116,9 @@ checked_all = [dataBaseallstim.sub_label, '_', dataBaseallstim.NmbrofStims ,'_ch
 check_all = dataBaseallstim.ccep;
 save([targetFolder,checked_all], 'check_all')
 
-checked_2 = [dataBase2stim(1).sub_label, '_', dataBase2stim.NmbrofStims ,'_checked.mat'];
-check_2 = dataBase2stim.ccep;
-save([targetFolder,checked_e], 'check_2')
+% checked_2 = [dataBase2stim(1).sub_label, '_', dataBase2stim.NmbrofStims ,'_checked.mat'];
+% check_2 = dataBase2stim.ccep;
+% save([targetFolder,checked_e], 'check_2')
 
 
 
