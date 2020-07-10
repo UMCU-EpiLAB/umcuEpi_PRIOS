@@ -43,14 +43,22 @@ for subj = 1:size(dataBase,2)
     
     if strcmp(cfg.dir,'yes') && strcmp(cfg.amp,'yes')
         stimelek = [stimnum stimcur];
+        
     elseif strcmp(cfg.dir,'yes') && strcmp(cfg.amp,'no')
         stimelek = stimnum;
+%         sort_stimelek = sort(stimelek,2);
+%         [cc_stimsets,~,IC] = unique(sort_stimelek,'rows');  
+%         
     elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'yes')
         stimelek = [sort(stimnum,2) stimcur];
+        
     elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'no')
         stimelek = sort(stimnum,2);
+
     end
     
+%     eerst sorteren!!!
+%     sort_cc_stimsets = sort(cc_stimsets,2);
     [cc_stimsets,~,IC] = unique(stimelek,'rows');
     
     n = histcounts(IC,'BinMethod','integers');
@@ -157,7 +165,7 @@ for subj = 1:size(dataBase,2)
                     end
                 end
             elseif strcmp(cfg.dir_avg,'no')
-                
+                %[cc_stimsets_dir,~,IC] = unique(cc_stimsets,'rows'); % Hier ben ik niet zeker van (10-7-2020)
                 % preallocation
                 cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted,1),size(cc_stimsets,1),size(cc_epoch_sorted,4)); % [ channels x stim pairs_dir x samples]
                 
@@ -198,6 +206,7 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).tt = tt;
     dataBase(subj).cc_epoch_sorted_avg = cc_epoch_sorted_avg;
     dataBase(subj).stimpnames = stimpnames;
+    dataBase(subj).cc_stimsets_avg = cc_stimsets_dir;
            
     fprintf('...%s has been epoched and averaged... \n',dataBase(subj).sub_label)
     

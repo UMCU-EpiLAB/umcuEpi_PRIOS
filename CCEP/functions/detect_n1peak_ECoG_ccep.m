@@ -78,10 +78,10 @@ n1_peak_range = cfg.n1_peak_range;
 epoch_prestim = cfg.epoch_prestim;
 epoch_length = cfg.epoch_length;
 
-sort_stimsets = sort(dataBase.cc_stimsets,2);
-[stimpsets,~,stimprow] = unique(sort_stimsets,'rows');
-stimpNames = dataBase.ch(stimpsets);  
-StimNames =  strcat(stimpNames(:,1),'-' ,stimpNames(:,2));
+% sort_stimsets = sort(dataBase.cc_stimsets,2);
+% [stimpsets,~,stimprow] = unique(sort_stimsets,'rows');
+% stimpNames = dataBase.ch(stimpsets);  
+% StimNames =  strcat(stimpNames(:,1),'-' ,stimpNames(:,2));
     
     
 %% Script
@@ -126,12 +126,17 @@ for subj = 1:length(dataBase)
                 end
 
                 % when the electrode is stimulated
-                %%% DIT GAAT FOUT!! CC_STIMSETS IS 2 KEER ZO VEEL
-                %%% STIMPAREN ALS DE AVERAGE WAARIN JJ BEPAALT IS.
-                if ii == dataBase(subj).cc_stimsets(jj,1) || ...
+               if  ii == dataBase(subj).cc_stimsets(jj,1) || ...
                         ii == dataBase(subj).cc_stimsets(jj,2)
                     n1_peak_sample = NaN;
                     n1_peak_amplitude = NaN;
+                   
+                    %% Testen of dit ook werkt. (verschillende opties in config_ccep uitproberen.
+%                    ii == dataBase.cc_stimsets_avg(jj,1) || ...
+%                         ii == dataBase.cc_stimsets_avg(jj,2)
+%                     n1_peak_sample = NaN;
+%                     n1_peak_amplitude = NaN;
+
 
                     % in other electrode
                 else

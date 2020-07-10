@@ -4,6 +4,7 @@ clear;
 config_CCEP
 
 %% set paths
+% Adapt for RESP or PRIOS patients!
 myDataPath = setLocalDataPath(cfg);
 
 %% select run
@@ -33,6 +34,11 @@ dataBase = load_ECoGdata(cfg,myDataPath);
 % stimulation pair, we only 'average' the first stimulus. If you want to 
 % use all stimuli, use avg_stim = [];
 
+%%% VERSCHILLENDE OPTIES IN CONFIG_CCEP UITPROBEREN OM TE TESTEN OF HET
+%%% WERKT MET DATABASE.CC_STIMSETS_AVG ALS DE STIMSETS EIGENLIJK WEL APART
+%%% GENOMEN MOETEN WORDEN OMDAT JE DE EERSTE VAN DE NEGATIEVE WIL EN DE EERSTE VAN DE POSITEIVE, 
+%%% MAAR UITEINDELIJK VOOR DE ANALYSE WEL DE AVERGE
+%%% WIL HEBBEN.....
 % save only first stimulus in both directions
 avg_stim = 1;
 dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
@@ -41,7 +47,7 @@ dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 avg_stim = [];
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
-% detect ccep in only first stimulus in both directions and all stimuli
+%% detect ccep in only first stimulus in both directions and all stimuli
 dataBase2stim = detect_n1peak_ECoG_ccep(dataBase2stim,cfg);
 dataBaseallstim = detect_n1peak_ECoG_ccep(dataBaseallstim,cfg);
 dataBase2stim.NmbrofStims = '2_stims';
@@ -94,35 +100,38 @@ close all
 fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
     agreement_run.OA, agreement_run.PA, agreement_run.NA)
 
-fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
-    agreement_stim.OA, agreement_stim.PA, agreement_stim.NA)
+% fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
+%     agreement_stim.OA, agreement_stim.PA, agreement_stim.NA)
 
 %% Determine the location of the ones (ER vs. No-ER)
 
 [FindOnes, LocOnes, stimchans] = find_ones(dataBaseallstim,agreement_run);
  
-%% visually check detected ccepsyy
-%% Er zijn ERs gedetecteerd op de electroden die gestimuleerd worden! Hier gaat dus eerder al iets fout!
+%% visually check detected cceps
 
-dataBase10 = visualRating_ccep(dataBaseallstim, stimchans);
-%dataBase2stim = visualRating_ccep(dataBase2stim, stimchans);
+dataBaseallstim = visualRating_ccep(dataBaseallstim, stimchans);
+dataBase2stim = visualRating_ccep(dataBase2stim, stimchans);
 % correct: y
 % incorrect: n or enter
 
 % Save the values for the agreement per run (2 and 10 stims)
 targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
 
-checked_all = [dataBaseallstim.sub_label, '_', dataBaseallstim.NmbrofStims ,'_checked.mat'];
-check_all = dataBaseallstim.ccep;
-save([targetFolder,checked_all], 'check_all')
+checked_all = [dataBaseallstim.sub_label, '_',dataBase(1).run_label, '_CCEP_', dataBaseallstim.NmbrofStims ,'_checked.mat'];
+ccep = dataBaseallstim.ccep;
+save([targetFolder,checked_all], 'ccep')
 
-% checked_2 = [dataBase2stim(1).sub_label, '_', dataBase2stim.NmbrofStims ,'_checked.mat'];
-% check_2 = dataBase2stim.ccep;
-% save([targetFolder,checked_e], 'check_2')
-
-
-
+checked_2 = [dataBase2stim.sub_label, '_', dataBase(1).run_label, '_CCEP_', dataBase2stim.NmbrofStims ,'_checked.mat'];
+ccep = dataBase2stim.ccep;
+save([targetFolder,checked_2], 'ccep')
 fprintf('Checked files are saved in %s \n',targetFolder);
+
+%% Perform the determine agreement again.
+
+[agreement_check] = determine_agreement_checked(myDataPath,cfg);
+
+fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
+    agreement_check.OA, agreement_check.PA, agreement_check.NA)
 
 %% Plot the average signal of the 2 stims or 10 stims
 

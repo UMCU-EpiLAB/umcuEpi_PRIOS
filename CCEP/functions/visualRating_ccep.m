@@ -66,9 +66,12 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             ylabel('Voltage (uV)')
             
             currkey = 0;
-            fprintf('N1 [y/n], if incorrect N1, select correct N1 \n')
+            fprintf('N1 [y/n], if incorrect N1, select correct N1 and press enter \n')
             
             % select new N1 or categorize as good N1 or no N1
+            % When incorrect N1 is selected, click on correct N1, a blue
+            % stip will occure, then press enter! The new coordinates will
+            % show in n1_peak_amplitude and sample.
             while ~strcmp(currkey,{'y','n',char(13)})
                 cp =[];
                 w = waitforbuttonpress;
