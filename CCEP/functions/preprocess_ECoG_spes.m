@@ -45,23 +45,32 @@ for subj = 1:size(dataBase,2)
         stimelek = [stimnum stimcur];
         
     elseif strcmp(cfg.dir,'yes') && strcmp(cfg.amp,'no')
-        stimelek = stimnum;
-%         sort_stimelek = sort(stimelek,2);
-%         [cc_stimsets,~,IC] = unique(sort_stimelek,'rows');  
-%         
+        stimelek = stimnum; 
+        
     elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'yes')
         stimelek = [sort(stimnum,2) stimcur];
         
     elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'no')
         stimelek = sort(stimnum,2);
-
     end
     
-%     eerst sorteren!!!
-%     sort_cc_stimsets = sort(cc_stimsets,2);
-    [cc_stimsets,~,IC] = unique(stimelek,'rows');
+ % Make sure there is a differentiation between the averaged cc_stimsets and the cc_stimsets_avg.
+ %     dataBase(subj).cc_stimsets_avg = cc_stimsets_dir;
+        if strcmp(cfg.dir,'yes') && strcmp(cfg.dir_avg,'yes')       % dir = 'yes' to be able to take the first stim of positive and first stim in negative direction
+             [cc_stimsets,~,IC] = unique(stimelek,'rows');          % dir_avg = 'yes' analyse the average signal
+             sort_cc_stimsets = sort(cc_stimsets,2);
+             [cc_stimsets_dir,~,ic] = unique(sort_cc_stimsets,'rows');
+                
+    elseif strcmp(cfg.dir,'yes') && strcmp(cfg.dir_avg,'no')        % dir = 'yes' to be able to take the first stim of positive and first stim in negative direction
+             [cc_stimsets,~,IC] = unique(stimelek,'rows');          % dir_avg = 'no' to analyse all signals separately
+             cc_stimsets_dir = cc_stimsets;
+        
+    elseif strcmp(cfg.dir,'no')                                     % dir = 'no' no differentition between pos and negative
+        [cc_stimsets,~,IC] = unique(stimelek,'rows');
+        cc_stimsets_dir = cc_stimsets;
+        end
     
-    n = histcounts(IC,'BinMethod','integers');
+    n = histcounts(IC,'BinMethod','integers');                      % This must be the same number of stims at every stimpair
     
     if any(diff(n) ~= 0)
 
@@ -77,11 +86,11 @@ for subj = 1:size(dataBase,2)
     end
     
     % pre-allocation
-    cc_stimchans = cell(size(cc_stimsets,1),2);
-    stimpnames = cell(1,size(cc_stimsets,1));
-    for stimp = 1:size(cc_stimsets,1)
+    cc_stimchans = cell(size(cc_stimsets_dir,1),2);
+    stimpnames = cell(1,size(cc_stimsets_dir,1));
+    for stimp = 1:size(cc_stimsets_dir,1)
         for chan =1:2
-            cc_stimchans{stimp,chan} = dataBase(subj).ch{cc_stimsets(stimp,chan)};
+            cc_stimchans{stimp,chan} = dataBase(subj).ch{cc_stimsets_dir(stimp,chan)};
         end
         stimpnames{stimp} = [cc_stimchans{stimp,1} '-' cc_stimchans{stimp,2}]; 
         
@@ -90,6 +99,7 @@ for subj = 1:size(dataBase,2)
     max_stim = median(n);
     
     dataBase(subj).cc_stimsets = cc_stimsets;
+    dataBase(subj).cc_stimsets_avg = cc_stimsets_dir;
     dataBase(subj).cc_stimchans = cc_stimchans;
     dataBase(subj).stimpnames = stimpnames;
     dataBase(subj).max_stim = max_stim;
@@ -104,11 +114,11 @@ for subj = 1:size(dataBase,2)
     tt = (1:epoch_length*dataBase(subj).ccep_header.Fs)/dataBase(subj).ccep_header.Fs - epoch_prestim;
 
         % allocation
-    cc_epoch_sorted = NaN(size(dataBase(subj).data,1),dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets,1),t);
-    tt_epoch_sorted = NaN(dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets,1),t); % samplenumbers for each epoch
+    cc_epoch_sorted = NaN(size(dataBase(subj).data,1),dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_avg,1),t);
+    tt_epoch_sorted = NaN(dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_avg,1),t); % samplenumbers for each epoch
     
     for elec = 1:size(dataBase(subj).data,1) % for all channels
-        for ll = 1:size(dataBase(subj).cc_stimsets,1) % for all epochs with >4 stimuli
+        for ll = 1:size(dataBase(subj).cc_stimsets_avg,1) % for all epochs with >4 stimuli
             if strcmp(cfg.dir,'no')
                 % Find the stimulationnumbers on which a stimulation pair is stimulated. 
                 eventnum1 = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans{ll,1}, '-',dataBase(subj).cc_stimchans{ll,2}])); % Positive stimulation
@@ -141,53 +151,45 @@ for subj = 1:size(dataBase,2)
     end   
     
     %% average epochs
+    % Wheter or not an average is required, the cc_epoch_sorted_avg file
+    % should always be made for further analysis.
     
     if strcmp(cfg.dir ,'yes') 
         if any(contains(fieldnames(cfg),'dir_avg'))
             if strcmp(cfg.dir_avg,'yes')
-                sort_cc_stimsets = sort(cc_stimsets,2);
-                [cc_stimsets_dir,~,IC] = unique(sort_cc_stimsets,'rows');
+%                 sort_cc_stimsets = sort(cc_stimsets,2);
+%                 [cc_stimsets_dir,~,ic] = unique(sort_cc_stimsets,'rows');
                 
                 % preallocation
                 cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted,1),size(cc_stimsets_dir,1),size(cc_epoch_sorted,4)); % [ channels x stim pairs_both x samples]
                 
-                for ll = 1:max(IC)
+                for ll = 1:max(ic)
                 
-                    if sum(IC == ll) == 2 % both directions are stimulated
+                    if sum(ic == ll) == 2 % both directions are stimulated
                         
-                        if ~exist('avg_stim','var') % average all events in one stimulation pair
-                            cc_epoch_sorted_avg(:,ll,:) = squeeze(nanmean(squeeze(nanmean(cc_epoch_sorted(:,:,IC==ll,:),2)),2));
+                        if ~exist('avg_stim','var')                     % average all events in one stimulation pair
+                            cc_epoch_sorted_avg(:,ll,:) = squeeze(nanmean(squeeze(nanmean(cc_epoch_sorted(:,:,ic==ll,:),2)),2));
                         elseif isempty(avg_stim)
-                            cc_epoch_sorted_avg(:,ll,:) = squeeze(nanmean(squeeze(nanmean(cc_epoch_sorted(:,:,IC==ll,:),2)),2));
-                        else % average only 1 or a few events in one stimulation pair
-                            cc_epoch_sorted_avg(:,ll,:) =  squeeze(nanmean(squeeze(nanmean(cc_epoch_sorted(:,avg_stim,IC==ll,:),2)),2));
+                            cc_epoch_sorted_avg(:,ll,:) = squeeze(nanmean(squeeze(nanmean(cc_epoch_sorted(:,:,ic==ll,:),2)),2));
+                        else                                            % average only 1 or a few events in one stimulation pair
+                            cc_epoch_sorted_avg(:,ll,:) =  squeeze(nanmean(squeeze(nanmean(cc_epoch_sorted(:,avg_stim,ic==ll,:),2)),2));
                         end
                     end
                 end
-            elseif strcmp(cfg.dir_avg,'no')
-                %[cc_stimsets_dir,~,IC] = unique(cc_stimsets,'rows'); % Hier ben ik niet zeker van (10-7-2020)
-                % preallocation
-                cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted,1),size(cc_stimsets,1),size(cc_epoch_sorted,4)); % [ channels x stim pairs_dir x samples]
-                
-                if ~exist('avg_stim','var') % average all events in one stimulation pair
-                    cc_epoch_sorted_avg(:,ll,:) = squeeze(nanmean(cc_epoch_sorted,2));
-                elseif isempty(avg_stim)
-                    cc_epoch_sorted_avg(:,ll,:) = squeeze(nanmean(cc_epoch_sorted,2));
-                else % average only 1 or a few events in one stimulation pair
-                    cc_epoch_sorted_avg(:,ll,:) = squeeze(nanmean(cc_epoch_sorted(:,avg_stim,:,:),2));
-                end
-            end
-
-        else % if cfg.dir_avg does not exist
-            % preallocation
-            cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted,1),size(cc_stimsets,1),size(cc_epoch_sorted,4)); % [ channels x stim pairs_dir x samples]
-            
-            if ~exist('avg_stim','var') % average all events in one stimulation pair
-                cc_epoch_sorted_avg(:,1:ll,:) = squeeze(nanmean(cc_epoch_sorted,2));
-            elseif isempty(avg_stim)
-                cc_epoch_sorted_avg(:,1:ll,:) = squeeze(nanmean(cc_epoch_sorted,2));
-            else % average only 1 or a few events in one stimulation pair
-                cc_epoch_sorted_avg(:,1:ll,:) = squeeze(nanmean(cc_epoch_sorted(:,avg_stim,:,:),2));
+                     
+                  
+            elseif strcmp(cfg.dir_avg,'no')         % Differentation is made between positive and negative, avery stim separately
+                   if ~exist('avg_stim','var') % average all events in one stimulation pair
+                        cc_epoch_sorted_avg(:,1:ll,:) = squeeze(nanmean(cc_epoch_sorted,2));
+                    elseif isempty(avg_stim)
+                        cc_epoch_sorted_avg(:,1:ll,:) = squeeze(nanmean(cc_epoch_sorted,2));
+                    else % average only 1 or a few events in one stimulation pair
+                        cc_epoch_sorted_avg(:,1:ll,:) = squeeze(nanmean(cc_epoch_sorted(:,avg_stim,:,:),2));
+                   end
+        
+                       
+            else % if cfg.dir_avg does not exist
+                fprintf('ERROR: no value is assigned to cf.dir_avg')
             end
         end
             
@@ -200,15 +202,15 @@ for subj = 1:size(dataBase,2)
             cc_epoch_sorted_avg(:,1:ll,:) = squeeze(nanmean(cc_epoch_sorted(:,avg_stim,:,:),2));
         end
     end
-        
+   
+       
     dataBase(subj).cc_epoch_sorted = cc_epoch_sorted;
     dataBase(subj).tt_epoch_sorted = tt_epoch_sorted;
     dataBase(subj).tt = tt;
     dataBase(subj).cc_epoch_sorted_avg = cc_epoch_sorted_avg;
     dataBase(subj).stimpnames = stimpnames;
-    dataBase(subj).cc_stimsets_avg = cc_stimsets_dir;
            
     fprintf('...%s has been epoched and averaged... \n',dataBase(subj).sub_label)
-    
-
+        
+end
 end

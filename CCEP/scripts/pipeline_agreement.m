@@ -34,11 +34,6 @@ dataBase = load_ECoGdata(cfg,myDataPath);
 % stimulation pair, we only 'average' the first stimulus. If you want to 
 % use all stimuli, use avg_stim = [];
 
-%%% VERSCHILLENDE OPTIES IN CONFIG_CCEP UITPROBEREN OM TE TESTEN OF HET
-%%% WERKT MET DATABASE.CC_STIMSETS_AVG ALS DE STIMSETS EIGENLIJK WEL APART
-%%% GENOMEN MOETEN WORDEN OMDAT JE DE EERSTE VAN DE NEGATIEVE WIL EN DE EERSTE VAN DE POSITEIVE, 
-%%% MAAR UITEINDELIJK VOOR DE ANALYSE WEL DE AVERGE
-%%% WIL HEBBEN.....
 % save only first stimulus in both directions
 avg_stim = 1;
 dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);

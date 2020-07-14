@@ -77,12 +77,6 @@ amplitude_thresh = cfg.amplitude_thresh;
 n1_peak_range = cfg.n1_peak_range;
 epoch_prestim = cfg.epoch_prestim;
 epoch_length = cfg.epoch_length;
-
-% sort_stimsets = sort(dataBase.cc_stimsets,2);
-% [stimpsets,~,stimprow] = unique(sort_stimsets,'rows');
-% stimpNames = dataBase.ch(stimpsets);  
-% StimNames =  strcat(stimpNames(:,1),'-' ,stimpNames(:,2));
-    
     
 %% Script
 % iterate over all subjects in database
@@ -96,8 +90,6 @@ for subj = 1:length(dataBase)
 
         % for every averaged stimulation
         for jj = 1:size(dataBase(subj).cc_epoch_sorted_avg,2)       % for every averaged stimulation
-            stimpnames = StimNames{jj} ;
-            stimpnmr = find(stimprow == jj);
              
             % for every channel
             for ii = 1:size(dataBase(subj).cc_epoch_sorted_avg,1)   % for every channel
@@ -125,20 +117,12 @@ for subj = 1:length(dataBase)
                     pre_stim_sd = 50;
                 end
 
-                % when the electrode is stimulated
-               if  ii == dataBase(subj).cc_stimsets(jj,1) || ...
-                        ii == dataBase(subj).cc_stimsets(jj,2)
+                % Place NaN when the electrode is stimulated
+               if  ii == dataBase(subj).cc_stimsets_avg(jj,1) || ...
+                        ii == dataBase(subj).cc_stimsets_avg(jj,2)
                     n1_peak_sample = NaN;
                     n1_peak_amplitude = NaN;
-                   
-                    %% Testen of dit ook werkt. (verschillende opties in config_ccep uitproberen.
-%                    ii == dataBase.cc_stimsets_avg(jj,1) || ...
-%                         ii == dataBase.cc_stimsets_avg(jj,2)
-%                     n1_peak_sample = NaN;
-%                     n1_peak_amplitude = NaN;
 
-
-                    % in other electrode
                 else
 
                     % use peakfinder to find all positive and negative peaks and their
