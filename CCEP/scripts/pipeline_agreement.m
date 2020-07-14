@@ -42,6 +42,11 @@ dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 avg_stim = [];
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
+%%
+plot_all_signals(dataBaseallstim, stimchans);
+%plot_all_signals(dataBase2stim, stimchans);
+
+
 %% detect ccep in only first stimulus in both directions and all stimuli
 dataBase2stim = detect_n1peak_ECoG_ccep(dataBase2stim,cfg);
 dataBaseallstim = detect_n1peak_ECoG_ccep(dataBaseallstim,cfg);
