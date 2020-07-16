@@ -22,6 +22,7 @@ function [AmatERsvis2, stimelektot, trialtot, trialelek, n_intot, n_outtot,...
     stimelektot = size(ccep.ch,1);
     % totaal aantal trials
     trialtot = size(stimchan,1);
+    
     % hoe vaak elke elektrode wordt gestimuleerd
     for el=1:size(AmatERsvis2,1)
         trialelek(el) = size(find(stimchan==el),1);

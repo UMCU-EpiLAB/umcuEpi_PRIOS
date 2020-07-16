@@ -42,10 +42,22 @@ dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 avg_stim = [];
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
-%%
-plot_all_signals(dataBaseallstim, stimchans);
-%plot_all_signals(dataBase2stim, stimchans);
+%% Visually check all averaged signals for ERs
 
+dataBaseallstim = plot_all_signals(dataBaseallstim);
+dataBase2stim = plot_all_signals(dataBase2stim);
+
+% Save 
+targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
+
+vis_checked_all = [dataBaseallstim.sub_label, '_',dataBase(1).run_label, '_avg_10stims_vis.mat'];
+ccep = dataBaseallstim.ccep;
+save([targetFolder,vis_checked_all], 'ccep')
+
+vis_checked_2 = [dataBase2stim.sub_label, '_', dataBase(1).run_label, '_avg_2stims_vis.mat'];
+ccep = dataBase2stim.ccep;
+save([targetFolder,vis_checked_2], 'ccep')
+fprintf('Checked files are saved in %s \n',targetFolder);
 
 %% detect ccep in only first stimulus in both directions and all stimuli
 dataBase2stim = detect_n1peak_ECoG_ccep(dataBase2stim,cfg);
@@ -126,32 +138,36 @@ ccep = dataBase2stim.ccep;
 save([targetFolder,checked_2], 'ccep')
 fprintf('Checked files are saved in %s \n',targetFolder);
 
-%% Perform the determine agreement again.
-
+% Perform the determine agreement again.
 [agreement_check] = determine_agreement_checked(myDataPath,cfg);
 
 fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
     agreement_check.OA, agreement_check.PA, agreement_check.NA)
 
 %% Plot the average signal of the 2 stims or 10 stims
-
-dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
-plot_ccep_av_stimp(dataBaseallstim,dataBase2stim, myDataPath, stimchans, LocOnes, TotOnesStim, dif_mat)
-
-fprintf('All CCEPS average are saved');
-
-%% Plot the all 10 stimuli per stimulation pair
-dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
-plot_all_ccep(dataBaseallstim, myDataPath, LocOnes, stimchans, dif_mat);
-
+% 
+% dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
+% plot_ccep_av_stimp(dataBaseallstim,dataBase2stim, myDataPath, stimchans, LocOnes, TotOnesStim, dif_mat)
+% 
+% fprintf('All CCEPS average are saved');
+% 
+% %% Plot the all 10 stimuli per stimulation pair
+% dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
+% plot_all_ccep(dataBaseallstim, myDataPath, LocOnes, stimchans, dif_mat);
 
 %% Plot all 10 stimuli and the average for the 10 stims and the 2 stims
+% This combines the two scripts above
+tic;
 dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
 plot_all_ccep_and_av(dataBaseallstim,dataBase2stim, myDataPath, LocOnes, stimchans, dif_mat, TotOnesStim);
-
+toc;
 
 %% Calculate agreement parameters
 close all;
+dataBase2stim = rewrite_Amat(dataBase2stim,Amat2);
+dataBaseallstim = rewrite_Amat(dataBaseallstim,Amat2);
+
+%%
 [indegree, outdegree, BC, rank_stimp, rank_elec]  = agreement_parameters(Amat10, dataBaseallstim, stimchans);
 
 [indegree_2, outdegree_2, BC_2, rank_stimp_2, rank_elec_2] = agreement_parameters(Amat2, dataBase2stim, stimchans);

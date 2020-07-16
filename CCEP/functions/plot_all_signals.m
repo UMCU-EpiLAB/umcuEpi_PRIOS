@@ -1,11 +1,11 @@
-function plot_all_signals(dataBase, stimchans)
+function dataBase = plot_all_signals(dataBase)
 %
 % Dora Hermes, 2020, Multimodal Neuroimaging Lab, Mayo Clinic
 % Dorien van Blooijs, 2020, UMC Utrecht
 
 tt = dataBase.tt;    
    for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)            % for all stimulation pairs
-         Stimpnm = stimchans{stimp};    
+         Stimpnm = dataBase.stimpnames_avg  {stimp};    
         for elec = 1:size(dataBase.cc_epoch_sorted_avg,1)            % for all electrodes
              elecnm = dataBase.ch{elec};
                 ccep_plot = squeeze(dataBase.cc_epoch_sorted_avg(elec,stimp,:));
@@ -13,7 +13,7 @@ tt = dataBase.tt;
 
                 figure()
                 plot(tt,  ccep_plot);   
-                str = sprintf('Stimulation pair %s on %s for %s ', stimchans{stimp,1}, elecnm, dataBase.NmbrofStims);
+                str = sprintf('Stimulation pair %s on %s for %s ', dataBase.stimpnames_avg  {stimp}, elecnm);
                 title(str)
                 xlim([-0.2 0.5])
                 ylim([-750 750])
@@ -31,8 +31,8 @@ tt = dataBase.tt;
                 if w == 1
                     currkey = get(gcf,'CurrentCharacter');
                     
-                    ER_check_amplitude = zeros(size(dataBase.ch,1),size(stimchans,1));
-                    ER_check_sample = zeros(size(dataBase.ch,1),size(stimchans,1));
+                    ER_check_amplitude = zeros(size(dataBase.ch,1),size(dataBase.stimpnames_avg,2));
+                    ER_check_sample = zeros(size(dataBase.ch,1),size(dataBase.stimpnames_avg,2));
                     %%% dit klopt nog niet, hij slaat het niet op...
                     if strcmp(currkey,'y') && isempty(cp)
                         ER_check_amplitude(elec,stimp) = 1 ;
@@ -45,10 +45,11 @@ tt = dataBase.tt;
             end
             
         end
-     
+    
     close all
-
-    nend
-end              
+   end 
+   dataBase.ccep.ER_check_amplitude = ER_check_amplitude;
+   dataBase.ccep.ER_check_sample = ER_check_sample;
+end
 
           
