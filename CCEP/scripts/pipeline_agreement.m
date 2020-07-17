@@ -168,9 +168,9 @@ dataBase2stim = rewrite_Amat(dataBase2stim,Amat2);
 dataBaseallstim = rewrite_Amat(dataBaseallstim,Amat2);
 
 %%
-[indegree, outdegree, BC, rank_stimp, rank_elec]  = agreement_parameters(Amat10, dataBaseallstim, stimchans);
-
-[indegree_2, outdegree_2, BC_2, rank_stimp_2, rank_elec_2] = agreement_parameters(Amat2, dataBase2stim, stimchans);
+%[indegree, outdegree, BC, rank_stimp, rank_elec]  = agreement_parameters(Amat10, dataBaseallstim, stimchans);
+agreement_parameters = agreement_parameters(Amat10,Amat2, dataBaseallstim, dataBase2stim,stimchans)
+%[indegree_2, outdegree_2, BC_2, rank_stimp_2, rank_elec_2] = agreement_parameters(Amat2, dataBase2stim, stimchans);
 
 targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
 fileName = ['degrees_',dataBase(1).sub_label,'.xlsx'];

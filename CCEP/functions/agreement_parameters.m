@@ -1,92 +1,176 @@
-function [indegree, outdegree, BC, rank_stimp, rank_elec] = agreement_parameters(Amat2, dataBase, stimchans)
+function agreement_parameters = agreement_parameters(Amat10, Amat2, dataBase10, dataBase2,stimchans)
 
-    wantedAmat = Amat2';                                    % Stimparen are the source nodes (rows) elektrodes are the target nodes (columns)                 
-    Amat = zeros(size(wantedAmat,1)+size(wantedAmat,2));    % Matrix with 4 quadrants, left under must be filled with the adjecency matrix            
-    rowStart = size(wantedAmat,2)+1;
-    columnEnd = size(wantedAmat,2);
-    ElecName = dataBase.ch;
-    StimName = stimchans;
+    wantedAmat10 = Amat10'; 
+    wantedAmat2 = Amat2';
+    Amat_10 = zeros(size(wantedAmat10,1)+size(wantedAmat10,2));     % Matrix with 4 quadrants, left under must be filled with the adjecency matrix            
+    Amat_2 = zeros(size(wantedAmat2,1)+size(wantedAmat2,2));        % Matrix with 4 quadrants, left under must be filled with the adjecency matrix            
+
+    rowStart = size(wantedAmat10,2)+1;      % Same for 2 stims
+    columnEnd = size(wantedAmat10,2);
+    ElecName = dataBase10.ch;
        
-    Amat((rowStart:end),(1:columnEnd)) = wantedAmat;
+    Amat_10((rowStart:end),(1:columnEnd)) = wantedAmat10;
+    Amat_2((rowStart:end),(1:columnEnd)) = wantedAmat2;
+
+    for stimPair = size(wantedAmat10,2)+1:size(Amat_10,1)
+        ERs_stimp10((stimPair-(rowStart-1)),1) = sum(Amat_10(stimPair,:));       % total number of ERs evoked by a stimulation pair 
+        ERs_stimp2((stimPair-(rowStart-1)),1) = sum(Amat_2(stimPair,:));
+    end
+       
+    ColN = {'number of ERs'};
+    rowNames = stimchans;
+    rank_stimp10 = array2table(ERs_stimp10,'RowNames',rowNames,'VariableNames',ColN);   % Number of outgoing stimulations (ERs evoked per stimpair)
+    rank_stimp10 = sortrows(rank_stimp10,1,'descend');
+    rank_stimp2 = array2table(ERs_stimp2,'RowNames',rowNames,'VariableNames',ColN);   
+    rank_stimp2 = sortrows(rank_stimp2,1,'descend');
     
-    G = digraph(Amat);                         % Matrix must have same length and width
-    % plot(G,'NodeLabel',{'alpha','beta','gamma','delta','epsilon','zeta'})
+    for elec = 1:size(wantedAmat10,2)
+        ERs_elec10(1,elec) = sum(Amat_10(:,elec));                            % total number of ERs evoked in an electrode (el) 
+        ERs_elec2(1,elec) = sum(Amat_2(:,elec)); 
+    end
 
-        % NETWERKMATEN
-        % BC IS ALWAYS ZERO BECAUSE ALL THE WEIGHTS ARE THE SAME = 1
-        % THEREFORE NO ELECTRODE OR STIMPAIR IS MORE IMPORTANT. 
-        
-        BC = centrality(G,'betweenness','Cost',G.Edges.Weight);    % Weighted betweenness centrality
-       
-        for stimPair = size(wantedAmat,2)+1:size(Amat,1)
-            outdegree((stimPair-(rowStart-1)),1) = sum(Amat(stimPair,:));                % total number of ERs evoked by a stimulation pair 
-            %T = minspantree(minnGraph)                                %minimum graph thats connects all of the nodes.
-            % [tree,d] =shortstpathtree(minnGraph,1561)
-        end
-        
-        ColN = {'number of ERs'};
-        rowNames = StimName;
-        rank_stimp = array2table(outdegree,'RowNames',rowNames,'VariableNames',ColN);   % Outdegree
-        rank_stimp = sortrows(rank_stimp,1,'descend');
-        
-        for elec = 1:size(wantedAmat,2)
-            indegree(1,elec) = sum(Amat(:,elec));                            % total number of ERs evoked in an electrode (el) 
-        end
-        
-        indegree = indegree';
-        RowNames = ElecName;
-        rank_elec = array2table(indegree,'RowNames',RowNames,'VariableNames',ColN);   % Indegree
-        rank_elec = sortrows(rank_elec,1,'descend');
+    ERs_elec10 = ERs_elec10';
+    ERs_elec2 = ERs_elec2';
+    RowNames = ElecName;
+    rank_elec10 = array2table(ERs_elec10,'RowNames',RowNames,'VariableNames',ColN);   % Indegree
+    rank_elec10 = sortrows(rank_elec10,1,'descend');
+    rank_elec2 = array2table(ERs_elec2,'RowNames',RowNames,'VariableNames',ColN);   % Indegree
+    rank_elec2 = sortrows(rank_elec2,1,'descend');
       
 %% Work with the electrodes in the columns and rows 
-    elec_mat = dataBase.elec_Amat;
-    G = digraph(elec_mat);
-    p = plot(G,'Layout','force','NodeLabel',dataBase.ch,'NodeColor','r','MarkerSize',bins);
-    %%% Misschien mag iets als linesize of linecolour ook wel gebaseerd op
-    %%% indegree en outdegree.
-
-    wbc = centrality(G,'betweenness','Cost',G.Edges.Weight);        % 'Cost' edge weights specify the length of the edges.
-    hub_ranks = centrality(G,'hubs');
-    Indegree = centrality(G,'indegree','Importance',G.Edges.Weight);
-    Outdegree = centrality(G,'outdegree','Importance',G.Edges.Weight);
+% All stimulations (10)    
+    elec_mat10 = dataBase10.elec_Amat;
+    G_10 = digraph(elec_mat10);
+    wbc_10 = centrality(G_10,'betweenness','Cost',G_10.Edges.Weight);        % 'Cost' edge weights specify the length of the edges.
+    hub_ranks_10 = centrality(G_10,'hubs');
+    Indegree_10 = centrality(G_10,'indegree','Importance',G_10.Edges.Weight);
+    Outdegree_10 = centrality(G_10,'outdegree','Importance',G_10.Edges.Weight);
     
-    edges = linspace(min(Indegree),max(Indegree),7);            % create 7 equally-spaced bins based on their indegree score
-    bins = discretize(Indegree,edges);
+    edges_10 = linspace(min(Indegree_10),max(Indegree_10),7);            % create 7 equally-spaced bins based on their indegree score (number of detected ERs)
+    bins_10 = discretize(Indegree_10,edges_10);
+    
+% Only 2 stimulations, first pos and first neg direction
+    elec_mat2 = dataBase2.elec_Amat;
+    G_2 = digraph(elec_mat2);
+    wbc_2 = centrality(G_2,'betweenness','Cost',G_2.Edges.Weight);        % 'Cost' edge weights specify the length of the edges.
+    hub_ranks_2 = centrality(G_2,'hubs');
+    Indegree_2 = centrality(G_2,'indegree','Importance',G_2.Edges.Weight);
+    Outdegree_2 = centrality(G_2,'outdegree','Importance',G_2.Edges.Weight);
+    
+    edges_2 = linspace(min(Indegree_2),max(Indegree_2),7);            % create 7 equally-spaced bins based on their indegree score
+    bins_2 = discretize(Indegree_2,edges_2);
      
+  %%% KLOPT DENK IK NOG NIET! FIGURE LATEN EXACT DEZELFDE ELECTRODEN ZIEN?!  --> ZOU TE PERFECT ZIJN
+    figure('Position',[1,2,1600,756])
+    subplot(1,2,1, 'Position',[0.018,0.11,0.48,0.82])
+    p_in10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','MarkerSize',bins_10*2,'NodeFontSize',10);
+    high_bins_10 = max(bins_10);
+   % highest_ind_10 = find(bins_10 == high_bins_10);
+   
+   % Dit klopt niet!! je
+   % zoekt nu gewoon nummer 0 5 10 15 20 25 en 30 op en die zijn natuurlijk
+   % gelijk in 2 stims en 10 stims.
+   % highlight(p_in10,highest_ind_10,'NodeColor','g')
+   
+    title({'{\bf\fontsize{13} Betweenness centrality all, highest indegree electrodes}'; 'Size of markers indicates the indegree ranking'},'FontWeight','Normal')
+    
+    subplot(1,2,2,'Position',[0.52,0.11,0.48,0.81])
+    p_in2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','MarkerSize',bins_2*2,'NodeFontSize',10);
+    high_bins_2 = max(bins_2);
+   % highest_ind_2 = find(bins_2 == high_bins_2);
+   % highlight(p_in2,highest_ind_2,'NodeColor','g')
+    title({'{\bf\fontsize{13} Betweenness centrality 2 stims, highest indegree electrodes}'; 'Size of markers indicates the indegree ranking'},'FontWeight','Normal')
     
     
+    figure('Position',[1,2,1600,756])
+    subplot(1,2,1, 'Position',[0.018,0.11,0.48,0.82])
+    edges_o_10 = linspace(min(Outdegree_10),max(Outdegree_10),7);            % create 7 equally-spaced bins based on their indegree score
+    bins_o_10 = discretize(Outdegree_10,edges_o_10);
+    p_o_10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','MarkerSize',bins_o_10*2,'NodeFontSize',10);
+    high_bins_o_10 = max(bins_o_10);
+    highest_ind_o_10 = find(bins_o_10 ==high_bins_o_10);
+    highlight(p_o_10,highest_ind_o_10,'NodeColor','g')
+    title({'{\bf\fontsize{13} Betweenness centrality all stims, highest outdegree electrodes}'; 'Size of markers indicates the outdegree ranking'},'FontWeight','Normal')
     
-%     G.Nodes.Hubs = hub_ranks;
-%     n = numnodes(G);
-%     p.NodeCData = wbc./((n-2)*(n-1));
-%     colormap(flip(autumn,1));
-%     title('Betweenness Centrality Scores - Weighted')
+    subplot(1,2,2,'Position',[0.52,0.11,0.48,0.81])
+    edges_o_2 = linspace(min(Outdegree_2),max(Outdegree_2),7);            % create 7 equally-spaced bins based on their indegree score
+    bins_o_2 = discretize(Outdegree_2,edges_o_2);
+    p_o_2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','MarkerSize',bins_o_2*2,'NodeFontSize',10);
+    high_bins_o_2 = max(bins_o_2);
+    highest_ind_o_2 = find(bins_o_2 ==high_bins_o_2);
+    highlight(p_o_2,highest_ind_o_2,'NodeColor','g')
+    title({'{\bf\fontsize{13} Betweenness centrality 2 stims, highest outdegree electrodes}'; 'Size of markers indicates the outdegree ranking'},'FontWeight','Normal')
+ 
+    figure('Position',[293,109,997,619])
+    p10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','NodeFontSize',10);
+    for i = 1:length(dataBase10.ch)
+        if ismember(i, highest_ind_10, 'rows') && ismember(i,highest_ind_o_10,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
+            highlight(p10,i,'NodeColor','g','MarkerSize',10)
+            title('Betweenness centrality all stims, in green the electrode with a high ranking in indegree and outdegree')
+        end
+    end
     
-    
-     % total number of electrodes
-    stimelektot = size(dataBase.ch,1);
+      figure('Position',[293,109,997,619])
+    p2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','NodeFontSize',10);
+    for i = 1:length(dataBase2.ch)
+        if ismember(i, highest_ind_2, 'rows') && ismember(i,highest_ind_o_2,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
+            highlight(p2,i,'NodeColor','g','MarkerSize',10)
+            title('Betweenness centrality 2 stims, in green the electrode with a high ranking in indegree and outdegree')
+        end
+    end
+
+%%% Normalisation %%%
+    % total number of electrodes
+    stimelektot = size(dataBase10.ch,1);
     % total number of stimpairs
-    stimptot = size(dataBase.stimpnames_avg,2);
+    stimptot = size(dataBase10.stimpnames_avg,2);
     
     % Number of times an electrode is used in a stimulation pair  
+    trialelek = zeros(1,stimelektot);
     for el=1:size(elec_mat,1)
         trialelek(el) = size(find(dataBase.cc_stimsets_avg==el),1);
     end
     
     % totaal number of possible connections
+    n_outtot = zeros(1,stimelektot);
+    n_intot = zeros(1,stimelektot);
     for el=1:size(elec_mat,1)
         n_outtot(el) = trialelek(el)*(stimelektot-2);
         n_intot(el) = 2*(stimptot - trialelek(el)); 
     end
     
-    % NETWERKMATEN         
+    % NETWERKMATEN   
+    outdegreenorm10 = zeros(1,stimelektot);
+    indegreenorm10 = zeros(1,stimelektot);
+    BCnorm10 = zeros(1,stimelektot); 
+    outdegreenorm2 = zeros(1,stimelektot);
+    indegreenorm2 = zeros(1,stimelektot);
+    BCnorm2 = zeros(1,stimelektot); 
+    
     for el=1:size(elec_mat,1)
-        % indegree en outdegree = som van 1tjes
-        indegreenorm(el) = indegree(el)/n_intot(el);
-        outdegreenorm(el) = outdegree(el)/n_outtot(el);
-        BCnorm(el) = wbc(el)/(n_intot(el)*n_outtot(el));
+        outdegreenorm10(el) = Outdegree_10(el)/n_outtot(el);
+        indegreenorm10(el) = Indegree_10(el)/n_intot(el);
+        BCnorm10(el) = wbc_10(el)/(n_intot(el)*n_outtot(el));
+        
+        outdegreenorm2(el) = Outdegree_2(el)/n_outtot(el);
+        indegreenorm2(el) = Indegree_2(el)/n_intot(el);
+        BCnorm2(el) = wbc_2(el)/(n_intot(el)*n_outtot(el));
     end
     
+  dataBase10.agreement_parameters.indegreeN = indegreenorm10;
+  dataBase10.agreement_parameters.outdegreeN = outdegreenorm10;
+  dataBase10.agreement_parameters.BCN_all = BCnorm10;
+  dataBase10.agreement_parameters.rank_stimp = rank_stimp10;
+  dataBase10.agreement_parameters.rank_elec = rank_elec10;
+ 
+  
+  dataBase2.agreement_parameters.indegreeN = indegreenorm2;
+  dataBase2.agreement_parameters.outdegreeN = outdegreenorm2;
+  dataBase2.agreement_parameters.BCN = BCnorm2;
+  dataBase2.agreeement_parametes.rank_stimp = rank_stimp2;
+  dataBase2.agreeement_parametes.rank_elec = rank_elec2;
+  
+  
 end
 
 
