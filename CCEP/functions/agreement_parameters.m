@@ -1,5 +1,5 @@
-function agreement_parameters = agreement_parameters(Amat10, Amat2, dataBase10, dataBase2,stimchans)
-
+function agreement_parameter = agreement_parameters(Amat10, Amat2, dataBase10, dataBase2,stimchans)
+    agreement_parameter = struct;    
     wantedAmat10 = Amat10'; 
     wantedAmat2 = Amat2';
     Amat_10 = zeros(size(wantedAmat10,1)+size(wantedAmat10,2));     % Matrix with 4 quadrants, left under must be filled with the adjecency matrix            
@@ -60,25 +60,19 @@ function agreement_parameters = agreement_parameters(Amat10, Amat2, dataBase10, 
     edges_2 = linspace(min(Indegree_2),max(Indegree_2),7);            % create 7 equally-spaced bins based on their indegree score
     bins_2 = discretize(Indegree_2,edges_2);
      
-  %%% KLOPT DENK IK NOG NIET! FIGURE LATEN EXACT DEZELFDE ELECTRODEN ZIEN?!  --> ZOU TE PERFECT ZIJN
     figure('Position',[1,2,1600,756])
     subplot(1,2,1, 'Position',[0.018,0.11,0.48,0.82])
     p_in10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','MarkerSize',bins_10*2,'NodeFontSize',10);
     high_bins_10 = max(bins_10);
-   % highest_ind_10 = find(bins_10 == high_bins_10);
-   
-   % Dit klopt niet!! je
-   % zoekt nu gewoon nummer 0 5 10 15 20 25 en 30 op en die zijn natuurlijk
-   % gelijk in 2 stims en 10 stims.
-   % highlight(p_in10,highest_ind_10,'NodeColor','g')
-   
+    highest_ind_10 = find(bins_10 == high_bins_10);
+    highlight(p_in10,highest_ind_10,'NodeColor','g')
     title({'{\bf\fontsize{13} Betweenness centrality all, highest indegree electrodes}'; 'Size of markers indicates the indegree ranking'},'FontWeight','Normal')
     
     subplot(1,2,2,'Position',[0.52,0.11,0.48,0.81])
     p_in2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','MarkerSize',bins_2*2,'NodeFontSize',10);
     high_bins_2 = max(bins_2);
-   % highest_ind_2 = find(bins_2 == high_bins_2);
-   % highlight(p_in2,highest_ind_2,'NodeColor','g')
+    highest_ind_2 = find(bins_2 == high_bins_2);
+    highlight(p_in2,highest_ind_2,'NodeColor','g')
     title({'{\bf\fontsize{13} Betweenness centrality 2 stims, highest indegree electrodes}'; 'Size of markers indicates the indegree ranking'},'FontWeight','Normal')
     
     
@@ -101,21 +95,22 @@ function agreement_parameters = agreement_parameters(Amat10, Amat2, dataBase10, 
     highlight(p_o_2,highest_ind_o_2,'NodeColor','g')
     title({'{\bf\fontsize{13} Betweenness centrality 2 stims, highest outdegree electrodes}'; 'Size of markers indicates the outdegree ranking'},'FontWeight','Normal')
  
-    figure('Position',[293,109,997,619])
+    figure('Position',[1,2,1600,756])
+    subplot(1,2,1, 'Position',[0.018,0.11,0.48,0.82])
     p10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','NodeFontSize',10);
+    title({'{\bf\fontsize{13}Betweenness centrality all stims}'; 'In green the electrode with a high ranking in indegree and outdegree'},'FontWeight','Normal');
     for i = 1:length(dataBase10.ch)
         if ismember(i, highest_ind_10, 'rows') && ismember(i,highest_ind_o_10,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
             highlight(p10,i,'NodeColor','g','MarkerSize',10)
-            title('Betweenness centrality all stims, in green the electrode with a high ranking in indegree and outdegree')
         end
     end
     
-      figure('Position',[293,109,997,619])
+    subplot(1,2,2,'Position',[0.52,0.11,0.48,0.81])
     p2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','NodeFontSize',10);
+    title({'{\bf\fontsize{13}Betweenness centrality of 2 stims}'; 'In green the electrode with a high ranking in indegree and outdegree'},'FontWeight','Normal');
     for i = 1:length(dataBase2.ch)
         if ismember(i, highest_ind_2, 'rows') && ismember(i,highest_ind_o_2,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
             highlight(p2,i,'NodeColor','g','MarkerSize',10)
-            title('Betweenness centrality 2 stims, in green the electrode with a high ranking in indegree and outdegree')
         end
     end
 
@@ -127,14 +122,14 @@ function agreement_parameters = agreement_parameters(Amat10, Amat2, dataBase10, 
     
     % Number of times an electrode is used in a stimulation pair  
     trialelek = zeros(1,stimelektot);
-    for el=1:size(elec_mat,1)
-        trialelek(el) = size(find(dataBase.cc_stimsets_avg==el),1);
+    for el=1:size(elec_mat10,1)
+        trialelek(el) = size(find(dataBase10.cc_stimsets_avg==el),1);
     end
     
     % totaal number of possible connections
     n_outtot = zeros(1,stimelektot);
     n_intot = zeros(1,stimelektot);
-    for el=1:size(elec_mat,1)
+    for el=1:size(elec_mat10,1)
         n_outtot(el) = trialelek(el)*(stimelektot-2);
         n_intot(el) = 2*(stimptot - trialelek(el)); 
     end
@@ -143,11 +138,12 @@ function agreement_parameters = agreement_parameters(Amat10, Amat2, dataBase10, 
     outdegreenorm10 = zeros(1,stimelektot);
     indegreenorm10 = zeros(1,stimelektot);
     BCnorm10 = zeros(1,stimelektot); 
+    
     outdegreenorm2 = zeros(1,stimelektot);
     indegreenorm2 = zeros(1,stimelektot);
     BCnorm2 = zeros(1,stimelektot); 
     
-    for el=1:size(elec_mat,1)
+    for el=1:size(elec_mat10,1)
         outdegreenorm10(el) = Outdegree_10(el)/n_outtot(el);
         indegreenorm10(el) = Indegree_10(el)/n_intot(el);
         BCnorm10(el) = wbc_10(el)/(n_intot(el)*n_outtot(el));
@@ -157,18 +153,17 @@ function agreement_parameters = agreement_parameters(Amat10, Amat2, dataBase10, 
         BCnorm2(el) = wbc_2(el)/(n_intot(el)*n_outtot(el));
     end
     
-  dataBase10.agreement_parameters.indegreeN = indegreenorm10;
-  dataBase10.agreement_parameters.outdegreeN = outdegreenorm10;
-  dataBase10.agreement_parameters.BCN_all = BCnorm10;
-  dataBase10.agreement_parameters.rank_stimp = rank_stimp10;
-  dataBase10.agreement_parameters.rank_elec = rank_elec10;
- 
-  
-  dataBase2.agreement_parameters.indegreeN = indegreenorm2;
-  dataBase2.agreement_parameters.outdegreeN = outdegreenorm2;
-  dataBase2.agreement_parameters.BCN = BCnorm2;
-  dataBase2.agreeement_parametes.rank_stimp = rank_stimp2;
-  dataBase2.agreeement_parametes.rank_elec = rank_elec2;
+  agreement_parameter.indegreeN_10 = indegreenorm10;
+  agreement_parameter.outdegreeN_10 = outdegreenorm10;
+  agreement_parameter.BCN_all_10 = BCnorm10;
+  agreement_parameter.rank_stimp_10 = rank_stimp10;
+  agreement_parameter.rank_elec_10 = rank_elec10;
+   
+  agreement_parameter.indegreeN_2 = indegreenorm2;
+  agreement_parameter.outdegreeN_2 = outdegreenorm2;
+  agreement_parameter.BCN_2 = BCnorm2;
+  agreement_parameter.rank_stimp_2 = rank_stimp2;
+  agreement_parameter.rank_elec_2 = rank_elec2;
   
   
 end

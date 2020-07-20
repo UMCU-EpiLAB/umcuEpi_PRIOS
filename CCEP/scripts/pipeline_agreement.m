@@ -165,26 +165,34 @@ toc;
 %% Calculate agreement parameters
 close all;
 dataBase2stim = rewrite_Amat(dataBase2stim,Amat2);
-dataBaseallstim = rewrite_Amat(dataBaseallstim,Amat2);
+dataBaseallstim = rewrite_Amat(dataBaseallstim,Amat10);
 
-%%
-%[indegree, outdegree, BC, rank_stimp, rank_elec]  = agreement_parameters(Amat10, dataBaseallstim, stimchans);
-agreement_parameters = agreement_parameters(Amat10,Amat2, dataBaseallstim, dataBase2stim,stimchans)
-%[indegree_2, outdegree_2, BC_2, rank_stimp_2, rank_elec_2] = agreement_parameters(Amat2, dataBase2stim, stimchans);
+%% Determine the indegree, outdegree, Betweenness centrality, the number of ERs per stimpair and the number of ERs per electrode
+close all;
+agreement_parameter = agreement_parameters(Amat10,Amat2, dataBaseallstim, dataBase2stim,stimchans);
 
 targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
-fileName = ['degrees_',dataBase(1).sub_label,'.xlsx'];
-sheet = 'Indegree all';
-writetable(rank_elec,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
+fileName = ['Agreement_parameters_',dataBase(1).sub_label];
 
-sheet =  'Indegree 2';
-writetable(rank_elec_2,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
- 
-sheet = 'Outdegree all';
-writetable(rank_stimp,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
+save([targetFolder, fileName], 'agreement_parameter')
 
-sheet =  'Outdegree 2';
-writetable(rank_stimp_2,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
-
-
+%%
+% targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
+% fileName = ['Agreement_parameters_',dataBase(1).sub_label,'.xlsx'];
+% sheet = 'Indegree all';
+% writetable(agreement_parameter,[targetFolder, fileName],'WriteRowNames',true)
+%
+% targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
+% fileName = ['degrees_',dataBase(1).sub_label,'.xlsx'];
+% sheet = 'Indegree all';
+% writetable(rank_elec,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
+% 
+% sheet =  'Indegree 2';
+% writetable(rank_elec_2,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
+%  
+% sheet = 'Outdegree all';
+% writetable(rank_stimp,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
+% 
+% sheet =  'Outdegree 2';
+% writetable(rank_stimp_2,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
 
