@@ -12,7 +12,10 @@ myDataPath = setLocalDataPath(cfg);
 files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg',...
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
-strings = cellfun(@(x) x(strfind(names{1},'run-'):strfind(names{1},'run-')+9), names, 'UniformOutput', false);
+strings = cell(size(names));
+for n = 1:size(names,2)
+    strings{n} = names{n}(strfind(names{n},'run-'):strfind(names{n},'run-')+9);
+end
 stringsz = [repmat('%s, ',1,size(strings,2)-1),'%s'];
 
 cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')}; % Chosen run is in cfg.run_label
@@ -29,18 +32,33 @@ dataBase = load_ECoGdata(cfg,myDataPath);
 
 %% CCEP for 2 and 10 stimulations
 
-% avg_stim = 1: we only want to use the first stimulation of all stimuli 
-% in one stimulation pair. So instead of averaging all stimuli in one 
-% stimulation pair, we only 'average' the first stimulus. If you want to 
-% use all stimuli, use avg_stim = [];
+% avg_stim : write down the number of stimuli you want to average
 
 % save only first stimulus in both directions
 avg_stim = 1;
 dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
-% save all stimuli
-avg_stim = [];
+% save all stimuli (5) in each direction
+avg_stim = 5;
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
+
+
+% check whether similar stimuli are present in the same stimulus pair
+chan = 13; stim=1;
+figure, 
+subplot(2,1,1),
+plot(squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))')
+hold on
+plot(squeeze(dataBase2stim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
+hold off
+title('two stimuli')
+
+subplot(2,1,2),
+plot(squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,:,:))')
+hold on
+plot(squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
+hold off
+title('all stimuli')
 
 %% Visually check all averaged signals for ERs
 
