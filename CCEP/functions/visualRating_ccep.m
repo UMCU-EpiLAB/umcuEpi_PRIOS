@@ -1,5 +1,5 @@
 
-function dataBase = visualRating_ccep(dataBase)
+function dataBase = visualRating_ccep(dataBase, stimchans)
 
 
 % INSTRUCTIONS
@@ -19,20 +19,27 @@ n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
 n1_peak_sample_check = NaN(size(n1_peak_sample));
 
 
+% [indivstimp,~,stimprow] = unique(sort(dataBase.cc_stimsets_all,2),'rows');
+
+
 for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
+%     Stimpnm = stimchans{stimp};     
+%     stimpnm = stimprow == stimp;
+        
     for chan =1 :size(dataBase.cc_epoch_sorted_avg,1)
+%         Channm = dataBase.ch{chan};
         
         if ~isnan(dataBase.ccep.n1_peak_sample(chan,stimp))
             % figure with left the epoch, and right zoomed in
             H=figure(1);
             H.Units = 'normalized';
-            H.Position = [0.13 0.11 0.77 0.8];
-            this_plot = squeeze(dataBase.cc_epoch_sorted(chan,:,stimp,:));
-            %             this_plot(:,tt>0 &tt<0.01) = NaN;
+            H.Position = [0.13 0.31 0.77 0.7];
+            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));      % This is not right, the stimpairs pos and neg are still separated.
+%             this_plot= reshape(this_plot, size(this_plot,1)*size(this_plot,2), size(this_plot,3));
+            this_plot(:,tt>-0.01 & tt<0.01) = NaN;            
             
             this_plot_avg = squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:));
-            this_plot_avg(tt>0 & tt<0.009) = NaN;
-            
+            this_plot_avg(tt>0 & tt<0.009) = NaN;            
             
             subplot(1,2,1)
             plot(tt,this_plot,':r','linewidth',1);
@@ -44,7 +51,7 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             ylim([-2000 2000])
             xlabel('time(s)')
             ylabel('amplitude(uV)')
-            title(sprintf('Electrode %s, stimulating %s-%s',dataBase.ch{chan},dataBase.cc_stimchans{stimp,1},dataBase.cc_stimchans{stimp,2}))
+            title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},stimchans{stimp,1}))
             
             subplot(1,2,2)
             plot(tt,this_plot,':r','linewidth',1);
@@ -59,12 +66,15 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             ylabel('Voltage (uV)')
             
             currkey = 0;
-            fprintf('N1 [y/n], if incorrect N1, select correct N1 \n')
+            fprintf('N1 [y/n], if incorrect N1, select correct N1 and press enter \n')
             
             % select new N1 or categorize as good N1 or no N1
+            % When incorrect N1 is selected, click on correct N1, a blue
+            % stip will occure, then press enter! The new coordinates will
+            % show in n1_peak_amplitude and sample.
             while ~strcmp(currkey,{'y','n',char(13)})
                 cp =[];
-                w = waitforbuttonpress;
+                w = waitforbuttonpress; % 0 = mouse, other = key
                 if w == 0
                     % draw correct N1
                     cp = get(gca,'CurrentPoint');

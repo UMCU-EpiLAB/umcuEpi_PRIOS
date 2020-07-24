@@ -25,6 +25,9 @@ Tinterstim=5;   % Time between stimulations
 Tstim=0.005;    % Length of the blockpulse
 Amp=1500;       % Amplitude of the blockpulse
 
+%B_gain = [0, 12, 25, 50, 75, 100];
+%values_B = adapt_gain(B_gain, Tend, deltat, Np, Tinterstim, Tin, Tstim, Amp);
+
 %% Initialize neural masses
 
 % Create parameter structs
@@ -33,7 +36,7 @@ NM(1)=create_NM(4.5,100,7,10,25,300,135,1,0,1,0.7);
 NM(2)=create_NM(4.5,100,7,10,25,300,135,1,0,1,0.7);
 
 %Add stimulation
-NM(1).Ivar=@(t) (mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);    % Stimulation at NM 1
+NM(1).Ivar = @(t) (mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);    % Stimulation at NM 1
 %NM(2).Ivar=@(t)(mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);   % Uncomment to add stimulation to NM2
 
 %% Network architecture
@@ -41,12 +44,13 @@ k=20;           % Connectivity strength
 cm=[0 0;1 0];   % Connectivity matrix, cm(i,j) is connection j->i.
 
 NM=NM(:);
-netw=create_NM_network(NM,cm,k);
+netw = create_NM_network(NM,cm,k);
 %strout=create_NM_network(nodes, conmat, constrength)
 %% perform simulation
 %rng(0);                                                            % Reset random number generator if desired
 [u2, x, xext, y] = sim_NM_network(Tend, deltat, Np, netw);          % Performs actual simulation
 %[uout,xout,xextout,yout,yextout] = sim_NM_network(Ttot,deltat,Nout,NM_network)
+
 
 %% show results
 tvec=0:deltat*Np:Tend;      % Create time vector
