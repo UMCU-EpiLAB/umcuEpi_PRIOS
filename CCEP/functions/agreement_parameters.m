@@ -1,9 +1,9 @@
-function agreement_parameter = agreement_parameters(Amat10, Amat2, dataBase10, dataBase2,stimchans)
+function agreement_parameter = agreement_parameters(agreement, dataBase10, dataBase2,stimchans)
     agreement_parameter = struct;    
-    wantedAmat10 = Amat10'; 
-    wantedAmat2 = Amat2';
-    Amat_10 = zeros(size(wantedAmat10,1)+size(wantedAmat10,2));     % Matrix with 4 quadrants, left under must be filled with the adjecency matrix            
-    Amat_2 = zeros(size(wantedAmat2,1)+size(wantedAmat2,2));        % Matrix with 4 quadrants, left under must be filled with the adjecency matrix            
+    wantedAmat10 = agreement.Amat10'; 
+    wantedAmat2 = agreement.Amat2';
+    Amat_10 = zeros(size(wantedAmat10,1)+size(wantedAmat10,2));     % Matrix with 4 quadrants, left under must be filled with the adjacency matrix            
+    Amat_2 = zeros(size(wantedAmat2,1)+size(wantedAmat2,2));        % Matrix with 4 quadrants, left under must be filled with the adjacency matrix            
 
     rowStart = size(wantedAmat10,2)+1;      % Same for 2 stims
     columnEnd = size(wantedAmat10,2);
