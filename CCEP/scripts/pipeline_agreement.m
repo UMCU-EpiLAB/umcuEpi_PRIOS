@@ -42,6 +42,8 @@ dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 avg_stim = [];
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
+TotalPosN1 = (size(dataBaseallstim.cc_stimsets_avg,1)*length(dataBaseallstim.ch)) - (size(dataBaseallstim.cc_stimsets_avg,1)*2);
+
 %% Visually check all averaged signals for ERs
 
 dataBaseallstim = plot_all_signals(dataBaseallstim);
@@ -144,16 +146,6 @@ fprintf('Checked files are saved in %s \n',targetFolder);
 fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
     agreement_check.OA, agreement_check.PA, agreement_check.NA)
 
-%% Plot the average signal of the 2 stims or 10 stims
-% 
-% dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
-% plot_ccep_av_stimp(dataBaseallstim,dataBase2stim, myDataPath, stimchans, LocOnes, TotOnesStim, dif_mat)
-% 
-% fprintf('All CCEPS average are saved');
-% 
-% %% Plot the all 10 stimuli per stimulation pair
-% dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
-% plot_all_ccep(dataBaseallstim, myDataPath, LocOnes, stimchans, dif_mat);
 
 %% Plot all 10 stimuli and the average for the 10 stims and the 2 stims
 % This combines the two scripts above
@@ -168,31 +160,21 @@ dataBase2stim = rewrite_Amat(dataBase2stim,Amat2);
 dataBaseallstim = rewrite_Amat(dataBaseallstim,Amat10);
 
 %% Determine the indegree, outdegree, Betweenness centrality, the number of ERs per stimpair and the number of ERs per electrode
+% The variables are saved in an excel in the run folder of the subject number
 close all;
-agreement_parameter = agreement_parameters(Amat10,Amat2, dataBaseallstim, dataBase2stim,stimchans);
+agreement_parameter = agreement_parameters(Amat10,Amat2, dataBaseallstim, dataBase2stim,myDataPath);
 
-targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
-fileName = ['Agreement_parameters_',dataBase(1).sub_label];
 
-save([targetFolder, fileName], 'agreement_parameter')
 
-%%
-% targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
-% fileName = ['Agreement_parameters_',dataBase(1).sub_label,'.xlsx'];
-% sheet = 'Indegree all';
-% writetable(agreement_parameter,[targetFolder, fileName],'WriteRowNames',true)
-%
-% targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
-% fileName = ['degrees_',dataBase(1).sub_label,'.xlsx'];
-% sheet = 'Indegree all';
-% writetable(rank_elec,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
+
+
+%% Plot the average signal of the 2 stims or 10 stims
 % 
-% sheet =  'Indegree 2';
-% writetable(rank_elec_2,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
-%  
-% sheet = 'Outdegree all';
-% writetable(rank_stimp,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
+% dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
+% plot_ccep_av_stimp(dataBaseallstim,dataBase2stim, myDataPath, stimchans, LocOnes, TotOnesStim, dif_mat)
 % 
-% sheet =  'Outdegree 2';
-% writetable(rank_stimp_2,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
-
+% fprintf('All CCEPS average are saved');
+% 
+% %% Plot the all 10 stimuli per stimulation pair
+% dataBaseallstim.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
+% plot_all_ccep(dataBaseallstim, myDataPath, LocOnes, stimchans, dif_mat);

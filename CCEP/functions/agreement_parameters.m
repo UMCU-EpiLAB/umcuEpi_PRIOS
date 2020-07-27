@@ -1,4 +1,4 @@
-function agreement_parameter = agreement_parameters(Amat10, Amat2, dataBase10, dataBase2,stimchans)
+function agreement_parameter = agreement_parameters(Amat10, Amat2, dataBase10, dataBase2,myDataPath)
     agreement_parameter = struct;    
     wantedAmat10 = Amat10'; 
     wantedAmat2 = Amat2';
@@ -17,25 +17,11 @@ function agreement_parameter = agreement_parameters(Amat10, Amat2, dataBase10, d
         ERs_stimp2((stimPair-(rowStart-1)),1) = sum(Amat_2(stimPair,:));
     end
        
-    ColN = {'number of ERs'};
-    rowNames = stimchans;
-    rank_stimp10 = array2table(ERs_stimp10,'RowNames',rowNames,'VariableNames',ColN);   % Number of outgoing stimulations (ERs evoked per stimpair)
-    rank_stimp10 = sortrows(rank_stimp10,1,'descend');
-    rank_stimp2 = array2table(ERs_stimp2,'RowNames',rowNames,'VariableNames',ColN);   
-    rank_stimp2 = sortrows(rank_stimp2,1,'descend');
     
     for elec = 1:size(wantedAmat10,2)
         ERs_elec10(1,elec) = sum(Amat_10(:,elec));                            % total number of ERs evoked in an electrode (el) 
         ERs_elec2(1,elec) = sum(Amat_2(:,elec)); 
     end
-
-    ERs_elec10 = ERs_elec10';
-    ERs_elec2 = ERs_elec2';
-    RowNames = ElecName;
-    rank_elec10 = array2table(ERs_elec10,'RowNames',RowNames,'VariableNames',ColN);   % Indegree
-    rank_elec10 = sortrows(rank_elec10,1,'descend');
-    rank_elec2 = array2table(ERs_elec2,'RowNames',RowNames,'VariableNames',ColN);   % Indegree
-    rank_elec2 = sortrows(rank_elec2,1,'descend');
       
 %% Work with the electrodes in the columns and rows 
 % All stimulations (10)    
@@ -156,49 +142,18 @@ function agreement_parameter = agreement_parameters(Amat10, Amat2, dataBase10, d
   agreement_parameter.indegreeN_10 = indegreenorm10;
   agreement_parameter.outdegreeN_10 = outdegreenorm10;
   agreement_parameter.BCN_all_10 = BCnorm10;
-  agreement_parameter.rank_stimp_10 = rank_stimp10;
-  agreement_parameter.rank_elec_10 = rank_elec10;
+  agreement_parameter.ERs_stimp10 = ERs_stimp10;
+  agreement_parameter.ERs_elec10 = ERs_elec10;
    
   agreement_parameter.indegreeN_2 = indegreenorm2;
   agreement_parameter.outdegreeN_2 = outdegreenorm2;
   agreement_parameter.BCN_2 = BCnorm2;
-  agreement_parameter.rank_stimp_2 = rank_stimp2;
-  agreement_parameter.rank_elec_2 = rank_elec2;
-  
+  agreement_parameter.ERs_stimp2 = ERs_stimp2;
+  agreement_parameter.ERs_elec2 = ERs_elec2;
+
+  % All variables are also saved to a excel variant
+  write2excelTables(dataBase10, myDataPath, agreement_parameter);
   
 end
 
 
-     
-    
-% % stimulation pairs/sets
-%     sort_stimsets = sort(ccep.ccep.stimsets,2);                         % all stimsets negative and positive toghether
-%     stimsets_dir = unique(sort_stimsets,'rows');                        % every unique stimset
-%     stimchan = [ccep.ccep.ch(stimsets_dir)]  ;                          % find all names matching all unique stimsets  
-%     trialtot = size(stimchan,1);                                        % total number of trials (verschillende mogelijkheden tot stimuleren)
-% % Electrodes  
-%     stimelek = ccep.ccep.ch;                                            % all stimulated electrodes 
-%     stimelektot = size(stimelek,1);                                     % total number of stimulated electrodes         
-%        
-     
-% % Number of times an elektrode is stimulated
-% % Find how often a elektrode number of found in the stimsets_dir
-%         for el=1:size(stimelek,1)
-%             trialelek(el,1) = size(find(stimsets_dir==el),1);
-%         end
-% 
-% % Total number of possible connections 
-%     for el=1:size(stimelek,1)                                               % number of electrodes
-%         % OUT
-%         % the number of trials in which the specific electrode is
-%         % stimulated (trialelek(el)) multiplied by the total number of
-%         % possible responses electrodes (stimelektot) minus 2. 
-%         n_outtot(el) = trialelek(el)*(stimelektot-2);
-% 
-%         % IN
-%         % 2 (the number of electrodes in a stimulation pair) multiplied by
-%         % the total number of trials (trialtot) minus the number of trials
-%         % in which the specific electrode was stimulated (trialelek)
-%         n_intot(el) = 2*(trialtot - trialelek(el));
-%     end
-    
