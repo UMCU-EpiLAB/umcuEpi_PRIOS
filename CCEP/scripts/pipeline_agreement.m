@@ -1,5 +1,5 @@
 clear; 
-
+% test of het pushen naar github werkt.
 %% Choose patient
 config_CCEP
 
@@ -42,14 +42,13 @@ dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 avg_stim = 5;
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
-<<<<<<< HEAD
 TotalPosN1 = (size(dataBaseallstim.cc_stimsets_avg,1)*length(dataBaseallstim.ch)) - (size(dataBaseallstim.cc_stimsets_avg,1)*2);
 
 %% Visually check all averaged signals for ERs
 
 dataBaseallstim = plot_all_signals(dataBaseallstim);
 dataBase2stim = plot_all_signals(dataBase2stim);
-=======
+
 % check whether similar stimuli are present in the same stimulus pair
 chan = 13; stim=1;
 figure, 
@@ -66,7 +65,7 @@ hold on
 plot(squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
 title('all stimuli')
->>>>>>> upstream/master
+
 
 %% Visually check all averaged signals for ERs
 

@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-function agreement_parameter = agreement_parameters(Amat10, Amat2, dataBase10, dataBase2,myDataPath)
-=======
 function agreement_parameter = agreement_parameters(agreement, dataBase10, dataBase2,stimchans)
->>>>>>> upstream/master
     agreement_parameter = struct;    
     wantedAmat10 = agreement.Amat10'; 
     wantedAmat2 = agreement.Amat2';
