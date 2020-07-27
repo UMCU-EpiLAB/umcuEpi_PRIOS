@@ -1,11 +1,11 @@
 function dataBase = plot_all_signals(dataBase)
 %
-% Dora Hermes, 2020, Multimodal Neuroimaging Lab, Mayo Clinic
+% Sifra Blok, 2020, UMC Utrecht & University of Twente
 % Dorien van Blooijs, 2020, UMC Utrecht
 
 tt = dataBase.tt;    
    for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)            % for all stimulation pairs
-         Stimpnm = dataBase.stimpnames_avg  {stimp};    
+         Stimpnm = dataBase.stimpnames_avg{stimp};    
         for elec = 1:size(dataBase.cc_epoch_sorted_avg,1)            % for all electrodes
              elecnm = dataBase.ch{elec};
                 ccep_plot = squeeze(dataBase.cc_epoch_sorted_avg(elec,stimp,:));
@@ -13,7 +13,7 @@ tt = dataBase.tt;
 
                 figure()
                 plot(tt,  ccep_plot);   
-                str = sprintf('Stimulation pair %s on %s for %s ', dataBase.stimpnames_avg  {stimp}, elecnm);
+                str = sprintf('Stimulation pair %s on %s', Stimpnm, elecnm);
                 title(str)
                 xlim([-0.2 0.5])
                 ylim([-750 750])
@@ -48,6 +48,7 @@ tt = dataBase.tt;
     
     close all
    end 
+   
    dataBase.ccep.ER_check_amplitude = ER_check_amplitude;
    dataBase.ccep.ER_check_sample = ER_check_sample;
 end
