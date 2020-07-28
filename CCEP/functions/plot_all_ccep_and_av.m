@@ -1,4 +1,4 @@
-function plot_all_ccep_and_av(dataBase,dataBase2, myDataPath, LocOnes, stimchans, agreement)
+function plot_all_ccep_and_av(dataBase, dataBase2, myDataPath, LocOnes, agreement)
 
 tic;
 dif_mat = agreement.dif_mat;
@@ -11,7 +11,7 @@ LocaOnes = LocOnes{:,:};
 
 ER_in10st = cell(size(ER_in10));
 for i = 1:size(ER_in10(:,2))                            % For the number of ones detected
-    ER_in10st(i,1) = stimchans(ER_in10(i,1))';
+    ER_in10st(i,1) = dataBase.stimpnames_avg(ER_in10(i,1))';
     ER_in10st(i,2) = dataBase.ch(ER_in10(i,2));
 end
 
@@ -21,7 +21,7 @@ set(groot,'defaultFigureVisible','on') % 'on' to turn figures showing on, 'off' 
 
 for stimp = 1:size(dataBase.cc_stimsets_avg,1)                           %1:max(indivstimp)
     
-    Stimpnm = stimchans{stimp};
+    Stimpnm = dataBase.stimpnames_avg{stimp};
     %     stimpnm = find(stimprow == stimp);
     
     for elec = 1:size(dataBase.cc_epoch_sorted_avg,1)    % for every electrode

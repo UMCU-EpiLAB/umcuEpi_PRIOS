@@ -1,5 +1,5 @@
 
-function dataBase = visualRating_ccep(dataBase, stimchans)
+function dataBase = visualRating_ccep(dataBase)
 
 
 % INSTRUCTIONS
@@ -51,7 +51,7 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             ylim([-2000 2000])
             xlabel('time(s)')
             ylabel('amplitude(uV)')
-            title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},stimchans{stimp,1}))
+            title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},dataBase.stimpnames_avg{stimp,1}))
             
             subplot(1,2,2)
             plot(tt,this_plot,':r','linewidth',1);

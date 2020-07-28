@@ -1,10 +1,6 @@
-function [FindOnes, LocOnes, stimchans]  = find_ones(dataBase,agreement_run)
-        
-    sort_stimsets = sort(dataBase.cc_stimsets_all,2);                         % all stimsets negative and positive together
-    stimsets_dir = unique(sort_stimsets,'rows');                        % every unique stimset
-    stimchan = [dataBase.ch(stimsets_dir)] ;
+function LocOnes = find_ones(dataBase,agreement_run)
 
-    stimchans =  strcat(stimchan(:,1),'-' ,stimchan(:,2));
+    stimchans =  dataBase.stimpnames_avg';
 
     % [electrodes,stimpairs]. 
     [x(:,2),x(:,1)] = find(agreement_run.compare_mat ==1);
