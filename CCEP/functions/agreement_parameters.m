@@ -1,4 +1,5 @@
 function agreement_parameter = agreement_parameters(agreement, dataBase10, dataBase2,myDataPath)
+% Testing git
     agreement_parameter = struct;    
     wantedAmat10 = agreement.Amat10'; 
     wantedAmat2 = agreement.Amat2';
