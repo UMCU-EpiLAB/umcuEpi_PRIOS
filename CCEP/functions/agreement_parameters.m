@@ -153,6 +153,7 @@ function agreement_parameter = agreement_parameters(agreement, dataBase10, dataB
 
   % All variables are also saved to a excel variant
   write2excelTables(dataBase10, myDataPath, agreement_parameter);       % database is only needed for the electrode names and the stimnames, therefore does not matter whether database 10 or 2 is taken.
+  write2excelTables(dataBase10, myDataPath, agreement_parameter);
   
 end
 

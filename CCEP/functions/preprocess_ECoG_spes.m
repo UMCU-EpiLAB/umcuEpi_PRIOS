@@ -1,4 +1,3 @@
-
 function dataBase = preprocess_ECoG_spes(dataBase,cfg,avg_stim)
 
 epoch_length = cfg.epoch_length;
