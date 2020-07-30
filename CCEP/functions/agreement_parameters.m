@@ -1,4 +1,4 @@
-function agreement_parameter = agreement_parameters(agreement, dataBase10, dataBase2,myDataPath)
+function agreement_parameter = agreement_parameters(agreement, dataBase10, dataBase2, myDataPath)
 % Testing git 6
     agreement_parameter = struct;    
     wantedAmat10 = agreement.Amat10'; 
@@ -69,8 +69,8 @@ function agreement_parameter = agreement_parameters(agreement, dataBase10, dataB
     bins_o_10 = discretize(Outdegree_10,edges_o_10);
     p_o_10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','MarkerSize',bins_o_10*2,'NodeFontSize',10);
     high_bins_o_10 = max(bins_o_10);
-    highest_ind_o_10 = find(bins_o_10 ==high_bins_o_10);
-    highlight(p_o_10,highest_ind_o_10,'NodeColor','g')
+    highest_outd_10 = find(bins_o_10 ==high_bins_o_10);
+    highlight(p_o_10,highest_outd_10,'NodeColor','g')
     title({'{\bf\fontsize{13} Betweenness centrality all stims, highest outdegree electrodes}'; 'Size of markers indicates the outdegree ranking'},'FontWeight','Normal')
     
     subplot(1,2,2,'Position',[0.52,0.11,0.48,0.81])
@@ -78,8 +78,8 @@ function agreement_parameter = agreement_parameters(agreement, dataBase10, dataB
     bins_o_2 = discretize(Outdegree_2,edges_o_2);
     p_o_2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','MarkerSize',bins_o_2*2,'NodeFontSize',10);
     high_bins_o_2 = max(bins_o_2);
-    highest_ind_o_2 = find(bins_o_2 ==high_bins_o_2);
-    highlight(p_o_2,highest_ind_o_2,'NodeColor','g')
+    highest_outd_2 = find(bins_o_2 ==high_bins_o_2);
+    highlight(p_o_2,highest_outd_2,'NodeColor','g')
     title({'{\bf\fontsize{13} Betweenness centrality 2 stims, highest outdegree electrodes}'; 'Size of markers indicates the outdegree ranking'},'FontWeight','Normal')
  
     figure('Position',[1,2,1600,756])
@@ -87,7 +87,7 @@ function agreement_parameter = agreement_parameters(agreement, dataBase10, dataB
     p10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','NodeFontSize',10);
     title({'{\bf\fontsize{13}Betweenness centrality all stims}'; 'In green the electrode with a high ranking in indegree and outdegree'},'FontWeight','Normal');
     for i = 1:length(dataBase10.ch)
-        if ismember(i, highest_ind_10, 'rows') && ismember(i,highest_ind_o_10,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
+        if ismember(i, highest_ind_10, 'rows') && ismember(i,highest_outd_10,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
             highlight(p10,i,'NodeColor','g','MarkerSize',10)
         end
     end
@@ -96,7 +96,7 @@ function agreement_parameter = agreement_parameters(agreement, dataBase10, dataB
     p2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','NodeFontSize',10);
     title({'{\bf\fontsize{13}Betweenness centrality of 2 stims}'; 'In green the electrode with a high ranking in indegree and outdegree'},'FontWeight','Normal');
     for i = 1:length(dataBase2.ch)
-        if ismember(i, highest_ind_2, 'rows') && ismember(i,highest_ind_o_2,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
+        if ismember(i, highest_ind_2, 'rows') && ismember(i,highest_outd_2,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
             highlight(p2,i,'NodeColor','g','MarkerSize',10)
         end
     end
@@ -110,7 +110,7 @@ function agreement_parameter = agreement_parameters(agreement, dataBase10, dataB
     % Number of times an electrode is used in a stimulation pair  
     trialelek = zeros(1,stimelektot);
     for el=1:size(elec_mat10,1)
-        trialelek(el) = size(find(dataBase10.cc_stimsets_avg==el),1);
+        trialelek(el) = size(find(dataBase10.stimsets_avg==el),1);
     end
     
     % totaal number of possible connections
@@ -145,16 +145,20 @@ function agreement_parameter = agreement_parameters(agreement, dataBase10, dataB
   agreement_parameter.BCN_all_10 = BCnorm10;
   agreement_parameter.ERs_stimp10 = ERs_stimp10;
   agreement_parameter.ERs_elec10 = ERs_elec10;
-   
+  
   agreement_parameter.indegreeN_2 = indegreenorm2;
   agreement_parameter.outdegreeN_2 = outdegreenorm2;
   agreement_parameter.BCN_2 = BCnorm2;
   agreement_parameter.ERs_stimp2 = ERs_stimp2;
   agreement_parameter.ERs_elec2 = ERs_elec2;
+  
+  agreement_parameter.highest_ind_2 = highest_ind_2;
+  agreement_parameter.highest_ind_10 = highest_ind_10;
+  agreement_parameter.highest_outd_2 = highest_outd_2;
+  agreement_parameter.highest_outd_10 = highest_outd_10;
 
   % All variables are also saved to a excel variant
   write2excelTables(dataBase10, myDataPath, agreement_parameter);       % database is only needed for the electrode names and the stimnames, therefore does not matter whether database 10 or 2 is taken.
-  write2excelTables(dataBase10, myDataPath, agreement_parameter);
   
 end
 

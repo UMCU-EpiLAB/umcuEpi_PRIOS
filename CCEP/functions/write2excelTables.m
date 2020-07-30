@@ -46,11 +46,11 @@ function write2excelTables(dataBase, myDataPath, agreement_parameter)
     BC2 = array2table(BCN_2,'RowNames',RowNames,'VariableNames',ColN);   % Indegree
     BC2 = sortrows(BC2,1,'descend');
    
+    sub_name = [extractBetween(dataBase.dataName,'ieeg/','_ses')];
 
-    
     % Write all to one table and save in folders
-    targetFolder = [myDataPath.CCEPpath, dataBase.sub_label,'/',dataBase.ses_label,'/', dataBase.run_label,'/'];
-    fileName = ['Agreement_table_',dataBase.sub_label,'.xlsx'];
+    targetFolder = [myDataPath.CCEPpath, 'Agreement_par_tables/'];
+    fileName = ['Agreement_table_',sub_name{1},'.xlsx'];
     
     sheet = 'rank_stimp10';
     writetable(rank_stimp10  ,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
@@ -83,15 +83,3 @@ function write2excelTables(dataBase, myDataPath, agreement_parameter)
     writetable(BC2,[targetFolder, fileName],'sheet',sheet,'WriteRowNames',true)
 
 end
-
-% 
-% 
-%     degree_table.rankstimp10 = rank_stimp10;
-%     degree_table.rankstimp2 = rank_stimp2;
-%     degree_table.rankelec10 = rank_elec10;
-%     degree_table.rankelec2 = rank_elec2;
-%     
-%     degree_table.indeg10 = indeg10;
-%     degree_table.indeg2 = indeg2;
-%     degree_table.outdeg10 = outdeg10;
-%     degree_table.outdeg2 = outdeg2;

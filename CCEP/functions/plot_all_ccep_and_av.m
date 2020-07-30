@@ -19,12 +19,12 @@ set(groot,'defaultFigureVisible','on') % 'on' to turn figures showing on, 'off' 
 
 % [indivstimp,~,stimprow] = unique(sort(dataBase.cc_stimsets_all,2),'rows');
 
-for stimp = 1:size(dataBase.cc_stimsets_avg,1)                           %1:max(indivstimp)
+for stimp = 1:size(dataBase.stimsets_avg,1)                           %1:max(indivstimp)
     
     Stimpnm = dataBase.stimpnames_avg{stimp};
     %     stimpnm = find(stimprow == stimp);
     
-    for elec = 1:size(dataBase.cc_epoch_sorted_avg,1)    % for every electrode
+    for elec = 1:size(dataBase.ch)    % for every electrode
         elecnm = dataBase.ch{elec};
         
         %         ccep_plot = zeros(length(tt),1);
@@ -34,19 +34,19 @@ for stimp = 1:size(dataBase.cc_stimsets_avg,1)                           %1:max(
         %         NameER = cell(1,nmbr_of_ones);
         
         %         for i = 1:size(LocaOnes)
-        if any(strcmp(LocaOnes(:,1),Stimpnm) & strcmp(LocaOnes(:,2),elecnm))
+        if any(strcmp(LocaOnes(:,1),Stimpnm) & strcmp(LocaOnes(:,2),elecnm))        % Check if the stimpair has evoked an CCEP in each electrode
             
             % Plot all 10 stimulations
-            ccep_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(elec,stimp,:,:));             % stimpnm is [1;2]!
+            ccep_plot = squeeze(dataBase.epoch_sorted_select_avg(elec,stimp,:,:));             % stimpnm is [1;2]!
             ccep_plot(:,tt>-0.01 & tt<0.02) = NaN;
-            ccep_plot2 = squeeze(dataBase2.cc_epoch_sorted_select_avg(elec,stimp,:,:));             % stimpnm is [1;2]!
+            ccep_plot2 = squeeze(dataBase2.epoch_sorted_select_avg(elec,stimp,:,:));             % stimpnm is [1;2]!
             ccep_plot2(:,tt>-0.01 & tt<0.02) = NaN;
             
             % Plot the average of the 10 or 2 stimulations per electrode
             % cc_epoch_sorted_avg(:,ll,:) =  squeeze(nanmean(squeeze(nanmean(cc_epoch_sorted(:,avg_stim,IC==ll,:),2)),2));
             
-            ccep_plot_avg = squeeze(dataBase.cc_epoch_sorted_avg(elec,stimp,:));
-            ccep_plot2_avg = squeeze(dataBase2.cc_epoch_sorted_avg(elec,stimp,:));       % stimulations of the 2 stims
+            ccep_plot_avg = squeeze(dataBase.epoch_sorted_avg(elec,stimp,:));
+            ccep_plot2_avg = squeeze(dataBase2.epoch_sorted_avg(elec,stimp,:));       % stimulations of the 2 stims
             ccep_plot_avg(tt>-0.010 & tt<0.010) = NaN;
             ccep_plot2_avg(tt>-0.010 & tt<0.010) = NaN;
             
