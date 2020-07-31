@@ -214,7 +214,7 @@ clear;
 % %% Choose patient
 ccep_allPat.name = {[input('Patient number type (RESPXXXX or PRIOSXX): ','s')]};
 
-%% set paths
+% set paths
 myDataPath = setLocalDataPath(ccep_allPat);
 
 %% Load all ccep files in the folder CCEP_files_allPat
@@ -258,6 +258,8 @@ LocOnes = find_ones(ccep10, agreement.agreement_run);
  
 
 %% Plot all 10 stimuli and the average for the 10 stims and the 2 stims
+% This does not work without epoch_sorted information, though, matlab
+% cannot save since it is to big.
 plot_fig = input('Do you want plot the 10 stimuli and the average signals? [y/n] ','s');
 
 if strcmp(plot_fig,'y')

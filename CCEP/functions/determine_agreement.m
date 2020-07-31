@@ -21,7 +21,7 @@ if size(runs,2) >1
                 if ~strcmp( extractBetween(runs(i).name,'_CCEP_','.mat'), extractBetween(runs(i+j).name,'_CCEP_','.mat')) % if stim num is not equal
                     if all(size(runs(i).ccep.n1_peak_amplitude) == size(runs(i+j).ccep.n1_peak_amplitude)) % if size of adjacency matrix is equal
                         
-                        title10 = extractBetween(runs(i).name,'_CCEP_','.mat');      % 10 stims
+                        title10 = extractBetween(runs(i).name,'_CCEP_','.mat');     % 10 stims
                         title2 = extractBetween(runs(i+j).name,'_CCEP_','.mat');    % 2 stims
                         run_label = extractBetween(runs(i).name,'_run-','_CCEP');
                         Amat10 = runs(i).ccep.n1_peak_amplitude;
@@ -35,9 +35,9 @@ if size(runs,2) >1
                         
                         compare_mat = Amat10 + Amat2;
                         dif_mat = Amat10-Amat2;                      % 1 = ER in 10stims, -1 = ER in 2stims
-                        truetrue = sum(compare_mat(:) == 2); % both are ER
-                        truefalse = sum(compare_mat(:) == 1); % one is ER and other is non-ER
-                        falsefalse = sum(compare_mat(:) == 0); % both are non-ER
+                        truetrue = sum(compare_mat(:) == 2);         % both are ER
+                        truefalse = sum(compare_mat(:) == 1);        % one is ER and other is non-ER
+                        falsefalse = sum(compare_mat(:) == 0);       % both are non-ER
                         
                         total = truetrue + truefalse + falsefalse;
                         
