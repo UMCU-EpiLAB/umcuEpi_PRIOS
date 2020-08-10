@@ -1,5 +1,4 @@
 function agreement_parameter = agreement_parameters(agreement, dataBase10, dataBase2, myDataPath)
-% Testing git 6
     agreement_parameter = struct;    
     wantedAmat10 = agreement.Amat10'; 
     wantedAmat2 = agreement.Amat2';
@@ -47,59 +46,59 @@ function agreement_parameter = agreement_parameters(agreement, dataBase10, dataB
     edges_2 = linspace(min(Indegree_2),max(Indegree_2),7);            % create 7 equally-spaced bins based on their indegree score
     bins_2 = discretize(Indegree_2,edges_2);
      
-    figure('Position',[1,2,1600,756])
-    subplot(1,2,1, 'Position',[0.018,0.11,0.48,0.82])
-    p_in10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','MarkerSize',bins_10*2,'NodeFontSize',10);
+%     figure('Position',[1,2,1600,756])
+%     subplot(1,2,1, 'Position',[0.018,0.11,0.48,0.82])
+%     p_in10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','MarkerSize',bins_10*2,'NodeFontSize',10);
     high_bins_10 = max(bins_10);
     highest_ind_10 = find(bins_10 == high_bins_10);
-    highlight(p_in10,highest_ind_10,'NodeColor','g')
-    title({'{\bf\fontsize{13} Betweenness centrality all, highest indegree electrodes}'; 'Size of markers indicates the indegree ranking'},'FontWeight','Normal')
-    
-    subplot(1,2,2,'Position',[0.52,0.11,0.48,0.81])
-    p_in2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','MarkerSize',bins_2*2,'NodeFontSize',10);
+%     highlight(p_in10,highest_ind_10,'NodeColor','g')
+%     title({'{\bf\fontsize{13} Betweenness centrality all, highest indegree electrodes}'; 'Size of markers indicates the indegree ranking'},'FontWeight','Normal')
+%     
+%     subplot(1,2,2,'Position',[0.52,0.11,0.48,0.81])
+%     p_in2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','MarkerSize',bins_2*2,'NodeFontSize',10);
     high_bins_2 = max(bins_2);
     highest_ind_2 = find(bins_2 == high_bins_2);
-    highlight(p_in2,highest_ind_2,'NodeColor','g')
-    title({'{\bf\fontsize{13} Betweenness centrality 2 stims, highest indegree electrodes}'; 'Size of markers indicates the indegree ranking'},'FontWeight','Normal')
+%     highlight(p_in2,highest_ind_2,'NodeColor','g')
+%     title({'{\bf\fontsize{13} Betweenness centrality 2 stims, highest indegree electrodes}'; 'Size of markers indicates the indegree ranking'},'FontWeight','Normal')
+%     
     
-    
-    figure('Position',[1,2,1600,756])
-    subplot(1,2,1, 'Position',[0.018,0.11,0.48,0.82])
+%     figure('Position',[1,2,1600,756])
+%     subplot(1,2,1, 'Position',[0.018,0.11,0.48,0.82])
     edges_o_10 = linspace(min(Outdegree_10),max(Outdegree_10),7);            % create 7 equally-spaced bins based on their indegree score
     bins_o_10 = discretize(Outdegree_10,edges_o_10);
-    p_o_10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','MarkerSize',bins_o_10*2,'NodeFontSize',10);
+%     p_o_10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','MarkerSize',bins_o_10*2,'NodeFontSize',10);
     high_bins_o_10 = max(bins_o_10);
     highest_outd_10 = find(bins_o_10 ==high_bins_o_10);
-    highlight(p_o_10,highest_outd_10,'NodeColor','g')
-    title({'{\bf\fontsize{13} Betweenness centrality all stims, highest outdegree electrodes}'; 'Size of markers indicates the outdegree ranking'},'FontWeight','Normal')
-    
-    subplot(1,2,2,'Position',[0.52,0.11,0.48,0.81])
+%     highlight(p_o_10,highest_outd_10,'NodeColor','g')
+%     title({'{\bf\fontsize{13} Betweenness centrality all stims, highest outdegree electrodes}'; 'Size of markers indicates the outdegree ranking'},'FontWeight','Normal')
+%     
+%     subplot(1,2,2,'Position',[0.52,0.11,0.48,0.81])
     edges_o_2 = linspace(min(Outdegree_2),max(Outdegree_2),7);            % create 7 equally-spaced bins based on their indegree score
     bins_o_2 = discretize(Outdegree_2,edges_o_2);
-    p_o_2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','MarkerSize',bins_o_2*2,'NodeFontSize',10);
+%     p_o_2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','MarkerSize',bins_o_2*2,'NodeFontSize',10);
     high_bins_o_2 = max(bins_o_2);
     highest_outd_2 = find(bins_o_2 ==high_bins_o_2);
-    highlight(p_o_2,highest_outd_2,'NodeColor','g')
-    title({'{\bf\fontsize{13} Betweenness centrality 2 stims, highest outdegree electrodes}'; 'Size of markers indicates the outdegree ranking'},'FontWeight','Normal')
- 
-    figure('Position',[1,2,1600,756])
-    subplot(1,2,1, 'Position',[0.018,0.11,0.48,0.82])
-    p10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','NodeFontSize',10);
-    title({'{\bf\fontsize{13}Betweenness centrality all stims}'; 'In green the electrode with a high ranking in indegree and outdegree'},'FontWeight','Normal');
-    for i = 1:length(dataBase10.ch)
-        if ismember(i, highest_ind_10, 'rows') && ismember(i,highest_outd_10,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
-            highlight(p10,i,'NodeColor','g','MarkerSize',10)
-        end
-    end
-    
-    subplot(1,2,2,'Position',[0.52,0.11,0.48,0.81])
-    p2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','NodeFontSize',10);
-    title({'{\bf\fontsize{13}Betweenness centrality of 2 stims}'; 'In green the electrode with a high ranking in indegree and outdegree'},'FontWeight','Normal');
-    for i = 1:length(dataBase2.ch)
-        if ismember(i, highest_ind_2, 'rows') && ismember(i,highest_outd_2,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
-            highlight(p2,i,'NodeColor','g','MarkerSize',10)
-        end
-    end
+%     highlight(p_o_2,highest_outd_2,'NodeColor','g')
+%     title({'{\bf\fontsize{13} Betweenness centrality 2 stims, highest outdegree electrodes}'; 'Size of markers indicates the outdegree ranking'},'FontWeight','Normal')
+
+% figure('Position',[1,2,1600,756])
+% subplot(1,2,1, 'Position',[0.018,0.11,0.48,0.82])
+% p10 = plot(G_10,'Layout','force','NodeLabel',dataBase10.ch,'NodeColor','r','NodeFontSize',10);
+% title({'{\bf\fontsize{13}Betweenness centrality all stims}'; 'In green the electrode with a high ranking in indegree and outdegree'},'FontWeight','Normal');
+% for i = 1:length(dataBase10.ch)
+%     if ismember(i, highest_ind_10, 'rows') && ismember(i,highest_outd_10,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
+%         highlight(p10,i,'NodeColor','g','MarkerSize',10)
+%     end
+% end
+% 
+% subplot(1,2,2,'Position',[0.52,0.11,0.48,0.81])
+% p2 = plot(G_2,'Layout','force','NodeLabel',dataBase2.ch,'NodeColor','r','NodeFontSize',10);
+% title({'{\bf\fontsize{13}Betweenness centrality of 2 stims}'; 'In green the electrode with a high ranking in indegree and outdegree'},'FontWeight','Normal');
+% for i = 1:length(dataBase2.ch)
+%     if ismember(i, highest_ind_2, 'rows') && ismember(i,highest_outd_2,'rows')               % When the electrode is highest ranked in the indegree and in outdegree
+%         highlight(p2,i,'NodeColor','g','MarkerSize',10)
+%     end
+% end
 
 %%% Normalisation %%%
     % total number of electrodes

@@ -73,24 +73,26 @@ for subj = 1:size(dataBase,2)
     
     if any(diff(n) ~= 0) % if any pair is stimulated a different amount
         
-        stimremove = n<minstim;               % remove al stimulation pairs that are stimulated less than 5 times
-        % remove stim pairs in both directions
-        remove_elec = cc_stimsets_all(stimremove,:);
-        remove_stimp = find(cc_stimsets_all(:,2)==remove_elec(:,2) & cc_stimsets_all(:,1)==remove_elec(:,1) |  cc_stimsets_all(:,2)==remove_elec(:,1) &  cc_stimsets_all(:,1)==remove_elec(:,2));
-        
-        warning('%s: stimulation pair(s) are stimulated less than all others, these are removed\n',dataBase(subj).sub_label);
-        
-        for i = 1:length(remove_stimp)-1
-            stimelek(IC_all==remove_stimp(i),:)= NaN;
-            stimelek(IC_all==remove_stimp(i+1),:)= NaN;
-        end
-        
-        remove(:,1) = isnan(stimelek(:,1));
-        stimelek(remove,:) = [];
-        
-        [cc_stimsets_all,~,IC_all] = unique(stimelek,'rows');
-        n = histcounts(IC_all,'BinMethod','integers');
-        
+       if n<minstim
+           stimremove = n<minstim;               % remove al stimulation pairs that are stimulated less than 5 times
+           % remove stim pairs in both directions
+           remove_elec = cc_stimsets_all(stimremove,:);
+           remove_stimp = find(cc_stimsets_all(:,2)==remove_elec(:,2) & cc_stimsets_all(:,1)==remove_elec(:,1) |  cc_stimsets_all(:,2)==remove_elec(:,1) &  cc_stimsets_all(:,1)==remove_elec(:,2));
+
+           warning('%s: stimulation pair(s) are stimulated less than all others, these are removed\n',dataBase(subj).sub_label);
+
+           for i = 1:length(remove_stimp)-1
+               stimelek(IC_all==remove_stimp(i),:)= NaN;
+               stimelek(IC_all==remove_stimp(i+1),:)= NaN;
+           end
+
+           remove(:,1) = isnan(stimelek(:,1));
+           stimelek(remove,:) = [];
+
+           [cc_stimsets_all,~,IC_all] = unique(stimelek,'rows');
+           n = histcounts(IC_all,'BinMethod','integers');
+       end
+       warning('%s: a stimulation pair is probably stimulated more than others \n',dataBase(subj).sub_label)
     end
     
     % find the amount of time most stimulus pairs are stimulated and set
