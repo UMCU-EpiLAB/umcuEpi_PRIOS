@@ -37,6 +37,7 @@ dataBase = load_ECoGdata(cfg,myDataPath);
 % save only first stimulus in both directions
 avg_stim = 1;
 dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
+tt = dataBase2stim.tt;
 
 % save all stimuli (5) in each direction
 avg_stim = 5;
@@ -46,18 +47,38 @@ dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 chan = 13; stim=1;
 figure, 
 subplot(2,1,1),
-plot(squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
+plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
-plot(squeeze(dataBase2stim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
+plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
 title('two stimuli')
+xlabel('time (s)')
+xlim([-.2 1.0])
 
+            
 subplot(2,1,2),
-plot(squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
 hold on
-plot(squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color','b','LineWidth',1)
+hold on
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
 title('all stimuli')
+xlabel('time (s)')
+xlim([-.2 1.0])
+
+
+figure()
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
+hold on
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color','b','LineWidth',1)
+hold on
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
+hold off
+title('all stimuli')
+xlabel('time (s)')
+xlim([-.1 0.1])
+
 
 %% Use the automatic N1 detector to detect ccep 
 dataBase2stim = detect_n1peak_ECoG_ccep(dataBase2stim,cfg);
