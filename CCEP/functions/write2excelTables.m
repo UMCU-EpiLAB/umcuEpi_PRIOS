@@ -5,8 +5,17 @@ function write2excelTables(dataBase, myDataPath, agreement_parameter)
     rowNames = dataBase.stimpnames_avg' ;
     rank_stimp10 = array2table(agreement_parameter.ERs_stimp10,'RowNames',rowNames,'VariableNames',ColN);   % Number of outgoing stimulations (ERs evoked per stimpair)
     rank_stimp10 = sortrows(rank_stimp10,1,'descend');
+    [~, ~, ic] = unique(rank_stimp10);
+    Ranked = num2cell(max(ic)-ic+1) ;
+    rank_stimp10(:,2) = Ranked;
+    rank_stimp10.Properties.VariableNames{2} = 'Assigned loc';   
+    
     rank_stimp2 = array2table(agreement_parameter.ERs_stimp2,'RowNames',rowNames,'VariableNames',ColN);   
     rank_stimp2 = sortrows(rank_stimp2,1,'descend');
+    [~, ~, ic] = unique(rank_stimp2);
+    Ranked = num2cell(max(ic)-ic+1) ;
+    rank_stimp2(:,2) = Ranked;
+    rank_stimp2.Properties.VariableNames{2} = 'Assigned loc'; 
     
 % Sorted table with the number of ERs per electrode
     ERs_elec10 = agreement_parameter.ERs_elec10';
@@ -47,7 +56,9 @@ function write2excelTables(dataBase, myDataPath, agreement_parameter)
     BC2 = sortrows(BC2,1,'descend');
    
     sub_name = [extractBetween(dataBase.dataName,'ieeg/','_ses')];
-
+    
+   
+    
     % Write all to one table and save in folders
     targetFolder = [myDataPath.CCEPpath, 'Agreement_par_tables/'];
     fileName = ['Agreement_table_',sub_name{1},'.xlsx'];
