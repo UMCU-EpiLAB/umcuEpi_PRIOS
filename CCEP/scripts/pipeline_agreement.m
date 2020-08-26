@@ -73,7 +73,7 @@ statistics = statistical_agreement(agreement_parameter,ccep10);
 %% load electrodes positions (xlsx/electrodes.tsv)
 % database (ccep10) is only used for channels and stimpairs and these are
 % equal for 2 and 10, so does not matter which database is used.
-visualise_gridstructure(myDataPath, ccep10, agreement_parameter);
+visualise_gridstructure(myDataPath, ccep10, ccep2, agreement_parameter);
 
 
 

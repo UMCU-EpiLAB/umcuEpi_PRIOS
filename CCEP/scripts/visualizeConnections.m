@@ -29,23 +29,19 @@ n=1;
 runs = cell(1);
 
 for i=1:size(files,1)
-    if contains(files(i).name ,'CCEP_') && n==1
+    if contains(files(i).name,'CCEP_') && n==1
         loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1},[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',cfg.run_label{:},'_CCEP_2stims.mat']));
-        ccep = loadfile.ccep;
+        ccep = loadfile.ccep2;
         runs{n} = files(i).name;
         n=n+1;
     elseif contains(files(i).name ,'CCEP_') && n>1
         loadfile = load(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1},[cfg.sub_labels{:},'_',cfg.ses_label,'_task-SPESclin_',cfg.run_label{:},'_CCEP_2stims.mat']));
-        ccep(n) = loadfile.ccep;
+        ccep(n) = loadfile.ccep2;
         runs{n} = files(i).name;
         n=n+1;
     end
 end
 
-
-%% load all CCEP detected by automatic detector
-
-[agreement_run, agreement_stim,compare_mat] = determine_agreement(myDataPath,cfg);
 
 %% load electrodes positions (xlsx/electrodes.tsv)
 
@@ -89,10 +85,10 @@ topo.x =x;
 topo.y=y;
 
 
-%% CCEP responses to specific stimulus
+%% Plot electrodes which respond differently to the 2 stimuli and the 10 stimuli protocol
 
-for stimp = 1:size(compare_mat,2)                   % Number of stimulation pairs (columns)
-    stimnum = ccep(1).stimsets(stimp,:);            % Stimulation pair numbers for column number (stimp)
+for stimp = 1:size(ccep(1).stimsets_avg)                   % Number of stimulation pairs (columns)
+    stimnum = ccep(1).stimsets_avg(stimp,:);            % Stimulation pair numbers for column number (stimp)
     resp = compare_mat(:,stimp);                    % matrix with one and zero for ER and non ER, respectively
 
         
