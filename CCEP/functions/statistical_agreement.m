@@ -77,7 +77,7 @@ Statistic_mat(:,3) = Stimpair_sorted2(:,2);
 [RHO_stmp,PVAL_stmp] = corr(Statistic_mat(:,2) , Statistic_mat(:,3) ,'Type','Spearman');
 fprintf('Spearman Corr between stimpair ranking of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
 
-clearvars -except Statistic_mat RHO_stmp PVAL_stmp ccep10 agreement_parameter SubjectName
+clearvars -except p Statistic_mat RHO_stmp PVAL_stmp ccep10 agreement_parameter SubjectName
 
 
 %% Spearman correlation 
@@ -118,7 +118,7 @@ end
 fprintf('Spearman Corr between indegree per electrode of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_ind, RHO_ind, SubjectName{1});
 
 
-clearvars -except Statistic_mat RHO_stmp PVAL_stmp ccep10 agreement_parameter SubjectName sort_Ind10 sort_Ind2 RHO_ind PVal_ind
+clearvars -except p Statistic_mat RHO_stmp PVAL_stmp ccep10 agreement_parameter SubjectName sort_Ind10 sort_Ind2 RHO_ind PVAL_ind
 
 %% Rank biserial correlation 
 % For the outdegree per electrode
@@ -156,7 +156,7 @@ end
 
 fprintf('Spearman Corr between outdegree per electrode of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_outd, RHO_outd, SubjectName{1});
 
-clearvars -except Statistic_mat RHO_stmp PVAL_stmp ccep10 agreement_parameter SubjectName sort_Ind10 sort_Ind2 RHO_ind PVal_ind sort_Outd10 sort_Outd2 RHO_outd PVal_outd
+clearvars -except p Statistic_mat RHO_stmp PVAL_stmp ccep10 agreement_parameter SubjectName sort_Ind10 sort_Ind2 RHO_ind PVAL_ind sort_Outd10 sort_Outd2 RHO_outd PVAL_outd
 
 
 %% Spearman correlation 
@@ -218,6 +218,17 @@ end
 [RHO_BC, PVAL_BC] = corr(rank_sort_BC10 , rank_sort_BC2 ,'Type','Spearman');
 
 fprintf('Spearman Corr between outdegree per electrode of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_BC, RHO_BC, SubjectName{1});
+
+% Write to variable
+statistics.p_BC = PVAL_BC;
+statistics.rho_BC = RHO_BC;
+statistics.p_ind= PVAL_ind;
+statistics.rho_ind = RHO_ind;
+statistics.p_outd = PVAL_outd;
+statistics.rho_outd = RHO_outd;
+statistics.p_stimp = PVAL_stmp;
+statistics.rho_stimp = RHO_stmp;
+statistics.p_ERsperStimp = p;
 
 end
 
