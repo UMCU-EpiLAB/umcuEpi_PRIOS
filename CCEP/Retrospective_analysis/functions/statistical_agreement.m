@@ -74,7 +74,7 @@ Statistic_mat(:,3) = Stimpair_sorted2(:,2);
 % colNames = {'Stimpair', 'Ranking10', 'Ranking2'};
 % T = array2table(Statistic_mat,'VariableNames', colNames);    % able to check           
 
-[RHO_stmp,PVAL_stmp] = corr(Statistic_mat(:,2) , Statistic_mat(:,3) ,'Type','Spearman');
+[RHO_stmp,PVAL_stmp] = corr(Statistic_mat(:,2) , Statistic_mat(:,3) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0 
 fprintf('Spearman Corr between stimpair ranking of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
 
 clearvars -except p Statistic_mat RHO_stmp PVAL_stmp ccep10 agreement_parameter SubjectName
