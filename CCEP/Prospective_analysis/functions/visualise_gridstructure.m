@@ -1,6 +1,6 @@
-function visualise_gridstructure(myDataPath, ccep, ccep2, agreement_parameter)
+function visualise_gridstructure(myDataPath, ccep_clin, ccep_prop, agreement_parameter)
 
-subj = [extractBetween(ccep.dataName,'sub-','/ses')];
+subj = [extractBetween(ccep_clin.dataName,'sub-','/ses')];
 
 
 if exist(fullfile(myDataPath.elec_input,[subj{1},'_elektroden.xlsx']),'file')
@@ -11,8 +11,8 @@ end
 
 % localize electrodes in grid
 % Same for 10 and 2 stims
-x = NaN(size(ccep.ch)); 
-y = NaN(size(ccep.ch));
+x = NaN(size(ccep_clin.ch)); 
+y = NaN(size(ccep_clin.ch));
 elecmat = NaN(size(elec));
 topo=struct;
 
@@ -23,14 +23,14 @@ for i=1:size(elec,1)
             number = regexp(elec{i,j},'[1-9]');
             test1 = elec{i,j}([letter,number:end]);
             test2 = [elec{i,j}(letter),'0',elec{i,j}(number:end)];
-            if sum(strcmp(ccep.ch,test1))==1
-                elecmat(i,j) = find(strcmp(ccep(1).ch,test1));
-                y(strcmp(ccep.ch,test1),1) = i;
-                x(strcmp(ccep.ch,test1),1)= j;
-            elseif sum(strcmp(ccep.ch,test2))==1
-                elecmat(i,j) = find(strcmp(ccep.ch,test2));
-                y(strcmp(ccep.ch,test2),1) = i;
-                x(strcmp(ccep.ch,test2),1)= j;
+            if sum(strcmp(ccep_clin.ch,test1))==1
+                elecmat(i,j) = find(strcmp(ccep_clin(1).ch,test1));
+                y(strcmp(ccep_clin.ch,test1),1) = i;
+                x(strcmp(ccep_clin.ch,test1),1)= j;
+            elseif sum(strcmp(ccep_clin.ch,test2))==1
+                elecmat(i,j) = find(strcmp(ccep_clin.ch,test2));
+                y(strcmp(ccep_clin.ch,test2),1) = i;
+                x(strcmp(ccep_clin.ch,test2),1)= j;
             else
                 error('Electrode is not found')
             end
@@ -68,25 +68,25 @@ topo.y = y;
 
    
 % Draw lines between the stimulation pairs with the highest number of ERs
-    for i = 1:length(ccep.stimchans_avg)
+    for i = 1:length(ccep_clin.stimchans_avg)
        if ismember(i, highest_10_1, 'rows')              % When the electrode is highest ranked in the indegree and in outdegree
-         elec1 = ccep.stimsets_avg(i,1);
-         elec2 = ccep.stimsets_avg(i,2);
+         elec1 = ccep_clin.stimsets_avg(i,1);
+         elec2 = ccep_clin.stimsets_avg(i,2);
          fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
          set(fig,{'LineWidth'},{5})
          fig.Color(4) = 0.4;
 
          
        elseif ismember(i, (highest_10_2), 'rows') 
-         elec1 = ccep.stimsets_avg(i,1);
-         elec2 = ccep.stimsets_avg(i,2);
+         elec1 = ccep_clin.stimsets_avg(i,1);
+         elec2 = ccep_clin.stimsets_avg(i,2);
          fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
          set(fig,{'LineWidth'},{3})
          fig.Color(4) = 0.4;
          
       elseif ismember(i, (highest_10_3), 'rows') 
-         elec1 = ccep.stimsets_avg(i,1);
-         elec2 = ccep.stimsets_avg(i,2);
+         elec1 = ccep_clin.stimsets_avg(i,1);
+         elec2 = ccep_clin.stimsets_avg(i,2);
          fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
          set(fig,{'LineWidth'},{1})
          fig.Color(4) = 0.4;
@@ -111,7 +111,7 @@ topo.y = y;
 
     title({'\rm Highest indegree scoring electrodes are darker green,'...
         'broader lines indicate more ERs evoked per stimulation pair, all stims'})
-    text(((topo.x)+0.2),topo.y,ccep.ch, 'FontSize',8)
+    text(((topo.x)+0.2),topo.y,ccep_clin.ch, 'FontSize',8)
 
     
 
@@ -174,24 +174,24 @@ str_main = sprintf('sub-%s', subj{1});
     highest_2_3 = find(bins_2 == high_bins_2-2);
    
 % Draw lines between the stimulation pairs with the highest number of ERs
-    for i = 1:length(ccep.stimchans_avg)
+    for i = 1:length(ccep_clin.stimchans_avg)
        if ismember(i, highest_2_1, 'rows')              % When the electrode is highest ranked in the indegree and in outdegree
-         elec1 = ccep.stimsets_avg(i,1);
-         elec2 = ccep.stimsets_avg(i,2);
+         elec1 = ccep_clin.stimsets_avg(i,1);
+         elec2 = ccep_clin.stimsets_avg(i,2);
          fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
          set(fig,{'LineWidth'},{5})
          fig.Color(4) = 0.4;
          
        elseif ismember(i, (highest_2_2), 'rows') 
-         elec1 = ccep.stimsets_avg(i,1);
-         elec2 = ccep.stimsets_avg(i,2);
+         elec1 = ccep_clin.stimsets_avg(i,1);
+         elec2 = ccep_clin.stimsets_avg(i,2);
          fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
          set(fig,{'LineWidth'},{3})
          fig.Color(4) = 0.4;
 
       elseif ismember(i, (highest_2_3), 'rows') 
-         elec1 = ccep.stimsets_avg(i,1);
-         elec2 = ccep.stimsets_avg(i,2);
+         elec1 = ccep_clin.stimsets_avg(i,1);
+         elec2 = ccep_clin.stimsets_avg(i,2);
          fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
          set(fig,{'LineWidth'},{1})
          fig.Color(4) = 0.4;
@@ -215,7 +215,7 @@ str_main = sprintf('sub-%s', subj{1});
     
     title({'\rm Highest indegree scoring electrodes are darker green,'...
         'broader lines indicate more ERs evoked per stimulation pair, 2 stims'})
-    text(((topo.x)+0.2),topo.y,ccep.ch,'FontSize',8)
+    text(((topo.x)+0.2),topo.y,ccep_clin.ch,'FontSize',8)
 
     
 % Save figure 
@@ -285,7 +285,7 @@ c = hot;
 c = flipud(c);
 colormap(c);
 cb = colorbar();
-text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+text(((topo.x)+0.2),topo.y,ccep_clin.ch,'bold')
 
 
 % 2 stims
@@ -313,7 +313,7 @@ c = hot;
 c = flipud(c);
 colormap(c);
 cb = colorbar();
-text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+text(((topo.x)+0.2),topo.y,ccep_clin.ch,'bold')
 
 
 % Save figure    
@@ -333,8 +333,8 @@ plot_fig = input('Do you want plot figures with all ERs per stimulation pair? [y
 
 if strcmp(plot_fig,'y')
 
-    for stimp = 1:size(ccep(1).stimsets_avg)                   % Number of stimulation pairs (columns)
-        stimnum = ccep(1).stimsets_avg(stimp,:);            % Stimulation pair numbers for column number (stimp)
+    for stimp = 1:size(ccep_clin(1).stimsets_avg)                   % Number of stimulation pairs (columns)
+        stimnum = ccep_clin(1).stimsets_avg(stimp,:);            % Stimulation pair numbers for column number (stimp)
 
         % for 10 stims
         figure3= figure('Position',[284,4,1309,1052]);
@@ -351,7 +351,7 @@ if strcmp(plot_fig,'y')
         axes1.XColor = 'none';
         axes1.YColor = 'none';
         axes1.Units = 'normalized';
-        text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+        text(((topo.x)+0.2),topo.y,ccep_clin.ch,'bold')
         str_main = sprintf('sub-%s', subj{1});
         sgtitle(str_main)
         title('\rm ERs responses to specific stimulus, all stims')   
@@ -364,8 +364,8 @@ if strcmp(plot_fig,'y')
         plot([topo.x(stimnum(1)), topo.x(stimnum(2))], [topo.y(stimnum(1)),topo.y(stimnum(2))], 'k');    
 
 
-        for elek = 1:length(ccep.ch)
-            if ~isnan(ccep.n1_peak_sample(elek,stimp))
+        for elek = 1:length(ccep_clin.ch)
+            if ~isnan(ccep_clin.n1_peak_sample(elek,stimp))
                 plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
                 'MarkerFaceColor',[0 0.7 0],'MarkerEdgeColor','k')
             end
@@ -389,7 +389,7 @@ if strcmp(plot_fig,'y')
         axes4.Units = 'normalized';
         str_main = sprintf('sub-%s', subj{1});
         sgtitle(str_main)
-        text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+        text(((topo.x)+0.2),topo.y,ccep_clin.ch,'bold')
         title('\rm  ERs responses to specific stimulus, 2 stims')
 
         for chan=1:2
@@ -399,8 +399,8 @@ if strcmp(plot_fig,'y')
         plot([topo.x(stimnum(1)), topo.x(stimnum(2))], [topo.y(stimnum(1)),topo.y(stimnum(2))], 'k');    
 
 
-        for elek = 1:length(ccep.ch)
-            if ~isnan(ccep2.n1_peak_sample(elek,stimp))
+        for elek = 1:length(ccep_clin.ch)
+            if ~isnan(ccep_prop.n1_peak_sample(elek,stimp))
                 plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
                 'MarkerFaceColor',[0 0.7 0],'MarkerEdgeColor','k')
             end
@@ -423,7 +423,7 @@ if strcmp(plot_fig,'y')
         axes3.XColor = 'none';
         axes3.YColor = 'none';
         axes3.Units = 'normalized';
-        text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+        text(((topo.x)+0.2),topo.y,ccep_clin.ch,'bold')
         str_main = sprintf('sub-%s', subj{1});
         sgtitle(str_main)
         title('\rm ERs differently detected in the 2 stimuli or 10 stimuli protocol')  
@@ -435,16 +435,16 @@ if strcmp(plot_fig,'y')
         plot([topo.x(stimnum(1)), topo.x(stimnum(2))], [topo.y(stimnum(1)),topo.y(stimnum(2))], 'k');    
 
 
-        for elek = 1:length(ccep.ch)
-            if isnan(ccep.n1_peak_sample(elek,stimp)) && ~isnan(ccep2.n1_peak_sample(elek,stimp)) 
+        for elek = 1:length(ccep_clin.ch)
+            if isnan(ccep_clin.n1_peak_sample(elek,stimp)) && ~isnan(ccep_prop.n1_peak_sample(elek,stimp)) 
                 plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
                 'MarkerFaceColor',[0 0.7 1],'MarkerEdgeColor','k')
             end
         end 
 
 
-         for elek = 1:length(ccep.ch)
-            if isnan(ccep2.n1_peak_sample(elek,stimp)) && ~isnan(ccep.n1_peak_sample(elek,stimp)) 
+         for elek = 1:length(ccep_clin.ch)
+            if isnan(ccep_prop.n1_peak_sample(elek,stimp)) && ~isnan(ccep_clin.n1_peak_sample(elek,stimp)) 
                 plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
                 'MarkerFaceColor',[1 0.7 1],'MarkerEdgeColor','k')
             end
