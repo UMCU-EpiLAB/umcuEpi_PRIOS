@@ -218,10 +218,7 @@ str_main = sprintf('sub-%s', subj{1});
     text(((topo.x)+0.2),topo.y,ccep.ch,'FontSize',8)
 
     
-% Save figure 
-outlabel=sprintf('sub-%s.jpg',...
-subj{1});
-path = [fullfile(myDataPath.CCEPpath,'Visualise_agreement/')];     
+% Save figure    
 outlabel=sprintf('sub-%s_indegree_ERstimp.jpg',...
 subj{1});
 path = [fullfile(myDataPath.CCEPpath,'Visualise_agreement/')];
@@ -337,10 +334,12 @@ if strcmp(plot_fig,'y')
         stimnum = ccep(1).stimsets_avg(stimp,:);            % Stimulation pair numbers for column number (stimp)
 
         % for 10 stims
-        figure3= figure('Position',[284,4,1309,1052]);
+        %figure3= figure('Position',[284,4,1309,1052]);
+        figure3 = figure('Position',[280,400,1300,500]);
+        axes1 = axes('Parent',figure3, 'Position', [0.04,0.014,0.9,0.886]);
         %axes1 = axes('Parent',figure3,'Position', [0.05, 0.69, 0.92, 0.27]);
 
-        axes1 = axes('Parent',figure3,'Position',[0.04,0.5,0.9,0.4]);
+        %axes1 = axes('Parent',figure3,'Position',[0.04,0.5,0.9,0.4]);
         hold(axes1,'on');
         plot(topo.x,topo.y,'ok','Parent',axes1,'MarkerSize',15);
         xlim([min(topo.x)-1, max(topo.x)+1])
@@ -356,85 +355,86 @@ if strcmp(plot_fig,'y')
         sgtitle(str_main)
         title('\rm ERs responses to specific stimulus, all stims')   
 
-        % plot stimulation pair in yellow
+        % plot stimulation pair in black
         for chan=1:2
             plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
-                'MarkerFaceColor',[1 0.9 0],'MarkerEdgeColor','k')
+                'MarkerFaceColor','k','MarkerEdgeColor','k')
         end
         plot([topo.x(stimnum(1)), topo.x(stimnum(2))], [topo.y(stimnum(1)),topo.y(stimnum(2))], 'k');    
 
-
+        % plot ERs in grey
         for elek = 1:length(ccep.ch)
             if ~isnan(ccep.n1_peak_sample(elek,stimp))
                 plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
-                'MarkerFaceColor',[0 0.7 0],'MarkerEdgeColor','k')
+                'MarkerFaceColor', [0.75 0.75 0.75],'MarkerEdgeColor','k')
             end
 
         end        
 
 
         % For 2 stims
-        axes4 = axes('Parent',figure3,'Position',[0.04,0.07,0.9,0.4]);
-        %axes4 = axes('Parent',figure3, 'Position', [0.05, 0.37, 0.92, 0.27]);
+%         axes4 = axes('Parent',figure3,'Position',[0.04,0.07,0.9,0.4]);
+%         %axes4 = axes('Parent',figure3, 'Position', [0.05, 0.37, 0.92, 0.27]);
+% 
+%         hold(axes4,'on');
+%         plot(topo.x,topo.y,'ok','Parent',axes4,'MarkerSize',15);
+%         xlim([min(topo.x)-2, max(topo.x)+2])
+%         ylim([min(topo.y)-2, max(topo.y)+2])
+%         axes4.YDir = 'reverse';
+%         axes4.YTick = [];
+%         axes4.XTick = [];
+%         axes4.XColor = 'none';
+%         axes4.YColor = 'none';
+%         axes4.Units = 'normalized';
+%         str_main = sprintf('sub-%s', subj{1});
+%         sgtitle(str_main)
+%         text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+%         title('\rm  ERs responses to specific stimulus, 2 stims')
+% 
+%         for chan=1:2
+%             plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
+%                 'MarkerFaceColor','k','MarkerEdgeColor','k')
+%         end
+%         plot([topo.x(stimnum(1)), topo.x(stimnum(2))], [topo.y(stimnum(1)),topo.y(stimnum(2))], 'k');    
 
-        hold(axes4,'on');
-        plot(topo.x,topo.y,'ok','Parent',axes4,'MarkerSize',15);
-        xlim([min(topo.x)-2, max(topo.x)+2])
-        ylim([min(topo.y)-2, max(topo.y)+2])
-        axes4.YDir = 'reverse';
-        axes4.YTick = [];
-        axes4.XTick = [];
-        axes4.XColor = 'none';
-        axes4.YColor = 'none';
-        axes4.Units = 'normalized';
-        str_main = sprintf('sub-%s', subj{1});
-        sgtitle(str_main)
-        text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
-        title('\rm  ERs responses to specific stimulus, 2 stims')
-
-        for chan=1:2
-            plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
-                'MarkerFaceColor',[1 0.9 0],'MarkerEdgeColor','k')
-        end
-        plot([topo.x(stimnum(1)), topo.x(stimnum(2))], [topo.y(stimnum(1)),topo.y(stimnum(2))], 'k');    
-
-
+        % plot ERs in grey
         for elek = 1:length(ccep.ch)
             if ~isnan(ccep2.n1_peak_sample(elek,stimp))
                 plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
-                'MarkerFaceColor',[0 0.7 0],'MarkerEdgeColor','k')
+                'MarkerFaceColor', [0.75 0.75 0.75],'MarkerEdgeColor','k')
             end
         end        
 
 
 
         % de elektroden die niet in beide zitten ander kleurtje geven
-        figure4= figure('Position',[280,400,1300,500]);
-        axes3 = axes('Parent',figure4,'Position',[0.04,0.014,0.9,0.886]);
-    %    axes3 = axes('Parent',figure3, 'Position', [0.05, 0.05, 0.92, 0.27]);
+%         figure4= figure('Position',[280,400,1300,500]);
+%         axes3 = axes('Parent',figure4,'Position',[0.04,0.014,0.9,0.886]);
+%     %    axes3 = axes('Parent',figure3, 'Position', [0.05, 0.05, 0.92, 0.27]);
+% 
+%         hold(axes3,'on');
+%         plot(topo.x,topo.y,'ok','MarkerSize',15);
+%         xlim([min(topo.x)-1, max(topo.x)+1])
+%         ylim([min(topo.y)-2, max(topo.y)+2])
+%         axes3.YDir = 'reverse';
+%         axes3.YTick = [];
+%         axes3.XTick = [];
+%         axes3.XColor = 'none';
+%         axes3.YColor = 'none';
+%         axes3.Units = 'normalized';
+%         text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+%         str_main = sprintf('sub-%s', subj{1});
+%         sgtitle(str_main)
+%         title('\rm ERs differently detected in the 2 stimuli or 10 stimuli protocol')  
 
-        hold(axes3,'on');
-        plot(topo.x,topo.y,'ok','MarkerSize',15);
-        xlim([min(topo.x)-1, max(topo.x)+1])
-        ylim([min(topo.y)-2, max(topo.y)+2])
-        axes3.YDir = 'reverse';
-        axes3.YTick = [];
-        axes3.XTick = [];
-        axes3.XColor = 'none';
-        axes3.YColor = 'none';
-        axes3.Units = 'normalized';
-        text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
-        str_main = sprintf('sub-%s', subj{1});
-        sgtitle(str_main)
-        title('\rm ERs differently detected in the 2 stimuli or 10 stimuli protocol')  
+%         for chan=1:2
+%             plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
+%                 'MarkerFaceColor',[1 0.9 0],'MarkerEdgeColor','k')
+%         end
+%         plot([topo.x(stimnum(1)), topo.x(stimnum(2))], [topo.y(stimnum(1)),topo.y(stimnum(2))], 'k');    
 
-        for chan=1:2
-            plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
-                'MarkerFaceColor',[1 0.9 0],'MarkerEdgeColor','k')
-        end
-        plot([topo.x(stimnum(1)), topo.x(stimnum(2))], [topo.y(stimnum(1)),topo.y(stimnum(2))], 'k');    
-
-
+        
+        % In blue the ERs in 2 and not in 10
         for elek = 1:length(ccep.ch)
             if isnan(ccep.n1_peak_sample(elek,stimp)) && ~isnan(ccep2.n1_peak_sample(elek,stimp)) 
                 plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
@@ -442,7 +442,7 @@ if strcmp(plot_fig,'y')
             end
         end 
 
-
+        % In magenta the ER in 10 and not in 2
          for elek = 1:length(ccep.ch)
             if isnan(ccep2.n1_peak_sample(elek,stimp)) && ~isnan(ccep.n1_peak_sample(elek,stimp)) 
                 plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
