@@ -7,11 +7,11 @@ config_CCEP
 % Adapt for RESP or PRIOS patients!
 myDataPath = setLocalDataPath(cfg);
 
-%% select run
-% choose between available runs
+% select run
 files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg',...
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
+
 % strings = cell(size(names));
 % for n = 1:size(names,2)
 %     strings{n} = names{n}(strfind(names{n},'run-'):strfind(names{n},'run-')+9);
@@ -23,8 +23,6 @@ names = {files.name};
 % if ~contains(cfg.run_label,'run-')
 %    error('"run-" is missing in run_label') 
 % end
-
-clear  names strings stringsz
 
 %% load data
 % Load for both runs
@@ -49,7 +47,8 @@ for i = 1:size(dataBase,2)
 
     elseif ismember(dataBase(i).task_name,'task-SPESprop')
         avg_stim = 2;
-        dataBase_prop = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim);
+        cfg.minstim = 1;
+        dataBase_prop = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim);     
 
     end
 end
@@ -58,43 +57,44 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-% chan = 13; stim=1;
-% figure, 
-% subplot(2,1,1),
-% plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
-% hold on
-% plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
-% hold off
-% title('two stimuli')
-% xlabel('time (s)')
-% xlim([-.2 1.0])
-% 
-%             
-% subplot(2,1,2),
-% plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
-% hold on
-% plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color','b','LineWidth',1)
-% hold on
-% plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
-% hold off
-% title('all stimuli')
-% xlabel('time (s)')
-% xlim([-.2 1.0])
-% 
-% 
-% figure()
-% plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
-% hold on
-% plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color','b','LineWidth',1)
-% hold on
-% plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
-% hold off
-% title('all stimuli')
-% xlabel('time (s)')
-% xlim([-.1 0.1])
+chan = 3; stim=5;
+figure, 
+subplot(2,1,1),
+plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
+hold on
+plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
+hold off
+title('two stimuli')
+xlabel('time (s)')
+xlim([-.2 1.0])
+
+            
+subplot(2,1,2),
+plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
+hold on
+plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color','b','LineWidth',1)
+hold on
+plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
+hold off
+title('all stimuli')
+xlabel('time (s)')
+xlim([-.2 1.0])
+
+
+figure()
+plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
+hold on
+plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color','b','LineWidth',1)
+hold on
+plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
+hold off
+title('all stimuli')
+xlabel('time (s)')
+xlim([-.1 0.1])
 
 
 %% Use the automatic N1 detector to detect ccep 
+% Hiervoor nog checken of de stimsets hetzelfde zijn?
 dataBase_clin = detect_n1peak_ECoG_ccep(dataBase_clin,cfg);
 dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);
 

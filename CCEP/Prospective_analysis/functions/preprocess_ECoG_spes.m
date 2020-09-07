@@ -31,11 +31,24 @@ for subj = 1:size(dataBase,2)
     
     ev_artefact = [];
     for i=1:size(ev_artefact_start,1)
-        ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)]; %#ok<AGROW>
+        ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)]; 
     end
     
     clear i
     
+    %% Remove stimulus pairs with less than minimal interstim time
+    % Stimulations with too little interstimulus time need to be removed
+    % since it cannot be guaranteed that the signal went back to baseline
+    % before the next stimulus was given.
+
+     idx_tbelec = contains(dataBase.tb_events.trial_type,'electrical_stimulation');
+     tb_stim = dataBase.tb_events(idx_tbelec,:);
+     
+     idx_keep5s = [true(1); diff([tb_stim.onset])>=5];
+     dataBase.tb_events = tb_stim(idx_keep5s,:);
+     
+     
+     
     %% unique stimulation pairs
     stimpair = dataBase(subj).tb_events.electrical_stimulation_site(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a')) ;
     
@@ -64,17 +77,15 @@ for subj = 1:size(dataBase,2)
         
     end
     
-    [cc_stimsets_all,~,IC_all] = unique(stimelek,'rows');
-    
-    clear stimcur stimnum stimpair stimchans stimp chan
-    
+    [cc_stimsets_all,~,IC_all] = unique(stimelek,'rows');      
+     
     %% remove stimulus pairs with less than minimum number of stimulations
-    n = histcounts(IC_all,'BinMethod','integers');                      % This must be the same number of stims at every stimpair
+    n = histcounts(IC_all,'BinMethod','integers');                      
     
     if any(diff(n) ~= 0) % if any pair is stimulated a different amount
         
        if n<minstim
-           stimremove = n<minstim;               % remove al stimulation pairs that are stimulated less than 5 times
+           stimremove = n<minstim;               
            % remove stim pairs in both directions
            remove_elec = cc_stimsets_all(stimremove,:);
            remove_stimp = find(cc_stimsets_all(:,2)==remove_elec(:,2) & cc_stimsets_all(:,1)==remove_elec(:,1) |  cc_stimsets_all(:,2)==remove_elec(:,1) &  cc_stimsets_all(:,1)==remove_elec(:,2));
@@ -95,6 +106,9 @@ for subj = 1:size(dataBase,2)
        warning('%s: a stimulation pair is probably stimulated more than others, often no problem \n',dataBase(subj).sub_label)
     end
     
+    
+  
+    %% Number of stimulations per stimulus pair
     % find the amount of time most stimulus pairs are stimulated and set
     % that as maximal number of stimulus pairs
     max_stim = median(n);
@@ -104,7 +118,12 @@ for subj = 1:size(dataBase,2)
     if strcmp(cfg.dir_avg,'yes')      % dir_avg = 'yes' analyse the average signal of both the positive and negative stimuli
         
         sort_cc_stimsets = sort(cc_stimsets_all,2);
-        [cc_stimsets_avg,~,IC_avg] = unique(sort_cc_stimsets,'rows');
+        [cc_stimsets_avg, both_dir, IC_avg] = unique(sort_cc_stimsets,'rows');
+        
+        % Check that stimulation pairs are stimulated in both directions,
+        % when this is not the case, remove the stimpair when averaging.
+        both_dir = (diff(both_dir)>1);              % Simulation pairs which are stimulated in both directions are assigned 1
+        cc_stimsets_avg = cc_stimsets_avg(both_dir,:);
         
     elseif strcmp(cfg.dir_avg,'no')         % dir_avg = 'no' to analyse all signals separately
         
@@ -196,6 +215,7 @@ for subj = 1:size(dataBase,2)
         avg_stim = maxstim;
     end
     
+    %% TOT HIER GEKOMEN IN DE ANALYSE WAARBIJ IK STIMPAIREN WEGHAAL DIE NIET IN BEIDE RICHTINGEN GESTIMULEERD ZIJN.
     % preallocation
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
     cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples[
