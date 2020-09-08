@@ -5,6 +5,7 @@ clear;
 ccep_allPat.name = {[input('Patient number type (RESPXXXX or PRIOSXX): ','s')]};
 
 % set paths
+ccep_allPat.mode = 'retro';
 myDataPath = setLocalDataPath(ccep_allPat);
 
 %% Load all ccep files in the folder CCEP_files_allPat

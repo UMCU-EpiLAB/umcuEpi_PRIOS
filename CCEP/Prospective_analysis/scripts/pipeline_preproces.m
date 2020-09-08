@@ -4,7 +4,8 @@ clear;
 config_CCEP
 
 %% set paths
-% Adapt for RESP or PRIOS patients!
+% PRIOS patients
+cfg.mode = 'pros';
 myDataPath = setLocalDataPath(cfg);
 
 % select run
@@ -43,6 +44,7 @@ for i = 1:size(dataBase,2)
 
     if ismember(dataBase(i).task_name,'task-SPESclin')
        avg_stim_clin = 5;
+       cfg.minstim = 5;
        dataBase_clin = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim_clin);
 
     elseif ismember(dataBase(i).task_name,'task-SPESprop')
@@ -94,6 +96,7 @@ xlim([-.1 0.1])
 
 
 %% Use the automatic N1 detector to detect ccep 
+% NU BEN IK TOT HIER GEKOMEN 
 % Hiervoor nog checken of de stimsets hetzelfde zijn?
 dataBase_clin = detect_n1peak_ECoG_ccep(dataBase_clin,cfg);
 dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);

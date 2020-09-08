@@ -44,7 +44,7 @@ for subj = 1:size(dataBase,2)
      idx_tbelec = contains(dataBase.tb_events.trial_type,'electrical_stimulation');
      tb_stim = dataBase.tb_events(idx_tbelec,:);
      
-     idx_keep5s = [true(1); diff([tb_stim.onset])>=5];
+     idx_keep5s = [true(1); diff([tb_stim.onset])>=4.9];
      dataBase.tb_events = tb_stim(idx_keep5s,:);
      
      
@@ -122,8 +122,19 @@ for subj = 1:size(dataBase,2)
         
         % Check that stimulation pairs are stimulated in both directions,
         % when this is not the case, remove the stimpair when averaging.
-        both_dir = (diff(both_dir)>1);              % Simulation pairs which are stimulated in both directions are assigned 1
+        both_dir = [true(1); diff(both_dir)>1];                          % Simulation pairs which are stimulated in both directions are assigned 1
         cc_stimsets_avg = cc_stimsets_avg(both_dir,:);
+        
+        %  IC_avg bevat nu ook nog regels met enkele richting stimulaties.
+         [x,~,~] = unique(IC_avg,'stable');
+         [Ncount,~] = find(histcounts(IC_avg,x)==1);             % mark the rows in which a unique stimulation pair occurs.
+         
+         remove_rows = zeros(length(Ncount),1);
+         for i = 1:length(Ncount)
+           remove_rows(i,:) = find(IC_avg==Ncount(i,:));
+         end
+         IC_avg(remove_rows) =[];
+        
         
     elseif strcmp(cfg.dir_avg,'no')         % dir_avg = 'no' to analyse all signals separately
         
@@ -131,7 +142,6 @@ for subj = 1:size(dataBase,2)
         IC_avg = IC_all;
     end
     
-    clear stimremove remove_elec remove_stimp remove sort_cc_stimsets
     
     %% determine stimulation pair names
     % pre-allocation
@@ -165,15 +175,14 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).max_stim = max_stim;
     
   
-    clear stimp chan
-    
+   
     %% select epochs
     t = round(epoch_length*dataBase(subj).ccep_header.Fs);
     tt = (1:epoch_length*dataBase(subj).ccep_header.Fs)/dataBase(subj).ccep_header.Fs - epoch_prestim;
     
     % allocation
     cc_epoch_sorted_all = NaN(size(dataBase(subj).data,1),dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t);
-    tt_epoch_sorted_all = NaN(dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t); % samplenumbers for each epoch
+    tt_epoch_sorted_all = NaN(dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t); % samplenumbers for each epoch % Dit is nu een 2xstimpairXtt matrix
     
     for elec = 1:size(dataBase(subj).data,1)                    % for all channels
         for ll = 1:size(dataBase(subj).cc_stimsets_all,1)       % for all epochs with > minimum number of stimuli (minstim)
@@ -215,23 +224,23 @@ for subj = 1:size(dataBase,2)
         avg_stim = maxstim;
     end
     
-    %% TOT HIER GEKOMEN IN DE ANALYSE WAARBIJ IK STIMPAIREN WEGHAAL DIE NIET IN BEIDE RICHTINGEN GESTIMULEERD ZIJN.
     % preallocation
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
-    cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples[
+    cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==2),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples[
     
     for ll = 1:max(IC_avg)
-        
-        selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
-        selection_avg =  squeeze(nanmean(selection,2));
-        
-        while size(size(selection_avg),2) >2
-            selection_avg =  squeeze(nanmean(selection_avg,2));
+        if sum(IC_avg==ll)>1 
+            
+            selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
+            selection_avg =  squeeze(nanmean(selection,2));
+
+            while size(size(selection_avg),2) >2
+                selection_avg =  squeeze(nanmean(selection_avg,2));
+            end
+
+            cc_epoch_sorted_avg(:,ll,:) = selection_avg;
+            cc_epoch_sorted_select(:,ll,:,:) = reshape(selection,size(selection,1),size(selection,2)*size(selection,3),size(selection,4));
         end
-               
-        cc_epoch_sorted_avg(:,ll,:) = selection_avg;
-        cc_epoch_sorted_select(:,ll,:,:) = reshape(selection,size(selection,1),size(selection,2)*size(selection,3),size(selection,4));
-           
     end
     
     dataBase(subj).cc_epoch_sorted = cc_epoch_sorted_all;

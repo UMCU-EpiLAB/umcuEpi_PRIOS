@@ -5,6 +5,7 @@ clear
 config_CCEP
 
 %% set paths
+cfg.mode = 'pros';
 myDataPath = setLocalDataPath(cfg);
 
 %% select run

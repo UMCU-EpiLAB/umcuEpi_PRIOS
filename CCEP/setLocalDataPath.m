@@ -31,13 +31,29 @@ if isempty(varargin)
 elseif ~isempty(varargin)
     % add path to data
     if isstruct(varargin{1})
-        localDataPath = personalDataPath(varargin{1});
+          
+        if strcmp(varargin{1}.mode,'retro')
+                localDataPath = personalDataPath_retro(varargin{1});
+                % add path to functions
+                addpath(genpath('/home/sifra/git_repositories/CCEP_NMM_SB/CCEP/Retrospective_analysis'));
+                
+        elseif strcmp(varargin{1}.mode,'pros')
+                localDataPath = personalDataPath_pros(varargin{1});
+                addpath(genpath('/home/sifra/git_repositories/CCEP_NMM_SB/CCEP/Prospective_analysis'));
+        end
+        
     else
         if varargin{1}==1 && exist('personalDataPath','file')
             
-            localDataPath = personalDataPath();
+            if strcmp(varargin{1}.mode,'retro')
+                        localDataPath = personalDataPath_retro(varargin{1});
+
+            elseif strcmp(varargin{1}.mode,'pros')
+                        localDataPath = personalDataPath_pros(varargin{1});
+
+            end
             
-        elseif varargin{1}==1 && ~exist('personalDataPath','file')
+    elseif varargin{1}==1 && ~exist('personalDataPath','file')
             
             sprintf(['add personalDataPath function to add your localDataPath:\n'...
                 '\n'...
@@ -49,10 +65,14 @@ elseif ~isempty(varargin)
             return
         end
     end
-    % add path to functions
-    rootPath = which('setLocalDataPath');
-    ccepRepoPath = fileparts(rootPath);
-    addpath(genpath(ccepRepoPath));
+    
+%     % add path to functions
+%     rootPath = which('setLocalDataPath');
+%     ccepRepoPath = fileparts(rootPath);
+%     addpath(genpath(ccepRepoPath));
+   
+    
+        
     
 end
 

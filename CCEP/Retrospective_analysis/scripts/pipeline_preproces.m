@@ -5,6 +5,7 @@ config_CCEP
 
 %% set paths
 % Adapt for RESP or PRIOS patients!
+cfg.mode = 'retro';
 myDataPath = setLocalDataPath(cfg);
 
 %% select run
