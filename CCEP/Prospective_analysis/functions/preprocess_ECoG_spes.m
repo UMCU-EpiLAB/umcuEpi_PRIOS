@@ -113,29 +113,26 @@ for subj = 1:size(dataBase,2)
     % that as maximal number of stimulus pairs
     max_stim = median(n);
     
-    % differentiate between cc_stimsets with all stimulus pairs, and
-    % cc_stimsets_dir that averages negative and positive stimuli
     if strcmp(cfg.dir_avg,'yes')      % dir_avg = 'yes' analyse the average signal of both the positive and negative stimuli
         
         sort_cc_stimsets = sort(cc_stimsets_all,2);
-        [cc_stimsets_avg, both_dir, IC_avg] = unique(sort_cc_stimsets,'rows');
+        [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
         
-        % Check that stimulation pairs are stimulated in both directions,
-        % when this is not the case, remove the stimpair when averaging.
-        both_dir = [true(1); diff(both_dir)>1];                          % Simulation pairs which are stimulated in both directions are assigned 1
-        cc_stimsets_avg = cc_stimsets_avg(both_dir,:);
-        
-        %  IC_avg bevat nu ook nog regels met enkele richting stimulaties.
-         [x,~,~] = unique(IC_avg,'stable');
-         [Ncount,~] = find(histcounts(IC_avg,x)==1);             % mark the rows in which a unique stimulation pair occurs.
-         
-         remove_rows = zeros(length(Ncount),1);
-         for i = 1:length(Ncount)
-           remove_rows(i,:) = find(IC_avg==Ncount(i,:));
+         if 2*length(cc_stimsets_avg) ~= length(cc_stimsets_all)                % When not all stimulation pairs are stimulated in both directions
+             Ncount = find(histcounts(IC_avg,length(cc_stimsets_avg))~=2);      % stimpairs which are stimulated in one direction            
+             
+             % Allocation
+             remove_rows = zeros(length(Ncount),1);
+             for i = 1:length(Ncount)
+               remove_rows(i,:) = find(IC_avg==Ncount(i,:));                    % Row in which the 'single' stimpair is located
+             end
+             
+              IC_avg(remove_rows) =[]; 
+              cc_stimsets_avg(Ncount,:) =[];
+              cc_stimsets_all(remove_rows,:) = [];   
+              sort_cc_stimsets(remove_rows,:) = [];
          end
-         IC_avg(remove_rows) =[];
-        
-        
+         
     elseif strcmp(cfg.dir_avg,'no')         % dir_avg = 'no' to analyse all signals separately
         
         cc_stimsets_avg = cc_stimsets_all;

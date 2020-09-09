@@ -35,7 +35,6 @@ for i = 1:size(dataBase,2)
     end
 end
 
-%dataBase_clin = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
@@ -73,6 +72,19 @@ hold off
 title('all stimuli')
 xlabel('time (s)')
 xlim([-.1 0.1])
+
+
+% Check whether SPESclin and SPESprop contain the same stimulation pairs
+if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)                    % if SPESclin contains more stimpairs
+    Ncount = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0); 
+    names = dataBase_clin.stimpnames_all(Ncount);
+    warning('%s: are only stimulated in SPESclin and not in SPESprop \n',[names{:}]);
+
+elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_all)
+    Ncount = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0);     % if SPESprop contains more stimpairs
+    names = dataBase_prop.stimpnames_all(Ncount);
+    warning('%s: are only stimulated in SPESprop and not in SPESclin \n',[names{:}]);
+end
 
 
 %% Use the automatic N1 detector to detect ccep 
