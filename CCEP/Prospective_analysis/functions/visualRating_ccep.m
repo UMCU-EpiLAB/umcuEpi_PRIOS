@@ -8,7 +8,6 @@ function dataBase = visualRating_ccep(dataBase)
 % incorrect: n or enter
 
 close all
-clc
 
 tt = dataBase.tt;
 
@@ -18,16 +17,9 @@ n1_peak_sample = dataBase.ccep.n1_peak_sample;
 n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
 n1_peak_sample_check = NaN(size(n1_peak_sample));
 
-
-% [indivstimp,~,stimprow] = unique(sort(dataBase.cc_stimsets_all,2),'rows');
-
-
 for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
-%     Stimpnm = stimchans{stimp};     
-%     stimpnm = stimprow == stimp;
         
     for chan =1 :size(dataBase.cc_epoch_sorted_avg,1)
-%         Channm = dataBase.ch{chan};
         
         if ~isnan(dataBase.ccep.n1_peak_sample(chan,stimp))
             % figure with left the epoch, and right zoomed in
@@ -51,7 +43,7 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             ylim([-2000 2000])
             xlabel('time(s)')
             ylabel('amplitude(uV)')
-            title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},dataBase.stimpnames_avg{stimp,1}))
+            title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},dataBase.stimpnames_avg{stimp}))
             
             subplot(1,2,2)
             plot(tt,this_plot,':r','linewidth',1);

@@ -3,8 +3,7 @@ clear;
 %% Choose patient
 config_CCEP
 
-%% set paths
-% PRIOS patients
+% set paths
 cfg.mode = 'pros';
 myDataPath = setLocalDataPath(cfg);
 
@@ -13,31 +12,12 @@ files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg'
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
 
-% strings = cell(size(names));
-% for n = 1:size(names,2)
-%     strings{n} = names{n}(strfind(names{n},'run-'):strfind(names{n},'run-')+9);
-% end
-% stringsz = [repmat('%s, ',1,size(strings,2)-1),'%s'];
-% 
-% cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')}; % Chosen run is in cfg.run_label
-% 
-% if ~contains(cfg.run_label,'run-')
-%    error('"run-" is missing in run_label') 
-% end
 
 %% load data
 % Load for both runs
 dataBase = load_ECoGdata(cfg,myDataPath,files);
 
 %% CCEP for SPES-clin stimulations
-
-% avg_stim : write down the number of stimuli you want to average
-
-% % save only first stimulus in both directions
-% avg_stim = 1;
-% dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
-% tt = dataBase2stim.tt;
-
 % save all stimuli of clinical SPES
 for i = 1:size(dataBase,2)
     dataBase(i).task_name = dataBase(i).dataName(strfind(dataBase(i).dataName,'task-'):strfind(dataBase(i).dataName,'_run')-1); 
