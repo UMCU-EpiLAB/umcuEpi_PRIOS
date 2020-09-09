@@ -69,7 +69,7 @@ close all;
 
 agreement_parameter = agreement_parameters(agreement, ccep2, ccep10, myDataPath);
 
-statistics = statistical_agreement(myDataPath, agreement_parameter,ccep10);
+statistics = statistical_agreement(agreement_parameter,ccep10);
 
 %% load electrodes positions (xlsx/electrodes.tsv)
 % database (ccep10) is only used for channels and stimpairs and these are
