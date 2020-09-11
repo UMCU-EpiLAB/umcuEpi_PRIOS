@@ -18,7 +18,7 @@ function localDataPath = setLocalDataPath(varargin)
 % dhermes, 2020, Multimodal Neuroimaging Lab
 
 if isempty(varargin)
-
+    
     rootPath = which('setLocalDataPath');
     ccepRepoPath = fileparts(rootPath);
     
@@ -27,33 +27,45 @@ if isempty(varargin)
     
     % add localDataPath default
     localDataPath = fullfile(ccepRepoPath,'data');
-
+    
 elseif ~isempty(varargin)
     % add path to data
     if isstruct(varargin{1})
-          
+        
         if strcmp(varargin{1}.mode,'retro')
-                localDataPath = personalDataPath_retro(varargin{1});
-                % add path to functions
-                addpath(genpath('/home/sifra/git_repositories/CCEP_NMM_SB/CCEP/Retrospective_analysis'));
-                
+            localDataPath = personalDataPath_retro(varargin{1});
+            
+            rootPath = which('setLocalDataPath');
+            RepoPath = fileparts(rootPath);
+                        
+            % add path to functions
+            addpath(genpath([RepoPath,'/CCEP/Retrospective_analysis']));
+            
         elseif strcmp(varargin{1}.mode,'pros')
-                localDataPath = personalDataPath_pros(varargin{1});
-                addpath(genpath('/home/sifra/git_repositories/CCEP_NMM_SB/CCEP/Prospective_analysis'));
+            localDataPath = personalDataPath_pros(varargin{1});
+            
+            rootPath = which('setLocalDataPath');
+            RepoPath = fileparts(rootPath);
+            
+            % add path to functions
+            addpath(genpath(RepoPath));
+            
+            % add path to functions
+            addpath(genpath([RepoPath,'/CCEP/Prospective_analysis']));
         end
         
     else
         if varargin{1}==1 && exist('personalDataPath','file')
             
             if strcmp(varargin{1}.mode,'retro')
-                        localDataPath = personalDataPath_retro(varargin{1});
-
+                localDataPath = personalDataPath_retro(varargin{1});
+                
             elseif strcmp(varargin{1}.mode,'pros')
-                        localDataPath = personalDataPath_pros(varargin{1});
-
+                localDataPath = personalDataPath_pros(varargin{1});
+                
             end
             
-    elseif varargin{1}==1 && ~exist('personalDataPath','file')
+        elseif varargin{1}==1 && ~exist('personalDataPath','file')
             
             sprintf(['add personalDataPath function to add your localDataPath:\n'...
                 '\n'...
@@ -64,16 +76,7 @@ elseif ~isempty(varargin)
                 'this function is ignored in .gitignore'])
             return
         end
-    end
-    
-%     % add path to functions
-%     rootPath = which('setLocalDataPath');
-%     ccepRepoPath = fileparts(rootPath);
-%     addpath(genpath(ccepRepoPath));
-   
-    
-        
-    
+    end 
 end
 
 return

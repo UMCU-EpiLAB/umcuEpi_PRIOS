@@ -25,7 +25,7 @@ normplot(ER_stimp2)
 if NorDis10 == 1 && NorDis2 ==1
     [p,h,stats] = ranksum(ER_stimp10, ER_stimp2) ;           % tests the null hypothesis that data in x and y are samples from continuous distributions with equal medians
 else
-    fprintf('The detected ERs per stimulation pair is normally distributed, Paired T-test is used')
+    fprintf('The detected ERs per stimulation pair is normally distributed, Paired T-test is used.\n')
     [h,p,ci,stats] = ttest(ER_stimp10, ER_stimp2);          % alpha default = 0.05
      
 end
@@ -342,7 +342,7 @@ end
 
 [RHO_BC, PVAL_BC] = corr(rank_sort_BC10 , rank_sort_BC2 ,'Type','Spearman');
 
-fprintf('Spearman Corr between outdegree per electrode of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_BC, RHO_BC, SubjectName{1});
+fprintf('Spearman Corr between outdegree per electrode of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n\n\n', PVAL_BC, RHO_BC, SubjectName{1});
 
 % Write to variable
 statistics.p_BC = PVAL_BC;
