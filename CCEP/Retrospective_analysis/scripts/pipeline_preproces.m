@@ -45,7 +45,7 @@ avg_stim = 5;
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 13; stim=1;
+chan = 11; stim=3;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -78,7 +78,10 @@ plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth
 hold off
 title('all stimuli')
 xlabel('time (s)')
-xlim([-.1 0.1])
+xlim([-0.1 0.2])
+ylim([-750 750])
+xlabel('Time (s)')
+ylabel('Voltage (uV)')
 
 
 %% Use the automatic N1 detector to detect ccep 
@@ -90,28 +93,29 @@ dataBaseallstim.NmbrofStims = '10_stims';
 disp('Detection of ERs is completed')
 
 %% Visually check detected cceps
-VisCheck = input('Do you want to visually check the detected CCEPs? [y/n] ','s');
-
-if strcmp(VisCheck,'y')
-    dataBaseallstim = visualRating_ccep(dataBaseallstim);
-    dataBase2stim = visualRating_ccep(dataBase2stim);
-
-    % Save the values for the agreement per run (2 and 10 stims)
-    targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
-
-    checked_all = [dataBaseallstim.sub_label, '_',dataBase(1).run_label, '_CCEP_', dataBaseallstim.NmbrofStims ,'_checked.mat'];
-    save([targetFolder,checked_all], 'ccep')
-
-    checked_2 = [dataBase2stim.sub_label, '_', dataBase(1).run_label, '_CCEP_', dataBase2stim.NmbrofStims ,'_checked.mat'];
-    save([targetFolder,checked_2], 'ccep')
-    fprintf('Checked files are saved in %s \n',targetFolder);
-
-    % Perform the determine agreement again.
-    [agreement_check] = determine_agreement_checked(myDataPath,cfg);
-
-    fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
-    agreement_check.OA, agreement_check.PA, agreement_check.NA)
-end
+% DIT IS NIET RELEVANT VOOR DE RETROSPECTIEVE ANALYSE
+% VisCheck = input('Do you want to visually check the detected CCEPs? [y/n] ','s');
+% 
+% if strcmp(VisCheck,'y')
+%     dataBaseallstim = visualRating_ccep(dataBaseallstim);
+%     dataBase2stim = visualRating_ccep(dataBase2stim);
+% 
+%     % Save the values for the agreement per run (2 and 10 stims)
+%     targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
+% 
+%     checked_all = [dataBaseallstim.sub_label, '_',dataBase(1).run_label, '_CCEP_', dataBaseallstim.NmbrofStims ,'_checked.mat'];
+%     save([targetFolder,checked_all], 'ccep')
+% 
+%     checked_2 = [dataBase2stim.sub_label, '_', dataBase(1).run_label, '_CCEP_', dataBase2stim.NmbrofStims ,'_checked.mat'];
+%     save([targetFolder,checked_2], 'ccep')
+%     fprintf('Checked files are saved in %s \n',targetFolder);
+% 
+%     % Perform the determine agreement again.
+%     [agreement_check] = determine_agreement_checked(myDataPath,cfg);
+% 
+%     fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
+%     agreement_check.OA, agreement_check.PA, agreement_check.NA)
+% end
 
 %% save ccep
 savefiles = input('Do you want to save the ccep-structures? [y/n] ','s');

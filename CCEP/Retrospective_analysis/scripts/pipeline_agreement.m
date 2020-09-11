@@ -49,8 +49,8 @@ LocOnes = find_ones(ccep10, agreement.agreement_run);
  
 
 %% Plot all 10 stimuli and the average for the 10 stims and the 2 stims
-% This does not work without epoch_sorted information, though, matlab
-% cannot save since it is to big.
+% This does not work without epoch_sorted information
+% ZIE NOTITIE IN PIPELINE_PREPROCES (SAVE CCEPS)
 plot_fig = input('Do you want plot the 10 stimuli and the average signals? [y/n] ','s');
 
 if strcmp(plot_fig,'y')
@@ -69,7 +69,7 @@ close all;
 
 agreement_parameter = agreement_parameters(agreement, ccep2, ccep10, myDataPath);
 
-statistics = statistical_agreement(agreement_parameter,ccep10);
+statistics = statistical_agreement(myDataPath, agreement_parameter,ccep10);
 
 %% load electrodes positions (xlsx/electrodes.tsv)
 % database (ccep10) is only used for channels and stimpairs and these are

@@ -186,10 +186,7 @@ end
 saveas(gca,[path,outlabel],'jpg')
 
 
-%%
-   
-
-% Concatenate/merge electrodes of the stimulation pair to be able to sort them
+%% Concatenate/merge electrodes of the stimulation pair to be able to sort them
 for i = 1: length(sort_rank10)
     stimpair_concat(i,:) = sscanf(sprintf('%d%d,',[sort_rank10{i, 1}(1).';sort_rank10{i, 1}(2)]),'%d,'); %horzcat(sort_rank10{i, 1}(1),sort_rank10{i, 1}(2));
     stimpair_concat2(i,:) = sscanf(sprintf('%d%d,',[sort_rank2{i, 1}(1).';sort_rank2{i, 1}(2)]),'%d,'); %horzcat(sort_rank2{i, 1}(1),sort_rank2{i, 1}(2));

@@ -57,7 +57,6 @@ function write2excelTables(dataBase, myDataPath, agreement_parameter)
    
     sub_name = [extractBetween(dataBase.dataName,'ieeg/','_ses')];
     
-   
     
     % Write all to one table and save in folders
     targetFolder = [myDataPath.CCEPpath, 'Agreement_par_tables/'];

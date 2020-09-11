@@ -144,18 +144,7 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).stimpnames_all = cc_stimpnames_all;
     dataBase(subj).stimpnames_avg = cc_stimpnames_avg;
     dataBase(subj).max_stim = max_stim;
-    
-    % CHECK: volgens mij doet dit onderstaande stukje niets... dus even
-    % uitgezet en een check ingebouwd zodat we zien wanneer het wel nodig
-    % is..
-    if ~isempty(find(n ~= max_stim, 1))
-        warning('we need commented code (line 143-146) in preprocess_ECoG_spes.m')
-    end
-    %     stimdif = find(n ~= max_stim);
-    %     for stimp = 1:size(stimdif,2)
-    %         [cc_stimchans{stimdif(stimp),1} '-' cc_stimchans{stimdif(stimp),2}] %#ok<NOPRT>
-    %     end
-    
+       
     clear stimp chan
     
     %% select epochs
