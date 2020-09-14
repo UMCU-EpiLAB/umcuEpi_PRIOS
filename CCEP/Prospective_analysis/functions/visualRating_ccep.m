@@ -14,8 +14,12 @@ tt = dataBase.tt;
 n1_peak_amplitude = dataBase.ccep.n1_peak_amplitude;
 n1_peak_sample = dataBase.ccep.n1_peak_sample;
 
+% Preallocation
 n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
 n1_peak_sample_check = NaN(size(n1_peak_sample));
+
+n2_latency = NaN(size(n1_peak_amplitude));
+n2_amplitude = NaN(size(n1_peak_sample));
 
 for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
         
@@ -71,6 +75,24 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
                     % draw correct N1
                     cp = get(gca,'CurrentPoint');
                     
+                    
+                      % If thre are multiple marks placed, than the one with the
+                        % highest x value is the N2, the Y-value for this one is the amplitude.
+                        N2 =datacursormode(1);
+                        N2_1 = getCursorInfo(N2);
+                        if size(N2_1,2)==2        % If there are more than 1 points marked
+                          if N2_1(2).Position(:,1) > N2_1(1).Position(:,1)              
+                            n2_latency(chan,stimp) = N2_1(2).Position(:,1);             % x-value is latency in ms
+                            n2_amplitude(chan,stimp) = N2_1(2).Position(:,2);           % y-value is amplitude
+                              
+                          elseif N2_1(1).Position(:,1) > N2_1(2).Position(:,1)
+                            n2_latency(chan,stimp) = N2_1(1).Position(:,1);
+                            n2_latency(chan,stimp) = N2_1(1).Position(:,1);
+                          end
+                        end
+                
+                        
+                        
                     % find sample number closest to the selected point
                     [~,sampnum] = min(abs(tt-cp(1,1)));
                     
@@ -108,4 +130,6 @@ end
 
 dataBase.ccep.n1_peak_amplitude_check = n1_peak_amplitude_check;
 dataBase.ccep.n1_peak_sample_check = n1_peak_sample_check;
+dataBase.ccep.n2_amplitude = n2_amplitude;
+dataBase.ccep.n2_latency = n2_latency;
 

@@ -38,7 +38,7 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 3; stim=5;
+chan = 3; stim=1;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -98,7 +98,7 @@ disp('Detection of ERs is completed')
 VisCheck = input('Do you want to visually check the detected CCEPs? [y/n] ','s');
 
 if strcmp(VisCheck,'y')
-
+    dataBase_clin = visualRating_ccep(dataBase_clin);
     dataBase_prop = visualRating_ccep(dataBase_prop);
 
     % Save the values for the agreement per run (2 and 10 stims)
@@ -124,17 +124,18 @@ end
 
 
 %% Visually check ALL signals to test the detector
-VisCheck_AllSig = input('Do you want to visually check ALL SIGNALS [y/n] ','s');
-
+VisCheck_AllSig = input('Do you want to visually check ALL PROPOFOL SIGNALS [y/n] ','s');
+% PROBEER OM TE VOORKOMEN DAT SIGNALEN DIE EEN ARTEFACT BEVATTEN GEPLOT
+% WORDEN. 
 if strcmp(VisCheck_AllSig,'y')
-    dataBase_clin = plot_all_signals(dataBase_clin);
+    %dataBase_clin = plot_all_signals(dataBase_clin);
     dataBase_prop = plot_all_signals(dataBase_prop);
 
     % Save the values for the agreement per run (2 and 10 stims)
     targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
 
-    checked_allSig_clin = [dataBase_clin.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_clin_allSig_checked.mat'];
-    save([targetFolder,checked_allSig_clin], 'ccep')
+    %checked_allSig_clin = [dataBase_clin.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_clin_allSig_checked.mat'];
+    %save([targetFolder,checked_allSig_clin], 'ccep')
     
     checked_allSig_prop = [checked_prop.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_prop_allSig_checked.mat'];
     save([targetFolder,checked_allSig_prop], 'ccep')

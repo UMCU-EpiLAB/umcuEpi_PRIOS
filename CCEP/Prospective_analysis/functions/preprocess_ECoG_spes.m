@@ -31,7 +31,7 @@ for subj = 1:size(dataBase,2)
     
     ev_artefact = [];
     for i=1:size(ev_artefact_start,1)
-        ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)]; 
+        dataBase(subj).ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)]; 
     end
     
     clear i
