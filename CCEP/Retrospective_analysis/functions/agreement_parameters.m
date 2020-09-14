@@ -87,7 +87,7 @@ ERs_elec2 = sum(wantedAmat2,1);
     
   agreement_parameter.indegreeN_10 = indegreenorm10;
   agreement_parameter.outdegreeN_10 = outdegreenorm10;
-  agreement_parameter.BCN_all_10 = BCnorm10;
+  agreement_parameter.BCN_10 = BCnorm10;
   agreement_parameter.ERs_stimp10 = ERs_stimp10;
   agreement_parameter.ERs_elec10 = ERs_elec10;
   

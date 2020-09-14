@@ -106,11 +106,15 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).agreement_parameter = agreement_parameters(dataBase(subj).agreement, ...
         dataBase(subj).ccep2, dataBase(subj).ccep10, myDataPath);
     
-    statistics = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep10);
+    dataBase(subj).statistics = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep10);
 end
 
 %% load electrodes positions (xlsx/electrodes.tsv)
 % database (ccep10) is only used for channels and stimpairs and these are
 % equal for 2 and 10, so does not matter which database is used.
-visualise_gridstructure(myDataPath, ccep10, ccep2, agreement_parameter);
+plot_fig = 'n';
+close all;
 
+for subj = 1:size(dataBase,2)
+    visualise_gridstructure(myDataPath, dataBase(subj).ccep10, dataBase(subj).ccep2, dataBase(subj).agreement_parameter,plot_fig);
+end
