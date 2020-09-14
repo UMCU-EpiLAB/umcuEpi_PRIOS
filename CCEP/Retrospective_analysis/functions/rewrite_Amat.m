@@ -4,7 +4,7 @@ stim1 = stimsets(:,1);
 stim2 = stimsets(:,2);
 ERs_col = Amat';                                                      % Electrodes in columns, stimpairs in rows
 
-elec_mat = zeros(size(ERs_col,2),size(ERs_col,2)); % adjacency matrix with electrodes to electrodes
+elec_mat = zeros(size(ERs_col,2),size(ERs_col,2));                    % adjacency matrix with electrodes to electrodes
 for chan = 1:size(ERs_col,2)
 
     if ismember(chan,stim1,'rows') &&  ismember(chan,stim2,'rows')              % True --> electrode is part of two stimpairs
