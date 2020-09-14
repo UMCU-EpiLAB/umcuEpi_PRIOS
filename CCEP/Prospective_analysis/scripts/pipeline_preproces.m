@@ -88,8 +88,6 @@ end
 
 
 %% Use the automatic N1 detector to detect ccep 
-% NU BEN IK TOT HIER GEKOMEN 
-% Hiervoor nog checken of de stimsets hetzelfde zijn?
 dataBase_clin = detect_n1peak_ECoG_ccep(dataBase_clin,cfg);
 dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);
 
@@ -100,7 +98,7 @@ disp('Detection of ERs is completed')
 VisCheck = input('Do you want to visually check the detected CCEPs? [y/n] ','s');
 
 if strcmp(VisCheck,'y')
-    dataBase_clin = visualRating_ccep(dataBase_clin);
+
     dataBase_prop = visualRating_ccep(dataBase_prop);
 
     % Save the values for the agreement per run (2 and 10 stims)
@@ -121,6 +119,34 @@ if strcmp(VisCheck,'y')
 
     fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
     agreement_check.OA, agreement_check.PA, agreement_check.NA)
+end
+
+
+
+%% Visually check ALL signals to test the detector
+VisCheck_AllSig = input('Do you want to visually check ALL SIGNALS [y/n] ','s');
+
+if strcmp(VisCheck_AllSig,'y')
+    dataBase_clin = plot_all_signals(dataBase_clin);
+    dataBase_prop = plot_all_signals(dataBase_prop);
+
+    % Save the values for the agreement per run (2 and 10 stims)
+    targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
+
+    checked_allSig_clin = [dataBase_clin.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_clin_allSig_checked.mat'];
+    save([targetFolder,checked_allSig_clin], 'ccep')
+    
+    checked_allSig_prop = [checked_prop.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_prop_allSig_checked.mat'];
+    save([targetFolder,checked_allSig_prop], 'ccep')
+
+    fprintf('Checked files are saved in %s \n',targetFolder);
+
+    % Perform the determine agreement again.
+    %[agreement_check] = determine_agreement_checked(myDataPath,cfg);   %
+    %dit staat nog ingesteld op de ccep_checked van de checked detected ERs
+
+   % fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
+   % agreement_check.OA, agreement_check.PA, agreement_check.NA)
 end
 
 %% save ccep

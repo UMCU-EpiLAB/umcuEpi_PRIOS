@@ -24,6 +24,7 @@ clear files names strings stringsz
 % Does not matter whether you take the 10 stims or the 2 stims
 % Only the channels and stimpairs are used, which should be similar in both
 % stimulation protocols.
+% DIT GELDT ALLEEN VO0R 2/10 NIET VOOR CLIN/PROP
 
 files = dir(fullfile(myDataPath.CCEPpath,cfg.sub_labels{:},cfg.ses_label,cfg.run_label{1}));
 n=1; 
