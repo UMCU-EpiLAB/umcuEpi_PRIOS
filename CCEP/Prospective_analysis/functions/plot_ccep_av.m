@@ -1,4 +1,4 @@
-function plot_ccep_av(dataBase,cfg)
+function plot_ccep_av(dataBase,cfg,myDataPath,stimchans)
 %
 % function ccep_plot_av(average_ccep,tt,n1_peak_sample, n1_peak_amplitude,average_ccep_names,...
 %     channel_names,good_channels,myDataPath,bids_sub,bids_ses,bids_task,bids_runs,params)
@@ -39,9 +39,10 @@ elnrs_plot = 1:size(dataBase.ch,1);
 
 for ll = 1:length(elnrs_plot)                   % For the number of electrodes
     el_plot = elnrs_plot(ll);
+    
     figure('Position',[0 0 700 700]),hold on
-    figure, hold on
-    for kk = 1:length(dataBase.cc_stimchans)    % For the number of stimulation pairs
+
+    for kk = 1:size(dataBase.cc_epoch_sorted_avg,2)    % For the number of stimulation pairs
         this_ccep_plot = squeeze(dataBase.cc_epoch_sorted_avg(el_plot,kk,:));
         this_ccep_plot(tt>-0.010 & tt<0.010) = NaN;
         
@@ -73,7 +74,7 @@ for ll = 1:length(elnrs_plot)                   % For the number of electrodes
 
         % filename
         figureName = fullfile(myDataPath.CCEPpath,'av_ccep_figures',dataBase.sub_label,dataBase.ses_label,dataBase.run_label,...
-            [dataBase.sub_label '_' dataBase.ses_label '_' dataBase.task_label '_' dataBase.run_label '_incomingCCEP_el' dataBase.ch{el_plot}]);
+            [dataBase.sub_label '_CCEP_el' dataBase.ch{el_plot}]);
         set(gcf,'PaperPositionMode','auto')
         print('-dpng','-r300',figureName)
         print('-depsc','-r300',figureName)

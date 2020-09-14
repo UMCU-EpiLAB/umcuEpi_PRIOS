@@ -31,14 +31,14 @@ function [ uout,xout,xextout,yout,yextout] = sim_NM_network(Ttot,deltat,Nout,NM_
 %   NMs directly when calculating the potential of the populations.
 %   yout: (4*Nnodes) x NTSTout matrix containing derivatives of PSPs. The
 %   order of the elements is equal to xout.
-%   yextout: Nnodes x NTSTout matrix containing the derivatives of xext.
+%   yextout: Nnodes x NTSTout matrix containing the derivatives of xextout.
 %
 % This code is part of the simulation code of the manuscript 'Pathological responses to single pulse electrical stimuli in epilepsy: the role of feedforward inhibition'
 % (c) 2019 Jurgen Hebbink (University of Twente, University Medical Centre Utrecht)
 
 
 NTST=ceil(Ttot/deltat);             %number of timestepes
-Nnodes=size(NM_network.nodes,1);    %number of nodes
+Nnodes=2 ;                           %size(NM_network.nodes,1);    %number of nodes
 
 
 %% Pre-allocate state variables
@@ -70,7 +70,7 @@ beta=[NM_network.nodes.beta]';
 gamma=[NM_network.nodes.gamma]';
 
 % Vector containing time varying input
-fvar=deltat*repmat(tvA',1,NTST).*cell2mat(cellfun(@(c) c(deltat:deltat:Ttot),{NM_network.nodes.Ivar}','UniformOutput',false));
+fvar = deltat*repmat(tvA',1,NTST).*cell2mat(cellfun(@(c) c(deltat:deltat:Ttot),{NM_network.nodes.Ivar}','UniformOutput',false));
 
 %% Stochastic input
 % normal situation independent noise
@@ -97,8 +97,8 @@ temp(4,3,:)=-cat(3,NM_network.nodes.C6);
 temp(4,4,:)=-cat(3,NM_network.nodes.C8);
 
 if(Nnodes>1)
-    temp=mat2cell(temp,4,4,ones(Nnodes,1));    
-    P=sparse(blkdiag(temp{:}));
+    temp = mat2cell(temp,4,4,ones(Nnodes,1));    
+    P = sparse(blkdiag(temp{:}));
 else
     P=temp;
 end
@@ -107,22 +107,22 @@ u=P*x;      % vector with potentials of the populations
 su=Sigm(u); % vector with firing rates of populations
 
 %% Pre-allocate output variables
-uout=zeros(4*Nnodes,ceil(NTST/Nout)+1);
+uout=zeros(4*Nnodes,ceil(NTST/Nout)+1);                 % prepare a zero matrix
 uout(:,1)=u;
-xout=zeros(4*Nnodes,ceil(NTST/Nout)+1);
+xout=zeros(4*Nnodes,ceil(NTST/Nout)+1);                
 xextout=zeros(Nnodes,ceil(NTST/Nout)+1);
 yout=zeros(4*Nnodes,ceil(NTST/Nout)+1);
 yextout=zeros(Nnodes,ceil(NTST/Nout)+1);
 
 %% Network structure
-conmat=NM_network.constrength*NM_network.conmat;
+conmat = NM_network.constrength*NM_network.conmat;
 
-indupy=1+(0:Nnodes-1)*4;
-induex=2+(0:Nnodes-1)*4;
-induins=3+(0:Nnodes-1)*4;
-induinf=4+(0:Nnodes-1)*4;
-indpyEu=1+(0:Nnodes-1)*4; %indices of the excitatory potential evoked by the pyramidal cells
-indEpy=2+(0:Nnodes-1)*4;
+indupy = 1+(0:Nnodes-1)*4;
+induex = 2+(0:Nnodes-1)*4;
+induins = 3+(0:Nnodes-1)*4;
+induinf = 4+(0:Nnodes-1)*4;
+indpyEu = 1+(0:Nnodes-1)*4;             %indices of the excitatory potential evoked by the pyramidal cells
+indEpy = 2+(0:Nnodes-1)*4;
 
 %%
 tel=0;          % counter for saving output   
@@ -145,11 +145,12 @@ for ii=1:NTST
     u=P*x;  % sum internal PSPs
     
     temp=xext+conmat*x(indpyEu); %Potentials contribution from external PSPs, consisting of PSPs due to timevarying input and PSPs from pyramidal cells of other populations
+    
     %add external potential contribution to populations
-    u(indupy)=u(indupy)+temp;           %py
-    u(induex)=u(induex)+alpha.*temp;    %ex
-    u(induins)=u(induins)+beta.*temp;   %is
-    u(induinf)=u(induinf)+gamma.*temp;  %if
+    u(indupy) = u(indupy)+temp;           %py
+    u(induex) = u(induex)+alpha.*temp;    %ex
+    u(induins) = u(induins)+beta.*temp;   %is
+    u(induinf) = u(induinf)+gamma.*temp;  %if
     
     su=Sigm(u);     %new firing rate
     
@@ -177,7 +178,7 @@ end
 
 % % sigmoid shifted s.t. S(0)=0 baselevel v0=4.5 (used in manuscript)
 function outp=Sigm(v)
-    outp=5./(1+exp(0.56*(4.5-v)))-0.372339725830140;
+    outp = 5./(1+exp(0.56*(4.5-v)))-0.372339725830140;
 end
 
 % % % sigmoid shifted s.t. S(0)=0, v0=6
