@@ -46,8 +46,7 @@ for subj = 1:size(dataBase,2)
      
      idx_keep5s = [true(1); diff([tb_stim.onset])>=4.9];
      dataBase.tb_events = tb_stim(idx_keep5s,:);
-     
-     
+       
      
     %% unique stimulation pairs
     stimpair = dataBase(subj).tb_events.electrical_stimulation_site(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a')) ;
@@ -119,7 +118,7 @@ for subj = 1:size(dataBase,2)
         [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
         
          if 2*length(cc_stimsets_avg) ~= length(cc_stimsets_all)                % When not all stimulation pairs are stimulated in both directions
-             Ncount = find(histcounts(IC_avg,length(cc_stimsets_avg))~=2);      % stimpairs which are stimulated in one direction            
+             Ncount = find(histcounts(IC_avg,length(cc_stimsets_avg))~=2)';      % stimpairs which are stimulated in one direction            
              
              % Allocation
              remove_rows = zeros(length(Ncount),1);
@@ -225,8 +224,9 @@ for subj = 1:size(dataBase,2)
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
     cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==2),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples[
     
-    for ll = 1:max(IC_avg)
-        if sum(IC_avg==ll)>1 
+    for ll = 1:max(IC_avg)                      % Takes every value between 1 and 33 while some numbers are not used, therefore the next line
+        if sum(IC_avg==ll)>1                   % Check whether the
+        %stimpair is stimulated in both directions.
             
             selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
             selection_avg =  squeeze(nanmean(selection,2));

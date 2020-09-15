@@ -104,15 +104,33 @@ for subj = 1:size(dataBase,2)
     if strcmp(cfg.dir_avg,'yes')      % dir_avg = 'yes' analyse the average signal of both the positive and negative stimuli
         
         sort_cc_stimsets = sort(cc_stimsets_all,2);
-        [cc_stimsets_avg,~,IC_avg] = unique(sort_cc_stimsets,'rows');
-        
+        [cc_stimsets_avg,~,IC_avg] = unique(sort_cc_stimsets,'rows');               % This should be an even number since all stimpairs should be stimulated in both dirs
+       
+        % Remove stimparis which are not stimulated in both directions
+        % ('single stimpar')
+        if 2*length(cc_stimsets_avg) ~= length(cc_stimsets_all)                         % When 2 times unique(average) is more than the all, than some stimpairs are not stimulated in both dirs
+             Ncount = find(histcounts(IC_avg,length(cc_stimsets_avg))~=2)' ;                  
+             
+             % Allocation
+             remove_rows = zeros(length(Ncount),1);
+             for i = 1:length(Ncount)
+               remove_rows(i,:) = find(IC_avg==Ncount(i,:));                    % Row in which the 'single' stimpair is located
+             end
+             
+              % Remove the rows with single stimpair in the IC_avg
+              IC_avg(remove_rows) =[];                                          
+              cc_stimsets_avg(Ncount,:) =[];                                    
+              cc_stimsets_all(remove_rows,:) = [];   
+              sort_cc_stimsets(remove_rows,:) = [];
+        end
+         
     elseif strcmp(cfg.dir_avg,'no')         % dir_avg = 'no' to analyse all signals separately
         
         cc_stimsets_avg = cc_stimsets_all;
         IC_avg = IC_all;
     end
     
-    clear stimremove remove_elec remove_stimp remove sort_cc_stimsets
+    clear stimremove remove_elec remove_stimp remove 
     
     %% determine stimulation pair names
     % pre-allocation
@@ -194,23 +212,24 @@ for subj = 1:size(dataBase,2)
     if isempty(avg_stim)
         avg_stim = maxstim;
     end
+    % cc_EPOCH_SORTED_AVG IS ALSNOG GEWOON 33 IPV 31 VOOR PAR 703...
     
     % preallocation
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
     cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples[
     
-    for ll = 1:max(IC_avg)
-        
-        selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
-        selection_avg =  squeeze(nanmean(selection,2));
-        
-        while size(size(selection_avg),2) >2
-            selection_avg =  squeeze(nanmean(selection_avg,2));
+    for ll = 1:max(IC_avg)                      % Takes every value between 1 and 33 while some numbers are not used, therefore the next line
+        if sum(IC_avg==ll)>1                    % When ll is a unique stimpair number
+            selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
+            selection_avg =  squeeze(nanmean(selection,2));
+
+            while size(size(selection_avg),2) >2
+                selection_avg =  squeeze(nanmean(selection_avg,2));
+            end
+
+            cc_epoch_sorted_avg(:,ll,:) = selection_avg;
+            cc_epoch_sorted_select(:,ll,:,:) = reshape(selection,size(selection,1),size(selection,2)*size(selection,3),size(selection,4));
         end
-               
-        cc_epoch_sorted_avg(:,ll,:) = selection_avg;
-        cc_epoch_sorted_select(:,ll,:,:) = reshape(selection,size(selection,1),size(selection,2)*size(selection,3),size(selection,4));
-           
     end
     
     dataBase(subj).cc_epoch_sorted = cc_epoch_sorted_all;
