@@ -86,7 +86,7 @@ if size(runs,2) >1
         agreement_run(countnum).NA = NA;
         agreement_run(countnum).compare_mat = compare_mat;
 
-        figure('Position',[680 137 1036 794]),
+        figure('Name',runs(1).sub_label,'Position',[680 137 1036 794]),
         subplot(2,3,1), imagesc(Amat10), xlabel('Stimpairs'), ylabel('Channels'), title(sprintf('%s in run %s',title10{:},run_label{:}))
         subplot(2,3,2), imagesc(Amat2),  xlabel('Stimpairs'), ylabel('Channels'),title(sprintf('%s in run %s',title2{:},run_label{:}))
         subplot(2,3,3), imagesc(compare_mat),  xlabel('Stimpairs'), ylabel('Channels'),title(sprintf('Comparison of %s vs %s',title10{:},title2{:}))
