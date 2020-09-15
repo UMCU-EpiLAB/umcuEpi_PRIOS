@@ -4,9 +4,8 @@ clear;
 config_CCEP
 
 %% set paths
-% Adapt for RESP or PRIOS patients!
 cfg.mode = 'retro';
-myDataPath = setLocalDataPath(cfg);
+myDataPath = setLocalDataPath(cfg);         % When retrospective analysis is run, folders of prospective are removed from path.    
 
 %% select run
 % choose between available runs

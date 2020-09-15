@@ -109,10 +109,8 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).statistics = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep10);
 end
 
-%% load electrodes positions (xlsx/electrodes.tsv)
-% database (ccep10) is only used for channels and stimpairs and these are
-% equal for 2 and 10, so does not matter which database is used.
-plot_fig = 'n';
+%% Load electrodes positions (xlsx/electrodes.tsv)
+plot_fig = 'n';                 % 'n' when not all ER responses per stim have to be plot, 'y' when you do want to plot all
 close all;
 
 for subj = 1:size(dataBase,2)

@@ -67,9 +67,10 @@ for i=1:size(mode,2)
     [~, order] = sort(rank.(mode{i})(:,3), 'descend');          % most ER evoking stimpairs first
     rank.(['sort_' mode{i}]) = rank.(mode{i})(order, :);
     
+    % If the next stimpair has the same number of ERs, give it the same order number
     rank.(['sort_' mode{i}])(1,4) = 1;
     for j = 2:size(rank.(['sort_' mode{i}]),1)
-        if rank.(['sort_' mode{i}])(j,3) == rank.(['sort_' mode{i}])(j-1,3)
+        if rank.(['sort_' mode{i}])(j,3) == rank.(['sort_' mode{i}])(j-1,3)          
             rank.(['sort_' mode{i}])(j,4) = rank.(['sort_' mode{i}])(j-1,4);
         else
             rank.(['sort_' mode{i}])(j,4) = j;
@@ -144,8 +145,8 @@ for i=1:size(mode,2)
     rank.(['fig_sort_names_' mode{i}]) = vertcat({' '}, newgroups{:});
 end
 
-cm = colormap(parula(max(rank.sort_stims10(:,4))));
 figure('Position',[1074,4,519,1052]);
+cm = colormap(parula(max(rank.sort_stims10(:,4))));
 colororder({'k','k'})
 set(gca,'YTick',(1:size(rank.fig_sort_names_stims10,1)),'YTickLabel',rank.fig_sort_names_stims10)
 yyaxis left
@@ -250,18 +251,20 @@ saveas(gcf,[path,outlabel],'jpg')
 % colNames = {'Stimpair', 'Ranking10', 'Ranking2'};
 % T = array2table(Statistic_mat,'VariableNames', colNames);    % able to check
 
+% Sorted matrix based on stimpair number, so ranking isunsorted 
 for i=1:size(mode,2)
     [~,order] = sortrows(rank.(['sort_' mode{i}])(:,1:2));
-    rank.(['unsort_' mode{i}]) = rank.(['sort_' mode{i}])(order,:);
+    rank.(['unsort_' mode{i}]) = rank.(['sort_' mode{i}])(order,:);         
 end
 
+% If the order of the stimulation pairs is not equal, than the ranking
+% cannot be compared
 if ~isequal(rank.unsort_stims10(:,1:2),rank.unsort_stims2(:,1:2))
     error('Sorting stimulus pairs is incorrect and led to unequal matrices in stims10 and stims2')
 end
 
 % Test the hypothesis of NO correlation
 % When p <0.05, an rho is close to (-)1, rejection of the hypothesis that no correlation exists between the two columns
-% [RHO_stmp,PVAL_stmp] = corr(Statistic_mat(:,2) , Statistic_mat(:,3) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
 [RHO_stmp,PVAL_stmp] = corr(rank.unsort_stims10(:,4) , rank.unsort_stims2(:,4) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
 fprintf('Spearman Corr between stimpair ranking of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
 
@@ -283,6 +286,7 @@ for n=1:size(measure,2)
         [~, order] = sort(rank.([measure{n} mode{i}])(:,2), 'descend');
         rank.(['sort_' measure{n} mode{i}]) = rank.([measure{n} mode{i}])(order, :);
         
+        % If the next stimpair has the same number of ERs, give it the same order number
         rank.(['sort_' measure{n} mode{i}])(1,3) = 1;
         for j = 2:size(rank.(['sort_' measure{n} mode{i}]),1)
             if rank.(['sort_' measure{n}  mode{i}])(j,2) == rank.(['sort_' measure{n} mode{i}])(j-1,2)
@@ -294,9 +298,9 @@ for n=1:size(measure,2)
         
         rank.(['sort_names_' measure{n} mode{i}]) = ccep10.ch(order);
         
+        % Sorted matrix based on stimpair number, so ranking isunsorted 
         [~,order] = sort(rank.(['sort_' measure{n} mode{i}])(:,1));
-        rank.(['unsort_' measure{n} mode{i}]) = rank.(['sort_' measure{n} mode{i}])(order,:);
-        
+        rank.(['unsort_' measure{n} mode{i}]) = rank.(['sort_' measure{n} mode{i}])(order,:);        
     end
     
     
