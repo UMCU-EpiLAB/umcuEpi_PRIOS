@@ -31,9 +31,7 @@ clear files names strings stringsz
 dataBase = load_ECoGdata(cfg,myDataPath);
 
 %% CCEP for 2 and 10 stimulations
-
 % avg_stim : write down the number of stimuli you want to average
-%%% BEZIG IN PREPROCES OM SINGLE STIMPAIRS ERUIT TE HALEN.
 
 % save only first stimulus in both directions
 avg_stim = 1;

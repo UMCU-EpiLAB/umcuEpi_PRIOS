@@ -212,14 +212,14 @@ for subj = 1:size(dataBase,2)
     if isempty(avg_stim)
         avg_stim = maxstim;
     end
-    % cc_EPOCH_SORTED_AVG IS ALSNOG GEWOON 33 IPV 31 VOOR PAR 703...
+    % cc_EPOCH_SORTED_AVG IS ALSNOG GEWOON 33 IPV 31 VOOR PAT 703...
     
     % preallocation
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
-    cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples[
+    cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples
     
-    for ll = 1:max(IC_avg)                      % Takes every value between 1 and 33 while some numbers are not used, therefore the next line
-        if sum(IC_avg==ll)>1                    % When ll is a unique stimpair number
+    for ll = 1:max(IC_avg)                      % Takes every value between 1 and unique stimpairnumber (some numbers are not used therefore the remove_sorted)
+         if sum(IC_avg==ll)>1                    % When ll is not a single stimpair 
             selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
             selection_avg =  squeeze(nanmean(selection,2));
 
@@ -229,8 +229,15 @@ for subj = 1:size(dataBase,2)
 
             cc_epoch_sorted_avg(:,ll,:) = selection_avg;
             cc_epoch_sorted_select(:,ll,:,:) = reshape(selection,size(selection,1),size(selection,2)*size(selection,3),size(selection,4));
-        end
+         end
     end
+        % Remove rows which are still NaN since they are no stimulation
+        % pair.
+        [~,col_nan] = find(isnan(cc_epoch_sorted_avg(:,:,1)));          
+        remove_sorted = unique(col_nan);
+        cc_epoch_sorted_avg(:,remove_sorted,:) = [];
+        cc_epoch_sorted_select(:,remove_sorted,:,:) = [];
+        
     
     dataBase(subj).cc_epoch_sorted = cc_epoch_sorted_all;
     dataBase(subj).tt_epoch_sorted = tt_epoch_sorted_all;

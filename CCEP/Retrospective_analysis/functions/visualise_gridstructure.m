@@ -50,46 +50,32 @@ axes1 = axes('Parent',figure1,'Position',[0.04,0.5,0.9,0.4]);
 hold(axes1,'on');
 plot(topo.x,topo.y,'ok','Parent',axes1,'MarkerSize',15);
 xlim([min(topo.x)-1, max(topo.x)+1])
-ylim([min(topo.y)-2, max(topo.y)+2])
+ylim([min(topo.y)-0.5, max(topo.y)+0.5])
 axes1.YDir = 'reverse';                                         % Flip figure
 axes1.YTick = [];                                               % Remove numbers on y-axis
 axes1.XTick = [];                                               % Remove numbers on x-axis
 axes1.XColor = 'none';                                          % Remove line indicating the x-axis
 axes1.YColor = 'none';                                          % Remove line indicating the y-axis
 
-edges_10 = linspace(min(agreement_parameter.ERs_stimp10), max(agreement_parameter.ERs_stimp10),7);            % create 7 equally-spaced bins based on their indegree score
-bins_10 = discretize(agreement_parameter.ERs_stimp10, edges_10);
-high_bins_10 = max(bins_10);
-highest_10_1 = find(bins_10 == high_bins_10);
-highest_10_2 = find(bins_10 == high_bins_10-1);
-highest_10_3 = find(bins_10 == high_bins_10-2);
+% Draw lines between stimpairs, thickness of the line indicates the number
+% of ERs per stimpair. Thicker = more ERs
+lineWidth_set = linspace(min(agreement_parameter.ERs_stimp10),max(agreement_parameter.ERs_stimp10),6);        % devide the number of ERs to fit the lineWidth 
+bins_lineWidth = discretize(agreement_parameter.ERs_stimp10,lineWidth_set);
 
-% Draw lines between the stimulation pairs with the highest number of ERs
 for i = 1:length(ccep.stimchans_avg)
-    if ismember(i, highest_10_1, 'rows')              % When the electrode is highest ranked in the indegree and in outdegree
-        elec1 = ccep.stimsets_avg(i,1);
+        elec1 = ccep.stimsets_avg(i,1);                         % Find the electrodes in the stimpair
         elec2 = ccep.stimsets_avg(i,2);
-        fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
-        set(fig,{'LineWidth'},{5})
-        fig.Color(4) = 0.4;
-        
-    elseif ismember(i, (highest_10_2), 'rows')
-        elec1 = ccep.stimsets_avg(i,1);
-        elec2 = ccep.stimsets_avg(i,2);
-        fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
-        set(fig,{'LineWidth'},{3})
-        fig.Color(4) = 0.4;
-        
-    elseif ismember(i, (highest_10_3), 'rows')
-        elec1 = ccep.stimsets_avg(i,1);
-        elec2 = ccep.stimsets_avg(i,2);
-        fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
-        set(fig,{'LineWidth'},{1})
-        fig.Color(4) = 0.4;
-        
-    end
+        if agreement_parameter.ERs_stimp10(i) > 0                                 % Stimpairs with 0 ERs do not get a line.
+           % horizontal lines between electrodes
+           line_stim_x = line([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'Color',[0.6 0.6 0.6]-0.05*bins_lineWidth(i),'LineWidth',bins_lineWidth(i));
+           line_stim_x.Color(4) = 0.6;              % Transparency
+           
+           % Vertical lines between electrodes
+           line_stim_y = line([topo.x(elec1), topo.x(elec1)], [topo.y(elec1),topo.y(elec2)],'Color',[0.6 0.6 0.6]-0.05*bins_lineWidth(i),'LineWidth',bins_lineWidth(i));
+           line_stim_y.Color(4) = 0.6;
+        end
 end
-
+    
 % Plot the indegree as a colorscale, combine this with the number of
 % ERS evoked per stimulation pair.
 scatter(topo.x, topo.y, 260, scale_10,'filled','MarkerEdgeColor','k')
@@ -110,66 +96,41 @@ hold(axes1,'off')
 str_main = sprintf('sub-%s', subj{1});
 sgtitle(str_main)
 
-title({'\rm Highest indegree scoring electrodes are darker green,'...
-    'broader lines indicate more ERs evoked per stimulation pair, all stims'})
-text(((topo.x)+0.2),topo.y,ccep.ch, 'FontSize',8)
-
-str_main = sprintf('sub-%s', subj{1});
-sgtitle(str_main)
-title({'\rm Highest indegree scoring electrodes are darker green,'...
-    'broader lines indicate more ERs evoked per stimulation pair, all stims'})
-
-
+title({'\rm Indegree & ERs per stimpair, all stimulations'})
+text(((topo.x)+0.2),topo.y,ccep.ch, 'FontSize',8,'FontWeight','bold')
 
 %% Indegree of electrodes and ERs per stimulation pair, for 2 stims
 axes2 = axes('Parent',figure1,'Position',[0.04,0.07,0.9,0.4]);          %[0.04,0.5,0.9,0.4]
 hold(axes2,'on');
 plot(topo.x,topo.y,'ok','Parent',axes2,'MarkerSize',15);
 xlim([min(topo.x)-1, max(topo.x)+1])
-ylim([min(topo.y)-2, max(topo.y)+2])
+ylim([min(topo.y)-0.5, max(topo.y)+0.5])
 axes2.YDir = 'reverse';
 axes2.YTick = [];
 axes2.XTick = [];
 axes2.XColor = 'none';
 axes2.YColor = 'none';
 
-% Plot lines between electrodes to show the number of ERs evoked by that stimulation pair
-% Divide number of ERs per stimpair in 7 equal bin
-% For 2 stimpairs
-edges_2 = linspace(min(agreement_parameter.ERs_stimp2), max(agreement_parameter.ERs_stimp2),7);            % create 7 equally-spaced bins based on their indegree score
-bins_2 = discretize(agreement_parameter.ERs_stimp2, edges_2);
-high_bins_2 = max(bins_2);
-highest_2_1= find(bins_2 == high_bins_2);
-highest_2_2 = find(bins_2 == high_bins_2-1);
-highest_2_3 = find(bins_2 == high_bins_2-2);
+% Draw lines between stimpairs, thickness of the line indicates the number
+% of ERs per stimpair. Thicker = more ERs
+lineWidth_set_2 = linspace(min(agreement_parameter.ERs_stimp10),max(agreement_parameter.ERs_stimp10),6);        % devide the number of ERs to fit the lineWidth 
+bins_lineWidth_2 = discretize(agreement_parameter.ERs_stimp10,lineWidth_set_2);
 
-% Draw lines between the stimulation pairs with the highest number of ERs
+% devide the number of ERs to fit the lineWidth 
 for i = 1:length(ccep.stimchans_avg)
-    if ismember(i, highest_2_1, 'rows')              % When the electrode is highest ranked in the indegree and in outdegree
-        elec1 = ccep.stimsets_avg(i,1);
+        elec1 = ccep.stimsets_avg(i,1);                                             % Find the electrodes in the stimpair
         elec2 = ccep.stimsets_avg(i,2);
-        fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
-        set(fig,{'LineWidth'},{5})
-        fig.Color(4) = 0.4;
-        
-    elseif ismember(i, (highest_2_2), 'rows')
-        elec1 = ccep.stimsets_avg(i,1);
-        elec2 = ccep.stimsets_avg(i,2);
-        fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
-        set(fig,{'LineWidth'},{3})
-        fig.Color(4) = 0.4;
-        
-    elseif ismember(i, (highest_2_3), 'rows')
-        elec1 = ccep.stimsets_avg(i,1);
-        elec2 = ccep.stimsets_avg(i,2);
-        fig = plot([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'k');
-        set(fig,{'LineWidth'},{1})
-        fig.Color(4) = 0.4;
-        
-    end
+        if agreement_parameter.ERs_stimp10(i) > 0                                   % Stimpairs with 0 ERs do not get a line.
+           % Horizontal lines
+           line_stim_x = line([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'Color',[0.6 0.6 0.6]-0.05*bins_lineWidth_2(i),'LineWidth',bins_lineWidth_2(i));
+           line_stim_x.Color(4) = 0.6;              % Transparancy
+           
+           % Vertical lines between electrodes
+           line_stim_y = line([topo.x(elec1), topo.x(elec1)], [topo.y(elec1),topo.y(elec2)],'Color',[0.6 0.6 0.6]-0.05*bins_lineWidth(i),'LineWidth',bins_lineWidth(i));
+           line_stim_y.Color(4) = 0.6;
+        end
 end
-
-
+    
 % Plot the indegree as a colorscale, combine this with the number of
 % ERS evoked per stimulation pair.
 scatter(topo.x, topo.y, 260, scale_2,'filled','MarkerEdgeColor','k')
@@ -179,10 +140,6 @@ colormap(c);
 caxis([0 max(scale_2)]);
 cb = colorbar();
 
-title({'\rm Highest indegree scoring electrodes are darker green,'...
-    'broader lines indicate more ERs evoked per stimulation pair, 2 stims'})
-text(((topo.x)+0.2),topo.y,ccep.ch,'FontSize',8)
-
 
 % Create the same colormap limits based on the highest protocol with the highest indegree
 if max(scale_10)>max(scale_2)                                   
@@ -191,6 +148,8 @@ else
     caxis([0 max(scale_2)]);
 end
 
+title({'\rm Indegree & ERs per stimpair, 2 stimulations'})
+text(((topo.x)+0.2),topo.y,ccep.ch, 'FontSize',8,'FontWeight','bold')
 
 % Save figure
 outlabel=sprintf('sub-%s_indegree_ERstimp.jpg',...
@@ -210,14 +169,14 @@ figure2 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
 axes3 = axes('Parent',figure2,'Position',[0.04,0.5,0.9,0.4]);
 hold(axes3,'on');
 plot(topo.x,topo.y,'ok','Parent',axes3,'MarkerSize',15);
-xlim([min(topo.x)-2, max(topo.x)+2])
-ylim([min(topo.y)-2, max(topo.y)+2])
+xlim([min(topo.x)-1, max(topo.x)+1])
+ylim([min(topo.y)-0.5, max(topo.y)+0.5])
 axes3.YDir = 'reverse';                                
 axes3.YTick = [];                                      
 axes3.XTick = [];
 axes3.XColor = 'none';
 axes3.YColor = 'none';
-title('\rm Highest outdegree scoring electrodes are darker, all stims')
+title('\rm Outdegree, all stims')
 
 % Plot the indegree as a colorscale, combine this with the number of
 % ERS evoked per stimulation pair.
@@ -226,7 +185,7 @@ c = hot;
 c = flipud(c);
 colormap(c);   
 cb = colorbar();
-text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+text(((topo.x)+0.2),topo.y,ccep.ch,'FontWeight','bold')
 
 % Create the same colormap limits based on the highest protocol with the highest outdegree
 if max(scale_10_out)>max(scale_2_out)                                   
@@ -240,8 +199,8 @@ end
 axes4 = axes('Parent',figure2,'Position',[0.04,0.07,0.9,0.4]);
 hold(axes4,'on');
 plot(topo.x,topo.y,'ok','Parent',axes4,'MarkerSize',15);
-xlim([min(topo.x)-2, max(topo.x)+2])
-ylim([min(topo.y)-2, max(topo.y)+2])
+xlim([min(topo.x)-1, max(topo.x)+1])
+ylim([min(topo.y)-0.5, max(topo.y)+0.5])
 axes4.YDir = 'reverse';
 axes4.YTick = [];
 axes4.XTick = [];
@@ -249,7 +208,7 @@ axes4.XColor = 'none';
 axes4.YColor = 'none';
 str_main = sprintf('sub-%s', subj{1});
 sgtitle(str_main)
-title('\rm Highest outdegree scoring electrodes are darker, 2 stims')
+title('\rm Outdegree, 2 stims')
 
 % Plot the indegree as a colorscale, combine this with the number of
 % ERS evoked per stimulation pair.
@@ -258,7 +217,7 @@ c = hot;
 c = flipud(c);
 colormap(c);
 cb = colorbar();
-text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+text(((topo.x)+0.2),topo.y,ccep.ch,'FontWeight','bold')
 
 % Create the same colormap limits based on the highest protocol with the highest outdegree
 if max(scale_10_out)>max(scale_2_out)                                   

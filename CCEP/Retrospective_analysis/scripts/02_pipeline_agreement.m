@@ -17,7 +17,9 @@ for i=1:size(cfg.sub_labels,2)
     dataBase(i).sub_label = cfg.sub_labels{i};
     
     respLoc = find(contains({files(:).name},cfg.sub_labels{i}));
-    
+    % ALS SPES IS OPGEDEELD IN MEERDERE RUNS GAAAT HET FOUT!!! DAN WORDT
+    % HET OVERSCHRIJVEN EN IS HET DUS NIET MEER COMPLEET. GELDT NU VORO 703
+    % EN 724
     for j=1:size(respLoc,2)
        if contains(files(respLoc(j)).name,'10stims') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
