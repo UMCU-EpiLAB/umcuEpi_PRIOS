@@ -12,14 +12,30 @@ myDataPath = setLocalDataPath(cfg);
 
 files = dir(fullfile(myDataPath.CCEP_allpat));
 
+
+for k = 1:size(files,1)
+    if contains(files(k).name, 'sub')                   % If row is not empty
+        run_label{k,:} = extractBetween(files(k).name, 'clin_', '_CCEP')
+        sub_label(k,:) = extractBefore(files(k).name, '_ses')
+    end
+end
+
+unique_runlabels = unique([run_label{:,:}])';
+[~,loc_sub_labels] = unique([sub_label(:,:)],'rows');
+
 dataBase = struct;
-for i=1:size(cfg.sub_labels,2)
-    dataBase(i).sub_label = cfg.sub_labels{i};
+for i=1:size(unique_runlabels,1)                          % Eigenlijk wil ik dit voor het aantal unique run_labels
     
-    respLoc = find(contains({files(:).name},cfg.sub_labels{i}));
-    % ALS SPES IS OPGEDEELD IN MEERDERE RUNS GAAAT HET FOUT!!! DAN WORDT
-    % HET OVERSCHRIJVEN EN IS HET DUS NIET MEER COMPLEET. GELDT NU VORO 703
-    % EN 724
+    row_run_label = find(contains({files(:).name}, run_label{i,:}))
+    
+    for k = 1:size(row_run_label,2)
+        run2sub(k,:) = extractBefore(files(row_run_label(k)).name, '_ses')
+    end
+    
+    %dataBase(i).sub_label = sub_label(i,:);
+    
+    respLoc = find(contains({files(:).name}, sub_labels{i}));
+ 
     for j=1:size(respLoc,2)
        if contains(files(respLoc(j)).name,'10stims') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
@@ -33,6 +49,73 @@ for i=1:size(cfg.sub_labels,2)
        end
     end
 end
+
+
+
+
+
+
+% files_all = dir(fullfile(myDataPath.CCEP_allpat));
+% files = size(find(contains({files_all(:).name},cfg.sub_labels)),2);         % Find number of rows containing subject info
+% diff = size(files_all,1)-files;
+% 
+% % Find sublabels (necessary because some SPES sessions are ran in two runs)
+% for k = diff+1:size(files_all,1)
+%     sub_labels{k-diff,:} = extractBefore(files_all(k).name, '_ses');
+% end
+% 
+% % Fill the dataBase with the filename and run-label of the subjects(label)
+% dataBase = struct;
+% for i=1:size(cfg.sub_labels,2)
+%     dataBase(i).sub_label = cfg.sub_labels(i);
+%     
+%     respLoc = find(contains({files_all(:).name},sub_labels{i}));                % Find which rows contain infor about that patient
+% 
+%     for k = 1:size(respLoc,2)
+%         run_label(k,:) = extractBetween(files_all(i).name, 'clin_', '_CCEP');
+%     end
+%     
+%     % Find run label when SPESclin contains multiple runs
+%     if size(run_label,1)>2                          % SPES is ran in more than 1 run
+%         for j=1:size(respLoc,2)
+%           if contains(files_all(respLoc(j)).name,'10stims') 
+%             load(fullfile(files_all(respLoc(j)).folder,files_all(respLoc(j)).name));
+%             dataBase(i).ccep10 = ccep10;
+%             dataBase(i).filename10 = files_all(respLoc(j)).name;
+%             dataBase(i).run_label = run_label(j); 
+%           
+%          elseif contains(files_all(respLoc(j)).name,'2stims') 
+%              load(fullfile(files_all(respLoc(j)).folder,files_all(respLoc(j)).name));
+%              dataBase(i).ccep2 = ccep2;   
+%              dataBase(i).filename2 = files_all(respLoc(j)).name;
+%              dataBase(i).run_label = run_label(j); 
+%           end
+%         end  
+%         
+%     else
+%         for j=1:size(respLoc,2)
+%           if contains(files_all(respLoc(j)).name,'10stims') 
+%             load(fullfile(files_all(respLoc(j)).folder,files_all(respLoc(j)).name));
+%             dataBase(i).ccep10 = ccep10;
+%             dataBase(i).filename10 = files_all(respLoc(j)).name;
+%             dataBase(i).run_label = run_label(1);                               % run_label(1) == run_label(2)
+%           
+%          elseif contains(files_all(respLoc(j)).name,'2stims') 
+%              load(fullfile(files_all(respLoc(j)).folder,files_all(respLoc(j)).name));
+%              dataBase(i).ccep2 = ccep2;   
+%              dataBase(i).filename2 = files_all(respLoc(j)).name;
+%              dataBase(i).run_label = run_label(1); 
+%           end
+%         end 
+%     end
+%     
+%     
+%     
+%     % ALS SPES IS OPGEDEELD IN MEERDERE RUNS GAAAT HET FOUT!!! DAN WORDT
+%     % HET OVERSCHRIJVEN EN IS HET DUS NIET MEER COMPLEET. GELDT NU VORO 703
+%     % EN 724  
+%   
+% end
 
 % small cleanup
 clear respLoc i j files ccep10 ccep2
