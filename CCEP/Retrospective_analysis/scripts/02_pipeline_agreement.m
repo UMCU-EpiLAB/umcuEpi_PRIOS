@@ -1,7 +1,7 @@
 % Script pipeline_preproces.m should be performed first to obtain the correct documents.
 
 clear; 
-% %% Choose patient
+% %% Select all patients
 cfg.sub_labels = {'sub-RESP0701','sub-RESP0702','sub-RESP0703','sub-RESP0706','sub-RESP0724','sub-RESP0728'}; %{[input('Patient number type (RESPXXXX or PRIOSXX): ','s')]};
 
 % set paths
@@ -9,116 +9,51 @@ cfg.mode = 'retro';
 myDataPath = setLocalDataPath(cfg);
 
 %% Load all ccep files in the folder CCEP_files_allPat
+% Be aware that for some patients, SPES is saved in multiple runs
 
 files = dir(fullfile(myDataPath.CCEP_allpat));
 
-
+% Find all run-labels (sometimes SPES is ran in multiple runs)
 for k = 1:size(files,1)
-    if contains(files(k).name, 'sub')                   % If row is not empty
-        run_label{k,:} = extractBetween(files(k).name, 'clin_', '_CCEP')
-        sub_label(k,:) = extractBefore(files(k).name, '_ses')
+    if contains(files(k).name, 'sub')  ;                                        % If row is not empty
+        run_label{k,:} = extractBetween(files(k).name, 'clin_', '_CCEP');
     end
 end
 
-unique_runlabels = unique([run_label{:,:}])';
-[~,loc_sub_labels] = unique([sub_label(:,:)],'rows');
+unique_runlabels = unique([run_label{:,:}])';                                   % Be aware that this is also ordered
 
-dataBase = struct;
-for i=1:size(unique_runlabels,1)                          % Eigenlijk wil ik dit voor het aantal unique run_labels
+% Create database with the CCEP information of all patients of all runs and
+% both protocols (2 and 10 stims)
+dataBase = struct;                      
+for i=1:size(unique_runlabels,1)                                                % DataBase must have the size of the number of runs 
+     dataBase(i).run_label = unique_runlabels{i};
+        
+    % Find rows with the run_label of interest to determine the sub_label
+    runLoc = find(contains({files(:).name},unique_runlabels{i}));              
+    dataBase(i).sub_label = extractBefore(files(runLoc(1)).name, '_ses')  ;      % sub_label is the same for every row the run_label is the same
+   
     
-    row_run_label = find(contains({files(:).name}, run_label{i,:}))
-    
-    for k = 1:size(row_run_label,2)
-        run2sub(k,:) = extractBefore(files(row_run_label(k)).name, '_ses')
-    end
-    
-    %dataBase(i).sub_label = sub_label(i,:);
-    
-    respLoc = find(contains({files(:).name}, sub_labels{i}));
- 
-    for j=1:size(respLoc,2)
-       if contains(files(respLoc(j)).name,'10stims') 
-          load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
+    % load all both the 10 stimuli and 2 stimuli of the patient
+    for j=1:size(runLoc,2)                                                      % number of rows with the run_label of interest
+       if contains(files(runLoc(j)).name,'10stims') 
+          load(fullfile(files(runLoc(j)).folder,files(runLoc(j)).name));
           dataBase(i).ccep10 = ccep10;
-          dataBase(i).filename10 = files(respLoc(j)).name;
+          dataBase(i).filename10 = files(runLoc(j)).name;
           
-       elseif contains(files(respLoc(j)).name,'2stims') 
-          load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
+       elseif contains(files(runLoc(j)).name,'2stims') 
+          load(fullfile(files(runLoc(j)).folder,files(runLoc(j)).name));
           dataBase(i).ccep2 = ccep2;   
-          dataBase(i).filename2 = files(respLoc(j)).name;
+          dataBase(i).filename2 = files(runLoc(j)).name;
        end
     end
 end
 
-
-
-
-
-
-% files_all = dir(fullfile(myDataPath.CCEP_allpat));
-% files = size(find(contains({files_all(:).name},cfg.sub_labels)),2);         % Find number of rows containing subject info
-% diff = size(files_all,1)-files;
-% 
-% % Find sublabels (necessary because some SPES sessions are ran in two runs)
-% for k = diff+1:size(files_all,1)
-%     sub_labels{k-diff,:} = extractBefore(files_all(k).name, '_ses');
-% end
-% 
-% % Fill the dataBase with the filename and run-label of the subjects(label)
-% dataBase = struct;
-% for i=1:size(cfg.sub_labels,2)
-%     dataBase(i).sub_label = cfg.sub_labels(i);
-%     
-%     respLoc = find(contains({files_all(:).name},sub_labels{i}));                % Find which rows contain infor about that patient
-% 
-%     for k = 1:size(respLoc,2)
-%         run_label(k,:) = extractBetween(files_all(i).name, 'clin_', '_CCEP');
-%     end
-%     
-%     % Find run label when SPESclin contains multiple runs
-%     if size(run_label,1)>2                          % SPES is ran in more than 1 run
-%         for j=1:size(respLoc,2)
-%           if contains(files_all(respLoc(j)).name,'10stims') 
-%             load(fullfile(files_all(respLoc(j)).folder,files_all(respLoc(j)).name));
-%             dataBase(i).ccep10 = ccep10;
-%             dataBase(i).filename10 = files_all(respLoc(j)).name;
-%             dataBase(i).run_label = run_label(j); 
-%           
-%          elseif contains(files_all(respLoc(j)).name,'2stims') 
-%              load(fullfile(files_all(respLoc(j)).folder,files_all(respLoc(j)).name));
-%              dataBase(i).ccep2 = ccep2;   
-%              dataBase(i).filename2 = files_all(respLoc(j)).name;
-%              dataBase(i).run_label = run_label(j); 
-%           end
-%         end  
-%         
-%     else
-%         for j=1:size(respLoc,2)
-%           if contains(files_all(respLoc(j)).name,'10stims') 
-%             load(fullfile(files_all(respLoc(j)).folder,files_all(respLoc(j)).name));
-%             dataBase(i).ccep10 = ccep10;
-%             dataBase(i).filename10 = files_all(respLoc(j)).name;
-%             dataBase(i).run_label = run_label(1);                               % run_label(1) == run_label(2)
-%           
-%          elseif contains(files_all(respLoc(j)).name,'2stims') 
-%              load(fullfile(files_all(respLoc(j)).folder,files_all(respLoc(j)).name));
-%              dataBase(i).ccep2 = ccep2;   
-%              dataBase(i).filename2 = files_all(respLoc(j)).name;
-%              dataBase(i).run_label = run_label(1); 
-%           end
-%         end 
-%     end
-%     
-%     
-%     
-%     % ALS SPES IS OPGEDEELD IN MEERDERE RUNS GAAAT HET FOUT!!! DAN WORDT
-%     % HET OVERSCHRIJVEN EN IS HET DUS NIET MEER COMPLEET. GELDT NU VORO 703
-%     % EN 724  
-%   
-% end
+% Sort the rows based on the subjects instead of the run_label order
+[~,index] = sortrows({dataBase.sub_label}.'); 
+dataBase = dataBase(index);
 
 % small cleanup
-clear respLoc i j files ccep10 ccep2
+clear runLoc k j files ccep10 ccep2 run_label
 
 %% determine the agreement between 2 and 10 stims per run
 % The determine_agreement function is not only determining the agreement
@@ -127,8 +62,12 @@ clear respLoc i j files ccep10 ccep2
 close 
 clc
 
+% CHECKEN OF DIT NOG WERKT NU ER PER PATIENT MEERDERE RUNS ZIJN!!!!
 for subj = 1:size(dataBase,2)
     
+    % Find the 2 runs matching.
+    % DIT MOET DUS EIGENLIJK, VIND ALLE RUNS PER PATIENT, VOEG DIE SAMEN EN
+    % BEPAAK DAN DE AGREEMENT
     runs(1).ccep = dataBase(subj).ccep10;
     runs(1).name = dataBase(subj).filename10;
     runs(1).sub_label = dataBase(subj).sub_label;
