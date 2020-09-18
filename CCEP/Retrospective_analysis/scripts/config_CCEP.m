@@ -3,7 +3,7 @@
 %% patient characteristics
 cfg.sub_labels = {['sub-' input('Patient number (RESPXXXX of PRIOSXX): ','s')]};
 cfg.ses_label = input('Session number (ses-X): ','s');
-cfg.task_label = 'task-SPES*';
+cfg.task_label = 'task-SPESclin';
 %cfg.run_label = input('Runlabel(run-XXXXXX): ','s');
 
 %% pre-allocation

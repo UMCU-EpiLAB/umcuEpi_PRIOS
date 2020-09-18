@@ -16,19 +16,30 @@ strings = cell(size(names));
 for n = 1:size(names,2)
     strings{n} = names{n}(strfind(names{n},'run-'):strfind(names{n},'run-')+9);
 end
-stringsz = [repmat('%s, ',1,size(strings,2)-1),'%s'];
 
-cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')}; % Chosen run is in cfg.run_label
+% stringsz = [repmat('%s, ',1,size(strings,2)-1),'%s'];
+% cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')}; % Chosen run is in cfg.run_label
 
-if ~contains(cfg.run_label,'run-')
-   error('"run-" is missing in run_label') 
+% Load data for multiple runs
+for R = 1:size(strings,2)
+   cfg.run_label = strings(R);
+   dataBase(R) = load_ECoGdata(cfg,myDataPath);
 end
 
-clear files names strings stringsz
 
-%% load data
 
-dataBase = load_ECoGdata(cfg,myDataPath);
+% 
+% if ~contains(cfg.run_label,'run-')
+%    error('"run-" is missing in run_label') 
+% end
+% 
+% % clear files names strings stringsz
+% 
+% %% load data
+% 
+% dataBase = load_ECoGdata(cfg,myDataPath);
+
+
 
 %% CCEP for 2 and 10 stimulations
 % avg_stim : write down the number of stimuli you want to average
@@ -42,8 +53,15 @@ tt = dataBase2stim.tt;
 avg_stim = 5;
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
+%%%IK BEN HIER!!!
+if size(dataBase2stim,2) >1         % When SPES is ran in multiple runs
+    dataBase2stim = merge_runs(dataBase2stim);
+    dataBaseallstim = merge_runs(dataBaseallstim);       
+end
+
+
 % check whether similar stimuli are present in the same stimulus pair
-chan = 11; stim=3;
+chan = 11; stim=57;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)

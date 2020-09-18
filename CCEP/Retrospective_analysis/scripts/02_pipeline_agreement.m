@@ -53,7 +53,7 @@ end
 dataBase = dataBase(index);
 
 % small cleanup
-clear runLoc k j files ccep10 ccep2 run_label
+clear runLoc k j files ccep10 ccep2 run_label index
 
 %% determine the agreement between 2 and 10 stims per run
 % The determine_agreement function is not only determining the agreement
@@ -66,15 +66,14 @@ clc
 for subj = 1:size(dataBase,2)
     
     % Find the 2 runs matching.
-    % DIT MOET DUS EIGENLIJK, VIND ALLE RUNS PER PATIENT, VOEG DIE SAMEN EN
-    % BEPAAK DAN DE AGREEMENT
     runs(1).ccep = dataBase(subj).ccep10;
-    runs(1).name = dataBase(subj).filename10;
+    runs(1).name = dataBase(subj).filename10;                                                  
     runs(1).sub_label = dataBase(subj).sub_label;
     runs(2).ccep = dataBase(subj).ccep2;
     runs(2).name = dataBase(subj).filename2;
-    runs(1).sub_label = dataBase(subj).sub_label;
+    runs(2).sub_label = dataBase(subj).sub_label;
     
+    % Determine the agreement between the two matching runs
     agreement = determine_agreement(runs);          % Deze agreement nog toevoegen aan ccep! handig voor visualize Gridstructure
     
     dataBase(subj).agreement = agreement;
