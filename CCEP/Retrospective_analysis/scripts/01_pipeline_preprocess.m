@@ -21,9 +21,12 @@ end
 % cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')}; % Chosen run is in cfg.run_label
 
 % Load data for multiple runs
+
 for R = 1:size(strings,2)
+    tic;
    cfg.run_label = strings(R);
    dataBase(R) = load_ECoGdata(cfg,myDataPath);
+    toc;
 end
 
 
@@ -53,12 +56,10 @@ tt = dataBase2stim.tt;
 avg_stim = 5;
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
-%%%IK BEN HIER!!!
 if size(dataBase2stim,2) >1         % When SPES is ran in multiple runs
     dataBase2stim = merge_runs(dataBase2stim);
     dataBaseallstim = merge_runs(dataBaseallstim);       
 end
-
 
 % check whether similar stimuli are present in the same stimulus pair
 chan = 11; stim=57;

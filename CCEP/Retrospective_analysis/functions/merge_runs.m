@@ -9,6 +9,16 @@ function dataBase_merge = merge_runs(dataBase)
    dataBase_merge.ch =  dataBase(1).ch;
    dataBase_merge.max_stim =  dataBase(1).max_stim;
    dataBase_merge.tt =  dataBase(1).tt;
+   if isequal(dataBase(1).tb_channels,dataBase(2).tb_channels)
+       dataBase_merge.tb_channels = dataBase(1).tb_channels ;           % tb_channels are equal for both SPES sessions
+   else
+       diff_chan = setdiff(dataBase(1).tb_channels, dataBase(2).tb_channels);
+       fprintf('WARNING: these channels are different in tb_channels CHECK the diference %s \n', diff_chan.name{:})
+        
+        % The difference is probably little, therefore the tb_channels in
+        % the merge dataBase is set anyway to make sure it is not forgotten
+       dataBase_merge.tb_channels = dataBase(1).tb_channels ;
+   end
 
    
    % Concatenate the stimpairs in the two runs
@@ -23,5 +33,4 @@ function dataBase_merge = merge_runs(dataBase)
    dataBase_merge.cc_epoch_sorted_avg = cat(2,dataBase(1).cc_epoch_sorted_avg, dataBase(2).cc_epoch_sorted_avg);         
    dataBase_merge.cc_epoch_sorted_select_avg = cat(2,dataBase(1).cc_epoch_sorted_select_avg, dataBase(2).cc_epoch_sorted_select_avg);         
    dataBase_merge.stimpnames = cat(2,dataBase(1).stimpnames, dataBase(2).stimpnames);  
-   dataBase_merge.tb_channels = cat(2,dataBase(1).tb_channels, dataBase(2).tb_channels);
 end

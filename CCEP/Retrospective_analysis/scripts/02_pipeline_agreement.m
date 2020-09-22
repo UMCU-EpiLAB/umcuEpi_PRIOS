@@ -13,48 +13,32 @@ myDataPath = setLocalDataPath(cfg);
 
 files = dir(fullfile(myDataPath.CCEP_allpat));
 
-% Find all run-labels (sometimes SPES is ran in multiple runs)
-for k = 1:size(files,1)
-    if contains(files(k).name, 'sub')  ;                                        % If row is not empty
-        run_label{k,:} = extractBetween(files(k).name, 'clin_', '_CCEP');
-    end
-end
-
-unique_runlabels = unique([run_label{:,:}])';                                   % Be aware that this is also ordered
-
 % Create database with the CCEP information of all patients of all runs and
 % both protocols (2 and 10 stims)
 dataBase = struct;                      
-for i=1:size(unique_runlabels,1)                                                % DataBase must have the size of the number of runs 
-     dataBase(i).run_label = unique_runlabels{i};
-        
-    % Find rows with the run_label of interest to determine the sub_label
-    runLoc = find(contains({files(:).name},unique_runlabels{i}));              
-    dataBase(i).sub_label = extractBefore(files(runLoc(1)).name, '_ses')  ;      % sub_label is the same for every row the run_label is the same
-   
+for i=1:size(cfg.sub_labels,2)                                                % DataBase must have the size of the number of runs 
+    dataBase(i).sub_label = cfg.sub_labels{i};        
+    
+    % Find rows with the sub_label of interest 
+    respLoc = find(contains({files(:).name},'merged'));             % find(contains({files(:).name},cfg.sub_labels{i}));
     
     % load all both the 10 stimuli and 2 stimuli of the patient
-    for j=1:size(runLoc,2)                                                      % number of rows with the run_label of interest
-       if contains(files(runLoc(j)).name,'10stims') 
-          load(fullfile(files(runLoc(j)).folder,files(runLoc(j)).name));
+    for j=1:size(respLoc,2)                                                      % number of rows with the run_label of interest
+       if contains(files(respLoc(j)).name,'10stims') 
+          load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep10 = ccep10;
-          dataBase(i).filename10 = files(runLoc(j)).name;
+          dataBase(i).filename10 = files(respLoc(j)).name;
           
-       elseif contains(files(runLoc(j)).name,'2stims') 
-          load(fullfile(files(runLoc(j)).folder,files(runLoc(j)).name));
+       elseif contains(files(respLoc(j)).name,'2stims') 
+          load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep2 = ccep2;   
-          dataBase(i).filename2 = files(runLoc(j)).name;
+          dataBase(i).filename2 = files(respLoc(j)).name;
        end
     end
 end
 
-% Sort the rows based on the subjects instead of the run_label order
-[~,index] = sortrows({dataBase.sub_label}.'); 
-dataBase = dataBase(index);
-
 % small cleanup
-clear runLoc k j files ccep10 ccep2 run_label index
-
+clear respLoc k j files ccep10 ccep2 
 %% determine the agreement between 2 and 10 stims per run
 % The determine_agreement function is not only determining the agreement
 % when 2 sessions are compared. It could be possible to compare more, but
