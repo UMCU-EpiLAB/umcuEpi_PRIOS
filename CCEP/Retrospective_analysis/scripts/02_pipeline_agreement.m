@@ -20,7 +20,7 @@ for i=1:size(cfg.sub_labels,2)                                                % 
     dataBase(i).sub_label = cfg.sub_labels{i};        
     
     % Find rows with the sub_label of interest 
-    respLoc = find(contains({files(:).name},'merged'));             % find(contains({files(:).name},cfg.sub_labels{i}));
+    respLoc = find(contains({files(:).name},cfg.sub_labels{i}));        %find(contains({files(:).name},'merged'));
     
     % load all both the 10 stimuli and 2 stimuli of the patient
     for j=1:size(respLoc,2)                                                      % number of rows with the run_label of interest
@@ -87,13 +87,13 @@ clear ccep10 agreement LocOnes subj
 %% Plot all 10 stimuli and the average for the 10 stims and the 2 stims
 % This does not work without epoch_sorted information
 % ZIE NOTITIE IN PIPELINE_PREPROCES (SAVE CCEPS)
-plot_fig = input('Do you want plot the 10 stimuli and the average signals? [y/n] ','s');
-
-if strcmp(plot_fig,'y')
-    ccep10.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
-    plot_all_ccep_and_av(ccep10, ccep2, myDataPath, LocOnes, agreement);
-end
-
+        % plot_fig = input('Do you want plot the 10 stimuli and the average signals? [y/n] ','s');
+        % for subj = 1:size(dataBase,2)
+        %     if strcmp(plot_fig,'y')
+        %         ccep10.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
+        %         plot_all_ccep_and_av(dataBase(subj).ccep10, dataBase(subj).ccep2, myDataPath, LocOnes, agreement);
+        %     end
+        % end
 %% Calculate agreement parameters
 
 close all;
@@ -123,3 +123,67 @@ close all;
 for subj = 1:size(dataBase,2)
     visualise_gridstructure(myDataPath, dataBase(subj).ccep10, dataBase(subj).ccep2, dataBase(subj).agreement_parameter,plot_fig);
 end
+
+
+%% Display agreement parameters on brain image
+
+%%% DIT IS EVEN VOOR HET VOORBEELD VOOR IN MIJN VERSLAG!!!
+
+close all;
+clear coordinates
+
+% Show CT scan with the grid (patient specific)
+[I] = imread('CT met grid.jpg');            
+figure1 = figure();
+fig = imshow(I);
+set(figure1, 'Position', [319,7,1241,935]);        % enlarge figure
+
+% Get the points of the elektrodes in the CT scan
+% Make sure to select the electrodes in the same order as the electrode
+% names in dataBase.ch!!! (check excel sjabloon when nessecary)
+[xi,yi] = getpts;                                                      % When done, press enter twice to save the coordinates
+coordinates(:,1:2) = [xi(:),yi(:)];
+
+
+% Put the electrode names next to the selected points in the CT scan
+set(fig, 'AlphaData', 0.6);                         % Set transparency to show electrode label
+text(((xi)),yi,ccep10.ch(1:length(xi)), 'FontSize',8,'FontWeight','bold')           % Does not matter wheter ccep10 or ccep2 is chosen, ch is the same
+
+ 
+% PLot the indegree between the electrodes 
+% When the elec_mat shows a 1, there is a connection between the electrodes
+% Therefore a line is drawn between the electrodes
+temp_mat = dataBase(subj).ccep10.elec_Amat(1:length(xi),1:length(xi));
+% Replace all twos in the elec x elec matrix with 1 since this is not of
+% interest now
+twos = find(ismember(temp_mat,2));
+temp_mat(twos) = 1;
+
+% 10 stims
+%%% dit nog met 'mode'  proberen in 1 loop te zetten
+lineWidth_ind = linspace(min(dataBase(subj).agreement_parameter.indegreeN_10), max(dataBase(subj).agreement_parameter.indegreeN_10), 6);        % devide the number of ERs to fit the lineWidth 
+bins_lineWidth_ind= discretize(dataBase(subj).agreement_parameter.indegreeN_10, lineWidth_ind);
+
+% Thickness and transperancy of lines indicates the indegree
+for elec1 = 1:length(temp_mat);                                     % This should be the same as the number of channels!!
+    for elec2 = 1:length(temp_mat);
+       
+        if temp_mat(elec1,elec2)== 1                                % When there is a link between elec 1 and elec 2
+            
+            % Lines between electrodes with ER connection    
+            line_elec_x = line([xi(elec1), xi(elec2)], [yi(elec1), yi(elec2)],'Color','m','LineWidth',(bins_lineWidth_ind(elec1)*1.5)) ;   % linewidth moet gebaseerd op norm indegree'LineWidth',bins_lineWidth_2(i));
+            line_elec_x.Color(4) = bins_lineWidth_ind(elec1)*0.1;                  %the lower the more transparant
+            
+            %line_elec_x = annotation(figure1,'arrow',[((xi(elec2)-maxX)/maxX)*-1, ((xi(elec1)-maxX)/maxX)*-1], [((yi(elec2)-maxY)/maxY)*-1, ((yi(elec1)-maxY)/maxY*-1)],'Color','b') ;                          
+
+        end
+    end
+    
+end
+
+    
+
+ 
+ 
+ 
+ 
