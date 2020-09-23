@@ -137,6 +137,7 @@ clear coordinates
 figure1 = figure();
 fig = imshow(I);
 set(figure1, 'Position', [319,7,1241,935]);        % enlarge figure
+hold on
 
 % Get the points of the elektrodes in the CT scan
 % Make sure to select the electrodes in the same order as the electrode
@@ -144,10 +145,9 @@ set(figure1, 'Position', [319,7,1241,935]);        % enlarge figure
 [xi,yi] = getpts;                                                      % When done, press enter twice to save the coordinates
 coordinates(:,1:2) = [xi(:),yi(:)];
 
-
 % Put the electrode names next to the selected points in the CT scan
 set(fig, 'AlphaData', 0.6);                         % Set transparency to show electrode label
-text(((xi)),yi,ccep10.ch(1:length(xi)), 'FontSize',8,'FontWeight','bold')           % Does not matter wheter ccep10 or ccep2 is chosen, ch is the same
+text(((xi)),yi,dataBase(subj).ccep10.ch(1:length(xi)), 'FontSize',8,'FontWeight','bold')           % Does not matter wheter ccep10 or ccep2 is chosen, ch is the same
 
  
 % PLot the indegree between the electrodes 
@@ -159,10 +159,11 @@ temp_mat = dataBase(subj).ccep10.elec_Amat(1:length(xi),1:length(xi));
 twos = find(ismember(temp_mat,2));
 temp_mat(twos) = 1;
 
+
 % 10 stims
 %%% dit nog met 'mode'  proberen in 1 loop te zetten
-lineWidth_ind = linspace(min(dataBase(subj).agreement_parameter.indegreeN_10), max(dataBase(subj).agreement_parameter.indegreeN_10), 6);        % devide the number of ERs to fit the lineWidth 
-bins_lineWidth_ind= discretize(dataBase(subj).agreement_parameter.indegreeN_10, lineWidth_ind);
+lineWidth_ind = linspace(min(dataBase(subj).agreement_parameter.indegreeN_10), max(dataBase(subj).agreement_parameter.indegreeN_10), 4);        % devide the number of ERs to fit the lineWidth 
+bins_lineWidth_ind= discretize(dataBase(subj).agreement_parameter.indegreeN_10, lineWidth_ind)*2;
 
 % Thickness and transperancy of lines indicates the indegree
 for elec1 = 1:length(temp_mat);                                     % This should be the same as the number of channels!!
@@ -170,17 +171,27 @@ for elec1 = 1:length(temp_mat);                                     % This shoul
        
         if temp_mat(elec1,elec2)== 1                                % When there is a link between elec 1 and elec 2
             
-            % Lines between electrodes with ER connection    
-            line_elec_x = line([xi(elec1), xi(elec2)], [yi(elec1), yi(elec2)],'Color','m','LineWidth',(bins_lineWidth_ind(elec1)*1.5)) ;   % linewidth moet gebaseerd op norm indegree'LineWidth',bins_lineWidth_2(i));
-            line_elec_x.Color(4) = bins_lineWidth_ind(elec1)*0.1;                  %the lower the more transparant
             
-            %line_elec_x = annotation(figure1,'arrow',[((xi(elec2)-maxX)/maxX)*-1, ((xi(elec1)-maxX)/maxX)*-1], [((yi(elec2)-maxY)/maxY)*-1, ((yi(elec1)-maxY)/maxY*-1)],'Color','b') ;                          
+            % Lines between electrodes with ER connection 
+            x = [xi(elec1),yi(elec1)];
+            y = [xi(elec2),yi(elec2)];
+            dp = y - x;
 
-        end
+            arrow_elec = quiver(x(1),x(2),dp(1),dp(2),0,'Color',[0 0 0]+0.05*bins_lineWidth_ind(elec1),'LineWidth', (bins_lineWidth_ind(elec1))*0.5,'AutoScaleFactor',06) ;              %(bins_lineWidth_ind(elec1)));
+            %arrow_elec.Color(4) = bins_lineWidth_ind(elec1)*0.05;                  %the lower the more transparant
+       end
     end
-    
 end
 
+
+
+%                
+%             line_elec_x = line([xi(elec1), xi(elec2)], [yi(elec1), yi(elec2)],'Color','m','LineWidth',(bins_lineWidth_ind(elec1)*1.5)) ;   % linewidth moet gebaseerd op norm indegree'LineWidth',bins_lineWidth_2(i));
+%             line_elec_x.Color(4) = bins_lineWidth_ind(elec1)*0.1;                  %the lower the more transparant
+%             
+            %line_elec_x = annotation(figure1,'arrow',[((xi(elec2)-maxX)/maxX)*-1, ((xi(elec1)-maxX)/maxX)*-1], [((yi(elec2)-maxY)/maxY)*-1, ((yi(elec1)-maxY)/maxY*-1)],'Color','b') ;                          
+
+ 
     
 
  

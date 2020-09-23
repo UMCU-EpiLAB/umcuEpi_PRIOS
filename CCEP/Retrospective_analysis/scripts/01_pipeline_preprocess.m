@@ -13,15 +13,14 @@ files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg'
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
 strings = cell(size(names));
+
+% Find run_labels
 for n = 1:size(names,2)
     strings{n} = names{n}(strfind(names{n},'run-'):strfind(names{n},'run-')+9);
 end
 
-% stringsz = [repmat('%s, ',1,size(strings,2)-1),'%s'];
-% cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')}; % Chosen run is in cfg.run_label
 
-% Load data for multiple runs
-
+% Load data (also possible for multiple runs)
 for R = 1:size(strings,2)
     tic;
    cfg.run_label = strings(R);
@@ -30,7 +29,8 @@ for R = 1:size(strings,2)
 end
 
 
-
+% stringsz = [repmat('%s, ',1,size(strings,2)-1),'%s'];
+% cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')}; % Chosen run is in cfg.run_label
 % 
 % if ~contains(cfg.run_label,'run-')
 %    error('"run-" is missing in run_label') 
@@ -41,7 +41,6 @@ end
 % %% load data
 % 
 % dataBase = load_ECoGdata(cfg,myDataPath);
-
 
 
 %% CCEP for 2 and 10 stimulations
@@ -56,7 +55,7 @@ tt = dataBase2stim.tt;
 avg_stim = 5;
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
-if size(dataBase2stim,2) >1         % When SPES is ran in multiple runs
+if size(dataBase2stim,2) >1         % When SPES was ran in multiple runs
     dataBase2stim = merge_runs(dataBase2stim);
     dataBaseallstim = merge_runs(dataBaseallstim);       
 end
