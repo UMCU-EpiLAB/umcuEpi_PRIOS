@@ -1,26 +1,31 @@
 function dataBase_merge = merge_runs(dataBase)
 
-   dataBase_merge.sub_label =  dataBase(1).sub_label;
-   dataBase_merge.ses_label =  dataBase(1).ses_label;
-   dataBase_merge.task_label =  dataBase(1).task_label;
-   dataBase_merge.run_label =  {dataBase(1).run_label,dataBase(2).run_label};
-   dataBase_merge.dataName =  dataBase(1).dataName;
+   dataBase_merge.sub_label = dataBase(1).sub_label;
+   dataBase_merge.ses_label = dataBase(1).ses_label;
+   dataBase_merge.task_label = dataBase(1).task_label;
+   dataBase_merge.run_label = {dataBase(:).run_label};    
+   dataBase_merge.dataName = dataBase(1).dataName;
    dataBase_merge.ccep_header = dataBase(1).ccep_header;
-   dataBase_merge.ch =  dataBase(1).ch;
-   dataBase_merge.max_stim =  dataBase(1).max_stim;
-   dataBase_merge.tt =  dataBase(1).tt;
-   if isequal(dataBase(1).tb_channels,dataBase(2).tb_channels)
-       dataBase_merge.tb_channels = dataBase(1).tb_channels ;           % tb_channels are equal for both SPES sessions
-   else
-       diff_chan = setdiff(dataBase(1).tb_channels, dataBase(2).tb_channels);
-       fprintf('WARNING: these channels are different in tb_channels CHECK the diference %s \n', diff_chan.name{:})
-        
-        % The difference is probably little, therefore the tb_channels in
-        % the merge dataBase is set anyway to make sure it is not forgotten
-       dataBase_merge.tb_channels = dataBase(1).tb_channels ;
-   end
-
+   dataBase_merge.ch = dataBase(1).ch;
+   dataBase_merge.max_stim = dataBase(1).max_stim;
+   dataBase_merge.tt = dataBase(1).tt;
    
+   % Check whether the two tb_channels are the same, since these might be
+   % different for different runs because electrodes can turn bad etc.
+   for i = 1:size(dataBase,2)-1
+       
+        if isequal(dataBase(i).tb_channels,dataBase(i+1).tb_channels)
+             dataBase_merge.tb_channels = dataBase(1).tb_channels ;           % tb_channels are equal for both SPES sessions
+        else
+              diff_chan = setdiff(dataBase(i).tb_channels, dataBase(i+1).tb_channels);
+              warning('These channels are different in tb_channels CHECK the diference %s \n', diff_chan.name{:})
+        
+             % The difference is probably little, therefore the tb_channels in
+             % the merge dataBase is set anyway to make sure it is not forgotten
+             dataBase_merge.tb_channels = dataBase(1).tb_channels ;
+        end
+   end
+      
    % Concatenate the stimpairs in the two runs
    dataBase_merge.cc_stimsets_all = cat(1,dataBase(:).cc_stimsets_all);         
    dataBase_merge.cc_stimsets_avg = cat(1,dataBase(:).cc_stimsets_avg);         

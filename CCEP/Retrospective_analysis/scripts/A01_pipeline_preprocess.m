@@ -71,8 +71,7 @@ hold off
 title('two stimuli')
 xlabel('time (s)')
 xlim([-.2 1.0])
-
-            
+           
 subplot(2,1,2),
 plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
 hold on
@@ -83,7 +82,6 @@ hold off
 title('all stimuli')
 xlabel('time (s)')
 xlim([-.2 1.0])
-
 
 figure()
 plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
@@ -99,7 +97,7 @@ ylim([-750 750])
 xlabel('Time (s)')
 ylabel('Voltage (uV)')
 
-
+clear R stim strings chan n names
 %% Use the automatic N1 detector to detect ccep 
 dataBase2stim = detect_n1peak_ECoG_ccep(dataBase2stim,cfg);
 dataBaseallstim = detect_n1peak_ECoG_ccep(dataBaseallstim,cfg);
@@ -146,7 +144,7 @@ end
 [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save 2 stims
-fileName=[extractBefore(filename,'_ieeg'),'_CCEP_2stims.mat'];
+fileName=[extractBefore(filename,'_ieeg'),'_CCEP_2stims_merged.mat'];
 ccep2 = dataBase2stim.ccep;
 ccep2.stimchans_all = dataBase2stim.cc_stimchans_all;
 ccep2.stimchans_avg = dataBase2stim.cc_stimchans_avg;
@@ -166,7 +164,7 @@ if strcmp(savefiles,'y')
 end
 
 % save all stims
-fileName5=[extractBefore(filename,'_ieeg'),'_CCEP_10stims.mat'];
+fileName5=[extractBefore(filename,'_ieeg'),'_CCEP_10stims_merged.mat'];
 ccep10 = dataBaseallstim.ccep;
 ccep10.stimchans_all = dataBaseallstim.cc_stimchans_all;
 ccep10.stimchans_avg = dataBaseallstim.cc_stimchans_avg;

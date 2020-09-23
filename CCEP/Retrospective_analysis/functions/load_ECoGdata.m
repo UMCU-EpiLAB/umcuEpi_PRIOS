@@ -92,7 +92,6 @@ for i=1:size(sub_labels,2)
     dataBase(i).tb_electrodes = tb_electrodes;
     dataBase(i).ch = ch_incl;
     dataBase(i).data = data;
-    fprintf('...Subject %s has been run...\n',sub_labels{i})
+    fprintf('...Run %d of Subject %s has been run...\n',i,sub_labels{i})
 end
-
-disp('All subjects are loaded')
+end
