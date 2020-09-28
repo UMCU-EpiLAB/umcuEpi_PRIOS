@@ -38,7 +38,7 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 3; stim=1;
+chan = 3; stim=6;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -219,3 +219,10 @@ if strcmp(savefiles,'y')
 end
 
 
+
+%% Plot the average signal of all electrodes per stimulation pair
+dataBase_clin.save_fig = input('Do you want plot all 10 stimuli and the average signals? [y/n] ','s');
+
+plot_all_ccep(dataBase_clin, myDataPath)
+ 
+ 

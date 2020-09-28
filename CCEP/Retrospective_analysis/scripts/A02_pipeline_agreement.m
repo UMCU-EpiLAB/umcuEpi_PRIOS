@@ -125,6 +125,7 @@ for subj = 1:size(dataBase,2)
 end
 
 
+
 %% Display agreement parameters on brain image
 
 %%% DIT IS EVEN VOOR HET VOORBEELD VOOR IN MIJN VERSLAG!!!
@@ -145,11 +146,16 @@ hold on
 [xi,yi] = getpts;                                                      % When done, press enter twice to save the coordinates
 coordinates(:,1:2) = [xi(:),yi(:)];
 
-% Put the electrode names next to the selected points in the CT scan
-set(fig, 'AlphaData', 0.6);                         % Set transparency to show electrode label
-text(((xi)),yi,dataBase(subj).ccep10.ch(1:length(xi)), 'FontSize',8,'FontWeight','bold')           % Does not matter wheter ccep10 or ccep2 is chosen, ch is the same
+% Put random electrode names next to the selected points in the CT scan
+set(fig, 'AlphaData', 0.6);         % Set transparancy
+% array of random EL names
+for i = 1:length(xi)
+    name_ch{i,:} = ['EL' num2str(i,'%2d')];
+end
+text(((xi)),yi, name_ch, 'FontSize',8,'FontWeight','bold')           % Does not matter wheter ccep10 or ccep2 is chosen, ch is the same
 
- 
+
+
 % PLot the indegree between the electrodes 
 % When the elec_mat shows a 1, there is a connection between the electrodes
 % Therefore a line is drawn between the electrodes
@@ -160,14 +166,15 @@ twos = find(ismember(temp_mat,2));
 temp_mat(twos) = 1;
 
 
+temp_mat = zeros(size(dataBase(subj).ccep10.elec_Amat(1:length(xi),1:length(xi))))
 % 10 stims
 %%% dit nog met 'mode'  proberen in 1 loop te zetten
 lineWidth_ind = linspace(min(dataBase(subj).agreement_parameter.indegreeN_10), max(dataBase(subj).agreement_parameter.indegreeN_10), 4);        % devide the number of ERs to fit the lineWidth 
 bins_lineWidth_ind= discretize(dataBase(subj).agreement_parameter.indegreeN_10, lineWidth_ind)*2;
 
 % Thickness and transperancy of lines indicates the indegree
-for elec1 = 1:length(temp_mat);                                     % This should be the same as the number of channels!!
-    for elec2 = 1:length(temp_mat);
+for elec1 = 1:length(temp_mat)                                     % This should be the same as the number of channels!!
+    for elec2 = 1:length(temp_mat)
        
         if temp_mat(elec1,elec2)== 1                                % When there is a link between elec 1 and elec 2
             
@@ -177,7 +184,7 @@ for elec1 = 1:length(temp_mat);                                     % This shoul
             y = [xi(elec2),yi(elec2)];
             dp = y - x;
 
-            arrow_elec = quiver(x(1),x(2),dp(1),dp(2),0,'Color',[0 0 0]+0.05*bins_lineWidth_ind(elec1),'LineWidth', (bins_lineWidth_ind(elec1))*0.5,'AutoScaleFactor',06) ;              %(bins_lineWidth_ind(elec1)));
+            arrow_elec = quiver(x(1),x(2),dp(1),dp(2),0,'Color',[0.05 0.05 0.05],'LineWidth', 1.5,'AutoScaleFactor',06) ;              %(bins_lineWidth_ind(elec1)));
             %arrow_elec.Color(4) = bins_lineWidth_ind(elec1)*0.05;                  %the lower the more transparant
        end
     end

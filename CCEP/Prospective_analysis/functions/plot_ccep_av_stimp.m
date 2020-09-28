@@ -1,4 +1,4 @@
-function plot_ccep_av_stimp(dataBase,dataBase2, myDataPath, stimchans, LocOnes, TotOnesStim, dif_mat)
+function plot_ccep_av_stimp(ccep_clin, ccep_prop, myDataPath)
 %
 % Function based on plot_ccep_av.m
 % Function plots average CCEPs across conditions per electrode.
@@ -12,12 +12,12 @@ LocaOnes = LocOnes{:,:};             % Create matrix of table
 
 for i = 1:size(ER_in10(:,2))                                    % For the number of ones detected
     ER_in10st(i,1) = stimchans(ER_in10(i,1))';
-    ER_in10st(i,2) = dataBase.ch(ER_in10(i,2));    
+    ER_in10st(i,2) = ccep_clin.ch(ER_in10(i,2));    
 end
 
 
-tt = dataBase.tt;    
-   for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)            % for all stimulation pairs
+tt = ccep_clin.tt;    
+   for stimp = 1:size(ccep_clin.cc_epoch_sorted_avg,2)            % for all stimulation pairs
         
          Stimpnm = stimchans{stimp};    
          counter = 0;
@@ -29,16 +29,16 @@ tt = dataBase.tt;
          NameER = cell(1,nmbr_of_ones);
               
          
-        for elec = 1:size(dataBase.cc_epoch_sorted_avg,1)            % for all electrodes
-             elecnm = dataBase.ch{elec};
+        for elec = 1:size(ccep_clin.cc_epoch_sorted_avg,1)            % for all electrodes
+             elecnm = ccep_clin.ch{elec};
              
             for i = 1:size(LocaOnes)     
-                if ismember({Stimpnm}, LocaOnes{i,1}) && ismember(dataBase.ch{elec}, LocaOnes(i,2)) 
+                if ismember({Stimpnm}, LocaOnes{i,1}) && ismember(ccep_clin.ch{elec}, LocaOnes(i,2)) 
                     counter = counter+1;
                     name(:,counter) =  [LocaOnes(i,2)];                 % names of electrodes with a 1 on stimulation pair stimp.
                      
-                    ccep_plot(:,counter) = squeeze(dataBase.cc_epoch_sorted_avg(elec,stimp,:));
-                    ccep_plot2(:,counter) = squeeze(dataBase2.cc_epoch_sorted_avg(elec,stimp,:));       % stimulations of the 2 stims
+                    ccep_plot(:,counter) = squeeze(ccep_clin.cc_epoch_sorted_avg(elec,stimp,:));
+                    ccep_plot2(:,counter) = squeeze(ccep_prop.cc_epoch_sorted_avg(elec,stimp,:));       % stimulations of the 2 stims
                     ccep_plot(tt>-0.010 & tt<0.010) = NaN;
                     ccep_plot2(tt>-0.010 & tt<0.010) = NaN;
                           
@@ -68,7 +68,7 @@ tt = dataBase.tt;
                 
                 
                  for j = 1:length(ER_in10st)
-                    if ismember({Stimpnm}, ER_in10st{j,1}) && ismember(dataBase.ch{elec}, ER_in10st(j,2))   
+                    if ismember({Stimpnm}, ER_in10st{j,1}) && ismember(ccep_clin.ch{elec}, ER_in10st(j,2))   
                         counter_10 = counter_10+1;
                         NameER(:,counter_10) =  [ER_in10st(j,2)];
                         str_main = sprintf('10 stims evoke ER in %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s',NameER{:});        
@@ -78,16 +78,16 @@ tt = dataBase.tt;
                 
 
     % Save the figures
-        if dataBase.save_fig==1
+        if ccep_clin.save_fig==1
             % create folder to save figures
-            if ~ exist(fullfile(myDataPath.CCEPpath,'av_ccep_figures',dataBase.sub_label),'dir')
+            if ~ exist(fullfile(myDataPath.CCEPpath,'av_ccep_figures',ccep_clin.sub_label),'dir')
 
-                mkdir(fullfile(myDataPath.CCEPpath,'av_ccep_figures',dataBase.sub_label));
+                mkdir(fullfile(myDataPath.CCEPpath,'av_ccep_figures',ccep_clin.sub_label));
             end
 
             % filename
-            figureName = fullfile(myDataPath.CCEPpath,'av_ccep_figures',dataBase.sub_label,...
-                [dataBase.sub_label '_stimp' stimchans{stimp}]);
+            figureName = fullfile(myDataPath.CCEPpath,'av_ccep_figures',ccep_clin.sub_label,...
+                [ccep_clin.sub_label '_stimp' stimchans{stimp}]);
             set(gcf,'PaperPositionMode','auto');
             print('-dpng','-r300',figureName);
         else

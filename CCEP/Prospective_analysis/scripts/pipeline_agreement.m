@@ -47,15 +47,16 @@ fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreeme
 LocOnes = find_ones(ccep_clin, agreement.agreement_run);
  
 
+
 %% Plot all 10 stimuli and the average for the 10 stims and the 2 stims
 % This does not work without epoch_sorted information, though, matlab
 % cannot save since it is to big.
-plot_fig = input('Do you want plot the 10 stimuli and the average signals? [y/n] ','s');
-
-if strcmp(plot_fig,'y')
-    ccep_clin.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
-    plot_all_ccep_and_av(ccep_clin, ccep_prop, myDataPath, LocOnes, agreement);
-end
+% plot_fig = input('Do you want plot the 10 stimuli and the average signals? [y/n] ','s');
+% 
+% if strcmp(plot_fig,'y')
+%     ccep_clin.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
+%     plot_all_ccep_and_av(ccep_clin, ccep_prop, myDataPath, LocOnes, agreement);
+% end
 
 %% Calculate agreement parameters
 close all;

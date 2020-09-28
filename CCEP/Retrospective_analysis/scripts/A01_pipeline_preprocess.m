@@ -61,7 +61,7 @@ if size(dataBase2stim,2) >1         % When SPES was ran in multiple runs
 end
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 11; stim=57;
+chan = 11; stim=23;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
