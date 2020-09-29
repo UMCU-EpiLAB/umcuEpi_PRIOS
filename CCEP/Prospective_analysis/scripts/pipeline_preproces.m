@@ -222,7 +222,8 @@ end
 
 %% Plot the average signal of all electrodes per stimulation pair
 dataBase_clin.save_fig = input('Do you want plot all 10 stimuli and the average signals? [y/n] ','s');
+dataBase_prop.save_fig = dataBase_clin.save_fig;
 
 plot_all_ccep(dataBase_clin, myDataPath)
  
- 
+plot_all_ccep(dataBase_prop, myDataPath)

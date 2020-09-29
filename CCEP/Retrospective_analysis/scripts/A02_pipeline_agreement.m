@@ -24,12 +24,12 @@ for i=1:size(cfg.sub_labels,2)                                                % 
     
     % load all both the 10 stimuli and 2 stimuli of the patient
     for j=1:size(respLoc,2)                                                      % number of rows with the run_label of interest
-       if contains(files(respLoc(j)).name,'10stims') 
+       if contains(files(respLoc(j)).name,'10stims_merged') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep10 = ccep10;
           dataBase(i).filename10 = files(respLoc(j)).name;
           
-       elseif contains(files(respLoc(j)).name,'2stims') 
+       elseif contains(files(respLoc(j)).name,'2stims_merged') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep2 = ccep2;   
           dataBase(i).filename2 = files(respLoc(j)).name;
