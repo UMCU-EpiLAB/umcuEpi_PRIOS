@@ -51,6 +51,9 @@ for subj = 1:size(dataBase,2)
     %% unique stimulation pairs
     stimpair = dataBase(subj).tb_events.electrical_stimulation_site(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a')) ;
     
+    
+    %%% FOR PRIOS04 GAAT HET MIS ZIE TB_EVENTS REGELS 47-52, MOGELIJK IETS
+    %%% INBOUWEN WAARBIJ JE AANGEEFT DAT ER MINIMAAL 5 CHARACTERS ZIJN
     stimnum = NaN(size(stimpair,1),2);
     for stimp = 1:size(stimpair,1)
         stimchans = strsplit(stimpair{stimp},'-');
@@ -110,9 +113,9 @@ for subj = 1:size(dataBase,2)
     %% Number of stimulations per stimulus pair
     % find the amount of time most stimulus pairs are stimulated and set
     % that as maximal number of stimulus pairs
-    max_stim = median(n);
+    max_stim = median(n);               % The max stim per stimulation pair DIRECTION!
     
-    if strcmp(cfg.dir_avg,'yes')      % dir_avg = 'yes' analyse the average signal of both the positive and negative stimuli
+    if strcmp(cfg.dir_avg,'yes')        % dir_avg = 'yes' analyse the average signal of both the positive and negative stimuli
         
         sort_cc_stimsets = sort(cc_stimsets_all,2);
         [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
@@ -181,7 +184,7 @@ for subj = 1:size(dataBase,2)
     tt_epoch_sorted_all = NaN(dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t); % samplenumbers for each epoch % Dit is nu een 2xstimpairXtt matrix
     
     for elec = 1:size(dataBase(subj).data,1)                    % for all channels
-        for ll = 1:size(dataBase(subj).cc_stimsets_all,1)       % for all epochs with > minimum number of stimuli (minstim)
+        for ll = 1:size(dataBase(subj).cc_stimsets_all,1)       % for all stimulation pair directions with the minimum number of stimuli (minstim)
             if strcmp(cfg.dir,'no')
                 
                 % Find the stimulationnumbers on which a stimulation pair is stimulated in both directions.
@@ -217,16 +220,15 @@ for subj = 1:size(dataBase,2)
     
     %% average epochs
     if isempty(avg_stim)
-        avg_stim = maxstim;
+        avg_stim = max_stim;
     end
     
     % preallocation
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
     cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==2),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples[
     
-    for ll = 1:max(IC_avg)                      % Takes every value between 1 and 33 while some numbers are not used, therefore the next line
-        if sum(IC_avg==ll)>1                   % Check whether the
-        %stimpair is stimulated in both directions.
+    for ll = 1:max(IC_avg)                     % Takes every value between 1 and max while some numbers are not used, therefore the next line
+        if sum(IC_avg==ll)>1                   % Check whether the stimpair is stimulated in both directions.
             
             selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
             selection_avg =  squeeze(nanmean(selection,2));

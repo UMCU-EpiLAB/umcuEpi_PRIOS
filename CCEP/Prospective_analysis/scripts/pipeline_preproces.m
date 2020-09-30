@@ -28,7 +28,7 @@ for i = 1:size(dataBase,2)
        dataBase_clin = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim_clin);
 
     elseif ismember(dataBase(i).task_name,'task-SPESprop')
-        avg_stim = 2;
+        avg_stim = 1;               % Average number of stimulations per direction of a stimpair
         cfg.minstim = 1;
         dataBase_prop = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim);     
 
@@ -221,9 +221,7 @@ end
 
 
 %% Plot the average signal of all electrodes per stimulation pair
-dataBase_clin.save_fig = input('Do you want plot all 10 stimuli and the average signals? [y/n] ','s');
-dataBase_prop.save_fig = dataBase_clin.save_fig;
+dataBase_clin.save_fig = input('Do you want plot all average signals to the stimulus per stimpair? [y/n] ','s');
 
-plot_all_ccep(dataBase_clin, myDataPath)
+plot_all_ccep(dataBase_clin, dataBase_prop, myDataPath)
  
-plot_all_ccep(dataBase_prop, myDataPath)
