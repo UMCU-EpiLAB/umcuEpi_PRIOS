@@ -38,14 +38,14 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 3; stim=6;
+chan = 9; stim=6;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
-title('two stimuli')
+title('SPES prop')
 xlabel('time (s)')
 xlim([-.2 1.0])
 
@@ -57,7 +57,7 @@ plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Co
 hold on
 plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
-title('all stimuli')
+title('SPES clin')
 xlabel('time (s)')
 xlim([-.2 1.0])
 
@@ -69,7 +69,7 @@ plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Co
 hold on
 plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
-title('all stimuli')
+title('SPES clin')
 xlabel('time (s)')
 xlim([-.1 0.1])
 
@@ -84,6 +84,7 @@ elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_al
     Ncount = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0);     % if SPESprop contains more stimpairs
     names = dataBase_prop.stimpnames_all(Ncount);
     warning('%s: are only stimulated in SPESprop and not in SPESclin \n',[names{:}]);
+    % hier functie miss
 end
 
 

@@ -10,26 +10,38 @@ ccep_clin.cc_epoch_sorted_avg(bad_sig_clin,:,:) = NaN;
 bad_sig_prop(:,1) = find(contains(ccep_prop.tb_channels.status, {'bad'}));
 ccep_prop.cc_epoch_sorted_avg(bad_sig_prop,:,:) = NaN;
 
-%%% WERKT NIET ALS DE EEN EEN MINDER STIMPAIREN HEEFT DAN DE ANDER (30-9)
-% Find rows (stimpair) which are not equal for both runs
-if size(ccep_clin.stimpnames_avg,2) ~= size(ccep_prop.stimpnames_avg,2)
-   diff_row = find(~ismember(ccep_clin.stimpnames_avg, ccep_prop.stimpnames_avg));      % Find stimpairs which are in clin-SPES but not in prop-SPES
-   warning('Clinical SPES contains more stimpairs than Prop-SPES')
-   
-   ccep_clin.stimpnames_avg(diff_row) = [];
+% Find rows (stimpair) which are not equal for both runs  
+if sum(~ismember(ccep_clin.stimpnames_avg, ccep_prop.stimpnames_avg)) ~= 0
+    
+    diff_row = find(~ismember(ccep_clin.stimpnames_avg, ccep_prop.stimpnames_avg));     % Find stimpairs which are in clin-SPES but not in prop-SPES
+    names = ccep_clin.stimpnames_avg(diff_row);                                         % Find names which are different for both protocols (could be a typo)
+    stringsz = [repmat('%s, ',1,size(names,2)-1),'%s '];                                % Create array in the lenght of the number of diff stimpairs
+    num_select = sprintf(['Runs present in SPESclin and NOT in SPESprop: \n' stringsz '\n'],names{:})  % stimpairs not in both runs
+    
+    strings2 = [repmat('%d, ',1,size(names,2)-1),'%d '];                                % Create array in the lenght of the number of diff stimpairs
+    % Select the rownumber corresponding to the incorrect stimulation pair
+    remv_elec(:,:) = input(sprintf(['Select which number correspond to the stimpair which is wrong, in [] when multiple: \n' strings2 '\n'],diff_row))  
+    
+    % The above selected incorrect stimulation pair is removed from the
+    % matrices
+    ccep_clin.stimpnames_avg(remv_elec) = [];
+    ccep_clin.cc_epoch_sorted_avg(:,remv_elec,:) = [];
+    ccep_clin.cc_stimsets_avg(remv_elec,:) = [];
 end
+
 
 % Plot all averaged responses to the stimuli of one stimulation pair
 % Left the Clinical SPES, right the Propofol SPES
 % Only plot the stimulation pairs which are stimulated in both protocols
+
+%%% GAAT NOG FOUT VOOR PRIOS05, STIMPAIR WORDT AFGEBEELD DUS GAAT IETS NIET
+%%% GOED IN HET STUK, UITZOEKEN WELK STIMPAAR HET IS.
+
 for stimp = 1:length(ccep_clin.stimpnames_avg)            % For each stimulation pair                              
     Stimpnm_clin = ccep_clin.stimpnames_avg{stimp};     
     Stimpnm_prop = ccep_prop.stimpnames_avg{stimp};     
 
-    % When the stimulation pairs are equal for clin and prop, plot them
-    % in one figure to compare
-    if Stimpnm_clin == Stimpnm_prop
-        % Clinical SPES
+        %%% Clinical SPES
         % Electrodes in the stimulation pair
         stim_elec = ccep_clin.cc_stimsets_avg(stimp,:);
        
@@ -40,7 +52,7 @@ for stimp = 1:length(ccep_clin.stimpnames_avg)            % For each stimulation
         plot_ccep_clin = squeeze(plot_ccep(:,stimp,:));
         plot_ccep_clin(:,tt>-0.01 & tt<0.02) = NaN;                 % remove stimulation artefact for easier visual check
 
-        % Propofol SPES
+        %%% Propofol SPES
         % Electrodes in the stimulation pair
         stim_elec_prop = ccep_prop.cc_stimsets_avg(stimp,:);
         
@@ -62,6 +74,7 @@ for stimp = 1:length(ccep_clin.stimpnames_avg)            % For each stimulation
         title(str)
         set(gca,'YTick',[0:1000:size(plot_ccep_clin,1)*1000-1],'YTickLabel',ccep_clin.ch) ;                  
         xlim([-.2 1.5])
+        ylim([-1000 size(plot_ccep_clin,1)*1000-1])
         ylabel('All stimuli of this stimulation pair' )
         xlabel('time (s)') 
 
@@ -75,6 +88,7 @@ for stimp = 1:length(ccep_clin.stimpnames_avg)            % For each stimulation
         title(str)
         set(gca,'YTick',[0:1000:size(plot_ccep_prop,1)*1000-1],'YTickLabel',ccep_prop.ch) ;                  
         xlim([-.2 1.5])
+        ylim([-1000 size(plot_ccep_clin,1)*1000-1])
         ylabel('All stimuli of this stimulation pair' )
         xlabel('time (s)') 
 
@@ -96,8 +110,7 @@ for stimp = 1:length(ccep_clin.stimpnames_avg)            % For each stimulation
             else
                 pause
             end
-    end
-    
+        
 end
 close all
 end
