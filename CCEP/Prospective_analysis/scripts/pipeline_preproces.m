@@ -38,7 +38,7 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 9; stim=6;
+chan = 9; stim=20;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -225,4 +225,5 @@ end
 dataBase_clin.save_fig = input('Do you want plot all average signals to the stimulus per stimpair? [y/n] ','s');
 
 plot_all_ccep(dataBase_clin, dataBase_prop, myDataPath)
- 
+% plot_all_ccep( dataBase_prop, myDataPath)
+

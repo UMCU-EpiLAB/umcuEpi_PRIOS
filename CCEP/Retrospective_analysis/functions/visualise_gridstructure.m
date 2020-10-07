@@ -66,7 +66,8 @@ for i = 1:length(ccep.stimchans_avg)
         elec1 = ccep.stimsets_avg(i,1);                         % Find the electrodes in the stimpair
         elec2 = ccep.stimsets_avg(i,2);
         if agreement_parameter.ERs_stimp10(i) > 0                                 % Stimpairs with 0 ERs do not get a line.
-           % horizontal lines between electrodes
+          
+            % horizontal lines between electrodes
            line_stim_x = line([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'Color',[0.6 0.6 0.6]-0.05*bins_lineWidth(i),'LineWidth',bins_lineWidth(i));
            line_stim_x.Color(4) = 0.6;              % Transparency
            
@@ -96,7 +97,7 @@ hold(axes1,'off')
 str_main = sprintf('sub-%s', subj{1});
 sgtitle(str_main)
 
-title({'\rm Indegree & ERs per stimpair, all stimulations'})
+title({'\rm Indegree & ERs per stimpair, all stimuli'})
 text(((topo.x)+0.2),topo.y,ccep.ch, 'FontSize',8,'FontWeight','bold')
 
 %% Indegree of electrodes and ERs per stimulation pair, for 2 stims
@@ -120,13 +121,13 @@ bins_lineWidth_2 = discretize(agreement_parameter.ERs_stimp10,lineWidth_set_2);
 for i = 1:length(ccep.stimchans_avg)
         elec1 = ccep.stimsets_avg(i,1);                                             % Find the electrodes in the stimpair
         elec2 = ccep.stimsets_avg(i,2);
-        if agreement_parameter.ERs_stimp10(i) > 0                                   % Stimpairs with 0 ERs do not get a line.
+        if agreement_parameter.ERs_stimp2(i) > 0                                   % Stimpairs with 0 ERs do not get a line.
            % Horizontal lines
            line_stim_x = line([topo.x(elec1), topo.x(elec2)], [topo.y(elec2),topo.y(elec2)], 'Color',[0.6 0.6 0.6]-0.05*bins_lineWidth_2(i),'LineWidth',bins_lineWidth_2(i));
            line_stim_x.Color(4) = 0.6;              % Transparancy
            
            % Vertical lines between electrodes
-           line_stim_y = line([topo.x(elec1), topo.x(elec1)], [topo.y(elec1),topo.y(elec2)],'Color',[0.6 0.6 0.6]-0.05*bins_lineWidth(i),'LineWidth',bins_lineWidth(i));
+           line_stim_y = line([topo.x(elec1), topo.x(elec1)], [topo.y(elec1),topo.y(elec2)],'Color',[0.6 0.6 0.6]-0.05*bins_lineWidth_2(i),'LineWidth',bins_lineWidth_2(i));
            line_stim_y.Color(4) = 0.6;
         end
 end
@@ -148,7 +149,7 @@ else
     caxis([0 max(scale_2)]);
 end
 
-title({'\rm Indegree & ERs per stimpair, 2 stimulations'})
+title({'\rm Indegree & ERs per stimpair, 2 stimuli'})
 text(((topo.x)+0.2),topo.y,ccep.ch, 'FontSize',8,'FontWeight','bold')
 
 % Save figure
@@ -176,16 +177,16 @@ axes3.YTick = [];
 axes3.XTick = [];
 axes3.XColor = 'none';
 axes3.YColor = 'none';
-title('\rm Outdegree, all stims')
+title('\rm Outdegree, all stimuli')
 
-% Plot the indegree as a colorscale, combine this with the number of
+% Plot the outdegree as a colorscale, combine this with the number of
 % ERS evoked per stimulation pair.
 scatter(topo.x, topo.y, 260, scale_10_out,'filled','MarkerEdgeColor','k')
 c = hot;
 c = flipud(c);
 colormap(c);   
 cb = colorbar();
-text(((topo.x)+0.2),topo.y,ccep.ch,'FontWeight','bold')
+text(((topo.x)+0.2),topo.y,ccep.ch, 'FontSize',8,'FontWeight','bold')
 
 % Create the same colormap limits based on the highest protocol with the highest outdegree
 if max(scale_10_out)>max(scale_2_out)                                   
@@ -208,16 +209,16 @@ axes4.XColor = 'none';
 axes4.YColor = 'none';
 str_main = sprintf('sub-%s', subj{1});
 sgtitle(str_main)
-title('\rm Outdegree, 2 stims')
+title('\rm Outdegree, 2 stimuli')
 
-% Plot the indegree as a colorscale, combine this with the number of
+% Plot the outdegree as a colorscale, combine this with the number of
 % ERS evoked per stimulation pair.
 scatter(topo.x, topo.y, 260, scale_2_out,'filled','MarkerEdgeColor','k')
 c = hot;
 c = flipud(c);
 colormap(c);
 cb = colorbar();
-text(((topo.x)+0.2),topo.y,ccep.ch,'FontWeight','bold')
+text(((topo.x)+0.2),topo.y,ccep.ch, 'FontSize',8,'FontWeight','bold')
 
 % Create the same colormap limits based on the highest protocol with the highest outdegree
 if max(scale_10_out)>max(scale_2_out)                                   
@@ -242,11 +243,12 @@ if ~exist('plot_fig')
 end
 
 if strcmp(plot_fig,'y')
-    
+
+
+        
     for stimp = 1:size(ccep(1).stimsets_avg)                   % Number of stimulation pairs (columns)
         stimnum = ccep(1).stimsets_avg(stimp,:);               % Stimulation pair numbers for column number (stimp)
         
-        % for 10 stims
         figure3 = figure('Position',[280,400,1300,500]);
         axes1 = axes('Parent',figure3, 'Position', [0.04,0.014,0.9,0.886]);
         hold(axes1,'on');
@@ -259,49 +261,46 @@ if strcmp(plot_fig,'y')
         axes1.XColor = 'none';
         axes1.YColor = 'none';
         text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
-        str_main = sprintf('sub-%s', subj{1});
-        sgtitle(str_main)
-        title('\rm ERs responses to specific stimulus, all stims')
-        
+
+
+        % for 10 stims
         % plot stimulation pair in black
         for chan=1:2
-            plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
-                'MarkerFaceColor','k','MarkerEdgeColor','k')
+           indicator(1,:) = plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
+                'MarkerFaceColor','k','MarkerEdgeColor','k');
         end
         plot([topo.x(stimnum(1)), topo.x(stimnum(2))], [topo.y(stimnum(1)),topo.y(stimnum(2))], 'k');
         
         % plot ERs in grey
         for elek = 1:length(ccep.ch)
             if ~isnan(ccep.n1_peak_sample(elek,stimp))
-                plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
-                    'MarkerFaceColor', [0.75 0.75 0.75],'MarkerEdgeColor','k')
+              indicator(2,:) =  plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
+                    'MarkerFaceColor', [0.75 0.75 0.75],'MarkerEdgeColor','k');
             end
             
-        end
-        
-        % plot ERs in grey
-        for elek = 1:length(ccep.ch)
-            if ~isnan(ccep2.n1_peak_sample(elek,stimp))
-                plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
-                    'MarkerFaceColor', [0.75 0.75 0.75],'MarkerEdgeColor','k')
-            end
         end
         
         % In blue the ERs in 2 and not in 10
         for elek = 1:length(ccep.ch)
             if isnan(ccep.n1_peak_sample(elek,stimp)) && ~isnan(ccep2.n1_peak_sample(elek,stimp))
-                plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
-                    'MarkerFaceColor',[0 0.7 1],'MarkerEdgeColor','k')
+               indicator(3,:) = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
+                    'MarkerFaceColor',[0 0.7 1],'MarkerEdgeColor','k');
             end
         end
         
         % In magenta the ER in 10 and not in 2
         for elek = 1:length(ccep.ch)
             if isnan(ccep2.n1_peak_sample(elek,stimp)) && ~isnan(ccep.n1_peak_sample(elek,stimp))
-                plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
-                    'MarkerFaceColor',[1 0.7 1],'MarkerEdgeColor','k')
+                indicator(4,:) = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
+                    'MarkerFaceColor',[1 0.7 1],'MarkerEdgeColor','k');
             end
         end
+        
+        legend(indicator,'Stimpair', 'ER in both','ER in 2','ER in 10')
+        str_main = sprintf('sub-%s', subj{1});
+        sgtitle(str_main)
+        title('\rm ERs responses to specific stimulus, all stims')
+        
     end
 end
 end

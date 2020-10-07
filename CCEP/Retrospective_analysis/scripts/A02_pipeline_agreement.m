@@ -24,12 +24,12 @@ for i=1:size(cfg.sub_labels,2)                                                % 
     
     % load all both the 10 stimuli and 2 stimuli of the patient
     for j=1:size(respLoc,2)                                                      % number of rows with the run_label of interest
-       if contains(files(respLoc(j)).name,'10stims_merged') 
+       if contains(files(respLoc(j)).name,'10stims') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep10 = ccep10;
           dataBase(i).filename10 = files(respLoc(j)).name;
           
-       elseif contains(files(respLoc(j)).name,'2stims_merged') 
+       elseif contains(files(respLoc(j)).name,'2stims') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep2 = ccep2;   
           dataBase(i).filename2 = files(respLoc(j)).name;
@@ -134,7 +134,7 @@ close all;
 clear coordinates
 
 % Show CT scan with the grid (patient specific)
-[I] = imread('CT met grid.jpg');            
+[I] = imread('top_left.jpg');            
 figure1 = figure();
 fig = imshow(I);
 set(figure1, 'Position', [319,7,1241,935]);        % enlarge figure
@@ -149,9 +149,15 @@ coordinates(:,1:2) = [xi(:),yi(:)];
 % Put random electrode names next to the selected points in the CT scan
 set(fig, 'AlphaData', 0.6);         % Set transparancy
 % array of random EL names
-for i = 1:length(xi)
-    name_ch{i,:} = ['EL' num2str(i,'%2d')];
+
+for i = 1:16
+    name_ch{i,:} = ['LC' num2str(i,'%2d')];
+    
 end
+for i = 16:48
+    name_ch{i,:} = ['C' num2str(i-16,'%2d')];
+end
+
 text(((xi)),yi, name_ch, 'FontSize',8,'FontWeight','bold')           % Does not matter wheter ccep10 or ccep2 is chosen, ch is the same
 
 

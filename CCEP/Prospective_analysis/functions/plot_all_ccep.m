@@ -18,15 +18,27 @@ if sum(~ismember(ccep_clin.stimpnames_avg, ccep_prop.stimpnames_avg)) ~= 0
     stringsz = [repmat('%s, ',1,size(names,2)-1),'%s '];                                % Create array in the lenght of the number of diff stimpairs
     num_select = sprintf(['Runs present in SPESclin and NOT in SPESprop: \n' stringsz '\n'],names{:})  % stimpairs not in both runs
     
-    strings2 = [repmat('%d, ',1,size(names,2)-1),'%d '];                                % Create array in the lenght of the number of diff stimpairs
+%     strings2 = [repmat('%d, ',1,size(names,2)-1),'%d '];                                % Create array in the lenght of the number of diff stimpairs
     % Select the rownumber corresponding to the incorrect stimulation pair
-    remv_elec(:,:) = input(sprintf(['Select which number correspond to the stimpair which is wrong, in [] when multiple: \n' strings2 '\n'],diff_row))  
+%     remv_elec(:,:) = input(sprintf(['Select which number correspond to the stimpair which is wrong, in [] when multiple: \n' strings2 '\n'],diff_row))  
     
     % The above selected incorrect stimulation pair is removed from the
     % matrices
-    ccep_clin.stimpnames_avg(remv_elec) = [];
-    ccep_clin.cc_epoch_sorted_avg(:,remv_elec,:) = [];
-    ccep_clin.cc_stimsets_avg(remv_elec,:) = [];
+    ccep_clin.stimpnames_avg(diff_row) = [];
+    ccep_clin.cc_epoch_sorted_avg(:,diff_row,:) = [];
+    ccep_clin.cc_stimsets_avg(diff_row,:) = [];
+    
+    
+    
+    % Find stimpairs which are in SPES-prop but not in SPES-clin
+    diff_row_prop = find(~ismember(ccep_prop.stimpnames_avg, ccep_clin.stimpnames_avg));
+    names_prop = ccep_prop.stimpnames_avg(diff_row_prop);
+    stringsz = [repmat('%s, ',1,size(names_prop,2)-1),'%s '];
+    sprintf(['Runs present in SPESprop and NOT in SPESclin: \n' stringsz '\n'],names_prop{:})  % stimpairs not in both runs
+    ccep_prop.stimpnames_avg(diff_row_prop) = [];
+    ccep_prop.cc_epoch_sorted_avg(:,diff_row_prop,:) = [];
+    ccep_prop.cc_stimsets_avg(diff_row_prop,:) = [];
+
 end
 
 
@@ -37,7 +49,7 @@ end
 %%% GAAT NOG FOUT VOOR PRIOS05, STIMPAIR WORDT AFGEBEELD DUS GAAT IETS NIET
 %%% GOED IN HET STUK, UITZOEKEN WELK STIMPAAR HET IS.
 
-for stimp = 1:length(ccep_clin.stimpnames_avg)            % For each stimulation pair                              
+for stimp = 1:length(ccep_clin.stimpnames_avg)            % For each stimulation pair should now be similar for prop and clin, see above                            
     Stimpnm_clin = ccep_clin.stimpnames_avg{stimp};     
     Stimpnm_prop = ccep_prop.stimpnames_avg{stimp};     
 

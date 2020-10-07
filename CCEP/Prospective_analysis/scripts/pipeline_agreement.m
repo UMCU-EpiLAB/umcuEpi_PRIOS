@@ -36,7 +36,7 @@ end
 agreement = determine_agreement(runs);          % Deze agreement nog toevoegen aan ccep! handig voor visualize Gridstructure
 
 fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
-    agreement.agreement_run.OA, agreement.agreement_run.PA, agreement.agreement_run.NA)
+    agreement.agreement_stim.OA, agreement.agreement_stim.PA, agreement.agreement_stim.NA)
 
 % fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
 %     agreement_stim.OA, agreement_stim.PA, agreement_stim.NA)
@@ -44,7 +44,7 @@ fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreeme
 %% Determine the location of the ones (ER vs. No-ER)
 % ccep10 is only necessary for the channels and stimpairs and those are
 % equal for 2 and 10 stimuli so does not matter which database is used.
-LocOnes = find_ones(ccep_clin, agreement.agreement_run);
+LocOnes = find_ones(ccep_clin, agreement.agreement_stim);
  
 
 
@@ -60,8 +60,8 @@ LocOnes = find_ones(ccep_clin, agreement.agreement_run);
 
 %% Calculate agreement parameters
 close all;
-ccep_prop = rewrite_Amat(ccep_prop, agreement.Amat2);
-ccep_clin = rewrite_Amat(ccep_clin, agreement.Amat10);
+ccep_prop = rewrite_Amat(ccep_prop, agreement.AmatProp);
+ccep_clin = rewrite_Amat(ccep_clin, agreement.AmatClin);
 
 %% Determine the indegree, outdegree, Betweenness centrality, the number of ERs per stimpair and the number of ERs per electrode
 % The variables are saved in an excel in the run folder of the subject number

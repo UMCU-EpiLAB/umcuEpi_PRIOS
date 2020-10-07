@@ -33,17 +33,17 @@ elseif ~isempty(varargin)
     if isstruct(varargin{1})
         
         if strcmp(varargin{1}.mode,'retro')
-            localDataPath = personalDataPath_retro(varargin{1});
-            
+                       
             rootPath = which('setLocalDataPath');
             RepoPath = fileparts(rootPath);
                         
             % add path to functions
             addpath(genpath([RepoPath,'/CCEP/Retrospective_analysis']));
             
-        elseif strcmp(varargin{1}.mode,'pros')
-            localDataPath = personalDataPath_pros(varargin{1});
+            localDataPath = personalDataPath_retro(varargin{1});
             
+        elseif strcmp(varargin{1}.mode,'pros')
+           
             rootPath = which('setLocalDataPath');
             RepoPath = fileparts(rootPath);
             
@@ -52,6 +52,9 @@ elseif ~isempty(varargin)
             
             % add path to functions
             addpath(genpath([RepoPath,'/CCEP/Prospective_analysis']));
+
+            localDataPath = personalDataPath_pros(varargin{1});
+
         end
         
     else

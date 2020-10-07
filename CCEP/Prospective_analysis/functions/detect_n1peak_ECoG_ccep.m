@@ -91,10 +91,10 @@ for subj = 1:length(dataBase)
         size(dataBase(subj).cc_epoch_sorted_avg,2),2);
     
     % for every averaged stimulation
-    for jj = 1:size(dataBase(subj).cc_epoch_sorted_avg,2)       % for every averaged stimulation
+    for jj = 1:size(dataBase(subj).stimpnames_avg,2)                    %size(dataBase(subj).cc_epoch_sorted_avg,2)       % for every averaged stimulation
         
         % for every channel
-        for ii = 1:size(dataBase(subj).cc_epoch_sorted_avg,1)   % for every channel
+        for ii = 1:size(dataBase(subj).ch,1)                     %size(dataBase(subj).cc_epoch_sorted_avg,1)   % for every channel
             
             % create time struct
             tt = (1:epoch_length*dataBase(subj).ccep_header.Fs) / ...

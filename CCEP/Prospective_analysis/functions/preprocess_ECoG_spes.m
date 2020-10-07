@@ -129,10 +129,13 @@ for subj = 1:size(dataBase,2)
                remove_rows(i,:) = find(IC_avg==Ncount(i,:));                    % Row in which the 'single' stimpair is located
              end
              
-              IC_avg(remove_rows) =[]; 
-              cc_stimsets_avg(Ncount,:) =[];
+             % Remove rows with 'single' stimpairs
               cc_stimsets_all(remove_rows,:) = [];   
               sort_cc_stimsets(remove_rows,:) = [];
+              % recalculate IC_avg
+              [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
+
+              
          end
          
     elseif strcmp(cfg.dir_avg,'no')         % dir_avg = 'no' to analyse all signals separately
@@ -178,6 +181,11 @@ for subj = 1:size(dataBase,2)
     %% select epochs
     t = round(epoch_length*dataBase(subj).ccep_header.Fs);
     tt = (1:epoch_length*dataBase(subj).ccep_header.Fs)/dataBase(subj).ccep_header.Fs - epoch_prestim;
+    
+    %%% HIER MOET IETS INGEBOUWD WORDEN DAT IK KAN KIEZEN WELKE PROPOFOL STIMULATIE
+    %%% IK WIL, NU IS HET TELKENS DE LAATSTE WAT NIET ALTIJD CORRECT IS.
+    %%% KOMT DOOR MAX STIM = 1, HEB DIT OOK WEL OP 5 GEHAD MAAR DAN KRIJG
+    %%% JE VEEL RIJEN MET NaN EN DAT KLOPT OOK NIET.
     
     % allocation
     cc_epoch_sorted_all = NaN(size(dataBase(subj).data,1),dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t);
