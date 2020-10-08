@@ -296,13 +296,120 @@ if strcmp(plot_fig,'y')
             end
         end
         
-        legend(indicator,'Stimpair', 'ER in both','ER in 2','ER in 10')
+%         legend(indicator,'Stimpair', 'ER in both','ER in 2','ER in 10')
         str_main = sprintf('sub-%s', subj{1});
         sgtitle(str_main)
         title('\rm ERs responses to specific stimulus, all stims')
         
+        % Save figure
+        outlabel=sprintf('sub-%s, stimp %s.jpg',subj{1},ccep.stimpnames_avg{stimp});
+        path = [fullfile(myDataPath.CCEPpath,'Grid_diffRes/',subj{1})];
+
+        if ~exist(path, 'dir')
+            mkdir(path);
+        end
+        saveas(gcf,[path,outlabel],'jpg')
+
     end
+    
+   
+    
 end
+ close all
+ 
+ 
+ %% Plot SOZ
+ close all
+ 
+ 
+plot_SOZ = input('Do you want plot the SOZ per patient? [y/n] ','s');
+
+
+if strcmp(plot_SOZ,'y')
+
+    % Plot the SOZ.
+    figure4 = figure('Position',[284,4,1309,1052]);
+    axes5 = axes('Parent',figure4, 'Position', [0.04,0.5,0.9,0.4]);
+    hold(axes5,'on');
+    plot(topo.x,topo.y,'ok','Parent',axes5,'MarkerSize',15);
+    xlim([min(topo.x)-1, max(topo.x)+1])
+    ylim([min(topo.y)-2, max(topo.y)+2])
+    axes5.YDir = 'reverse';
+    axes5.YTick = [];
+    axes5.XTick = [];
+    axes5.XColor = 'none';
+    axes5.YColor = 'none';
+    text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+    hold on
+
+    str_main = sprintf('sub-%s', subj{1});
+    sgtitle(str_main)
+    title('\rm ELectrodes in SOZ')
+
+    % In blue electrodes in SOZ
+    for elek = 1:length(ccep.ch)
+        if ismember(ccep.SOZ(elek),'yes')
+           SOZ = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
+                'MarkerFaceColor',[0 0.2 1],'MarkerEdgeColor','k');
+        end
+    end
+
+    legend(SOZ,'Electrode in SOZ')
+    
+    
+    % Plot the ranking of the stimpairs next to the SOZ
+    axes6 = axes('Parent',figure4,'Position', [0.04,0.07,0.9,0.4]);
+    hold(axes6,'on');
+    plot(topo.x,topo.y,'ok','Parent',axes6,'MarkerSize',15);
+    xlim([min(topo.x)-1, max(topo.x)+1])
+    ylim([min(topo.y)-2, max(topo.y)+2])
+    axes6.YDir = 'reverse';
+    axes6.YTick = [];
+    axes6.XTick = [];
+    axes6.XColor = 'none';
+    axes6.YColor = 'none';
+    text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+    hold on
+
+    str_main = sprintf('sub-%s', subj{1});
+    sgtitle(str_main)
+    title('\rm Electrodes with highest indegree 10 stimuli')
+    
+
+    % Rank the indegree
+    line_ind10 = linspace(min(scale_10),max(scale_10),6);        % devide the number of ERs to fit the lineWidth 
+    bins_ind10 = discretize(scale_10,line_ind10);
+    
+    % In pink electrodes in high ranked indegree based   
+    for elek = 1:length(ccep.ch)
+        if bins_ind10(elek) == 5
+           indegree_high = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
+                'MarkerFaceColor',[1 0.2 1],'MarkerEdgeColor','k');
+        end
+    end
+
+    legend(indegree_high,'Highest indegree')
+    
+    
+    
+     % Save figure
+    outlabel=sprintf('sub-%s.jpg',subj{1});
+    path = [fullfile(myDataPath.CCEPpath,'SOZ/')];
+
+    if ~exist(path, 'dir')
+        mkdir(path);
+    end
+    saveas(gcf,[path,outlabel],'jpg')
+end
+
+
+% ALS HIER NOU OOK NOG NAAST TE PLOTTEN IS WELKE ELEKTRODEN ER HOOG
+% SCOREN IN THE RANKINGS, DAN KAN DAT MISSCHIEN GECORRELEERT WORDEN??
+% NEEM DE HOOFSTE bins_lineWidth AND bins_lineWidth_2 FOR ERS PER STIMPAIR
+
+
+ 
+        
 end
 
 

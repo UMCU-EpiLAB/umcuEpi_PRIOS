@@ -124,8 +124,6 @@ for subj = 1:size(dataBase,2)
     visualise_gridstructure(myDataPath, dataBase(subj).ccep10, dataBase(subj).ccep2, dataBase(subj).agreement_parameter,plot_fig);
 end
 
-
-
 %% Display agreement parameters on brain image
 
 %%% DIT IS EVEN VOOR HET VOORBEELD VOOR IN MIJN VERSLAG!!!

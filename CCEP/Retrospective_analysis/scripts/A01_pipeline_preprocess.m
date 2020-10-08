@@ -106,30 +106,6 @@ dataBaseallstim.NmbrofStims = '10_stims';
 
 disp('Detection of ERs is completed')
 
-%% Visually check detected cceps
-% DIT IS NIET RELEVANT VOOR DE RETROSPECTIEVE ANALYSE
-% VisCheck = input('Do you want to visually check the detected CCEPs? [y/n] ','s');
-% 
-% if strcmp(VisCheck,'y')
-%     dataBaseallstim = visualRating_ccep(dataBaseallstim);
-%     dataBase2stim = visualRating_ccep(dataBase2stim);
-% 
-%     % Save the values for the agreement per run (2 and 10 stims)
-%     targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
-% 
-%     checked_all = [dataBaseallstim.sub_label, '_',dataBase(1).run_label, '_CCEP_', dataBaseallstim.NmbrofStims ,'_checked.mat'];
-%     save([targetFolder,checked_all], 'ccep')
-% 
-%     checked_2 = [dataBase2stim.sub_label, '_', dataBase(1).run_label, '_CCEP_', dataBase2stim.NmbrofStims ,'_checked.mat'];
-%     save([targetFolder,checked_2], 'ccep')
-%     fprintf('Checked files are saved in %s \n',targetFolder);
-% 
-%     % Perform the determine agreement again.
-%     [agreement_check] = determine_agreement_checked(myDataPath,cfg);
-% 
-%     fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
-%     agreement_check.OA, agreement_check.PA, agreement_check.NA)
-% end
 
 %% save ccep
 savefiles = input('Do you want to save the ccep-structures? [y/n] ','s');
@@ -144,7 +120,7 @@ end
 [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save 2 stims
-fileName=[extractBefore(filename,'_ieeg'),'_CCEP_2stims_merged.mat'];
+fileName=[extractBefore(filename,'_ieeg'),'_CCEP_2stims.mat'];
 ccep2 = dataBase2stim.ccep;
 ccep2.stimchans_all = dataBase2stim.cc_stimchans_all;
 ccep2.stimchans_avg = dataBase2stim.cc_stimchans_avg;
@@ -155,6 +131,7 @@ ccep2.stimsets_avg = dataBase2stim.cc_stimsets_avg;
 ccep2.dataName = dataBase2stim.dataName;
 ccep2.ch = dataBase2stim.ch;
 ccep2.tt = dataBase2stim.tt;
+ccep2.SOZ = dataBase(1).tb_electrodes.soz;
 %ccep2.epoch_sorted_avg = dataBase2stim.cc_epoch_sorted_avg;
 %ccep2.epoch_sorted_select_avg = dataBase2stim.cc_epoch_sorted_select_avg;
 
@@ -164,7 +141,7 @@ if strcmp(savefiles,'y')
 end
 
 % save all stims
-fileName5=[extractBefore(filename,'_ieeg'),'_CCEP_10stims_merged.mat'];
+fileName5=[extractBefore(filename,'_ieeg'),'_CCEP_10stims.mat'];
 ccep10 = dataBaseallstim.ccep;
 ccep10.stimchans_all = dataBaseallstim.cc_stimchans_all;
 ccep10.stimchans_avg = dataBaseallstim.cc_stimchans_avg;
@@ -175,6 +152,8 @@ ccep10.stimsets_avg = dataBaseallstim.cc_stimsets_avg;
 ccep10.dataName = dataBaseallstim.dataName;
 ccep10.ch = dataBaseallstim.ch;
 ccep10.tt = dataBaseallstim.tt;
+ccep10.SOZ = dataBase(1).tb_electrodes.soz;
+
 %ccep10.epoch_sorted_avg = dataBaseallstim.cc_epoch_sorted_avg;          % Deze epoch_sorted heb ik nodig voor plot_all_ccep_and_av maar hierdoor duurt het opslaan mega lang
 %ccep10.epoch_sorted_select_avg = dataBaseallstim.cc_epoch_sorted_select_avg;
 
@@ -184,7 +163,6 @@ if strcmp(savefiles,'y')
 
     fprintf('CCEPs 2stims and 10stims is saved in %s \n and %s',targetFolder , myDataPath.CCEP_allpat);
 end
-
 
 
  
