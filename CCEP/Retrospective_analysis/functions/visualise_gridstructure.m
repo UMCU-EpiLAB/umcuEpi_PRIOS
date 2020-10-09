@@ -321,95 +321,110 @@ end
  %% Plot SOZ
  close all
  
- 
+mode = {'Indegree 10','Indegree 2','Outdegree 10','Outdegree 2'};
 plot_SOZ = input('Do you want plot the SOZ per patient? [y/n] ','s');
 
-
 if strcmp(plot_SOZ,'y')
+  
+    for i = 1:size(mode,2)
+        % Plot the SOZ, this is equal for all different modes.
+        figure4 = figure('Position',[284,4,1309,1052]);
+        axes5 = axes('Parent',figure4, 'Position', [0.04,0.5,0.9,0.4]);
+        hold(axes5,'on');
+        plot(topo.x,topo.y,'ok','Parent',axes5,'MarkerSize',15);
+        xlim([min(topo.x)-1, max(topo.x)+1])
+        ylim([min(topo.y)-2, max(topo.y)+2])
+        axes5.YDir = 'reverse';
+        axes5.YTick = [];
+        axes5.XTick = [];
+        axes5.XColor = 'none';
+        axes5.YColor = 'none';
+        text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+        hold on
 
-    % Plot the SOZ.
-    figure4 = figure('Position',[284,4,1309,1052]);
-    axes5 = axes('Parent',figure4, 'Position', [0.04,0.5,0.9,0.4]);
-    hold(axes5,'on');
-    plot(topo.x,topo.y,'ok','Parent',axes5,'MarkerSize',15);
-    xlim([min(topo.x)-1, max(topo.x)+1])
-    ylim([min(topo.y)-2, max(topo.y)+2])
-    axes5.YDir = 'reverse';
-    axes5.YTick = [];
-    axes5.XTick = [];
-    axes5.XColor = 'none';
-    axes5.YColor = 'none';
-    text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
-    hold on
+        str_main = sprintf('sub-%s', subj{1});
+        sgtitle(str_main)
+        title('\rm ELectrodes in SOZ')
 
-    str_main = sprintf('sub-%s', subj{1});
-    sgtitle(str_main)
-    title('\rm ELectrodes in SOZ')
-
-    % In blue electrodes in SOZ
-    for elek = 1:length(ccep.ch)
-        if ismember(ccep.SOZ(elek),'yes')
-           SOZ = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
-                'MarkerFaceColor',[0 0.2 1],'MarkerEdgeColor','k');
+        % In blue electrodes in SOZ
+        for elek = 1:length(ccep.ch)
+            if ismember(ccep.SOZ(elek),'yes')
+               SOZ = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
+                    'MarkerFaceColor',[0 0.2 1],'MarkerEdgeColor','k');
+            end
         end
-    end
 
-    legend(SOZ,'Electrode in SOZ')
-    
-    
-    % Plot the ranking of the stimpairs next to the SOZ
-    axes6 = axes('Parent',figure4,'Position', [0.04,0.07,0.9,0.4]);
-    hold(axes6,'on');
-    plot(topo.x,topo.y,'ok','Parent',axes6,'MarkerSize',15);
-    xlim([min(topo.x)-1, max(topo.x)+1])
-    ylim([min(topo.y)-2, max(topo.y)+2])
-    axes6.YDir = 'reverse';
-    axes6.YTick = [];
-    axes6.XTick = [];
-    axes6.XColor = 'none';
-    axes6.YColor = 'none';
-    text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
-    hold on
-
-    str_main = sprintf('sub-%s', subj{1});
-    sgtitle(str_main)
-    title('\rm Electrodes with highest indegree 10 stimuli')
-    
-
-    % Rank the indegree
-    line_ind10 = linspace(min(scale_10),max(scale_10),6);        % devide the number of ERs to fit the lineWidth 
-    bins_ind10 = discretize(scale_10,line_ind10);
-    
-    % In pink electrodes in high ranked indegree based   
-    for elek = 1:length(ccep.ch)
-        if bins_ind10(elek) == 5
-           indegree_high = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
-                'MarkerFaceColor',[1 0.2 1],'MarkerEdgeColor','k');
-        end
-    end
-
-    legend(indegree_high,'Highest indegree')
-    
-    
-    
-     % Save figure
-    outlabel=sprintf('sub-%s.jpg',subj{1});
-    path = [fullfile(myDataPath.CCEPpath,'SOZ/')];
-
-    if ~exist(path, 'dir')
-        mkdir(path);
-    end
-    saveas(gcf,[path,outlabel],'jpg')
-end
-
-
-% ALS HIER NOU OOK NOG NAAST TE PLOTTEN IS WELKE ELEKTRODEN ER HOOG
-% SCOREN IN THE RANKINGS, DAN KAN DAT MISSCHIEN GECORRELEERT WORDEN??
-% NEEM DE HOOFSTE bins_lineWidth AND bins_lineWidth_2 FOR ERS PER STIMPAIR
-
-
- 
+        legend(SOZ,'Electrode in SOZ')
         
+        
+        % Per loopturn a differnt parameters is compared with the SOZ
+        if strcmp(mode{i},'Indegree 10')
+            val = scale_10;
+        elseif strcmp(mode{i},'Indegree 2')
+            val = scale_2;
+        elseif strcmp(mode{i},'Outdegree 10')
+            val = scale_10_out;
+        elseif strcmp(mode{i},'Outdegree 2')
+            val = scale_2_out;
+        end
+
+        % Plot the parameters to compare with the SOZ
+        axes6 = axes('Parent',figure4,'Position', [0.04,0.07,0.9,0.4]);
+        hold(axes6,'on');
+        plot(topo.x,topo.y,'ok','Parent',axes6,'MarkerSize',15);
+        xlim([min(topo.x)-1, max(topo.x)+1])
+        ylim([min(topo.y)-2, max(topo.y)+2])
+        axes6.YDir = 'reverse';
+        axes6.YTick = [];
+        axes6.XTick = [];
+        axes6.XColor = 'none';
+        axes6.YColor = 'none';
+        text(((topo.x)+0.2),topo.y,ccep.ch,'bold')
+        hold on
+
+        str_main = sprintf('sub-%s', subj{1});
+        sgtitle(str_main)
+        title(sprintf(' Electrodes with highest %s stimuli',mode{i}))
+
+
+        % Determine the number of SOZ electrodes
+        size_SOZ = sum(ismember(ccep.SOZ,'yes'));                                % plot the same number of electrodes of the highest scoring
+        x =maxk(val,size_SOZ);
+       
+        
+        
+        % In light red electrodes electrodes with high parameter value   
+        for elek = 1:length(ccep.ch)
+            if ismember(val(elek), x)
+               val_high(1,:) = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
+                    'MarkerFaceColor',[1 0.8 0.8],'MarkerEdgeColor','k');
+            end
+        end
+
+        hold on
+
+         % In red electrodes iin both SOZ and indegree   
+        for elek = 1:length(ccep.ch)
+            if ismember(val(elek), x) && ismember(ccep.SOZ(elek),'yes')
+               val_high(2,:) = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
+                    'MarkerFaceColor','r','MarkerEdgeColor','k');
+            end
+        end
+
+        legend(val_high,sprintf('Highest %s',mode{i}),'In both')
+
+
+         % Save figure
+        outlabel=sprintf('sub-%s_%s.jpg',subj{1},mode{i});
+        path = [fullfile(myDataPath.CCEPpath,'SOZ/')];
+
+        if ~exist(path, 'dir')
+            mkdir(path);
+        end
+        saveas(gcf,[path,outlabel],'jpg')
+    end
+ end
+       
 end
 
 

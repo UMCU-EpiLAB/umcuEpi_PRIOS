@@ -7,8 +7,8 @@ config_CCEP
 cfg.mode = 'retro';
 myDataPath = setLocalDataPath(cfg);         % When retrospective analysis is run, folders of prospective are removed from path.    
 
-%% select run
-% choose between available runs
+%% Load ECOG data
+% Find if there are multiple runs
 files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg',...
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
@@ -29,20 +29,6 @@ for R = 1:size(strings,2)
 end
 
 
-% stringsz = [repmat('%s, ',1,size(strings,2)-1),'%s'];
-% cfg.run_label = {input(sprintf(['Choose one of these runs: \n' stringsz '\n'],strings{:}),'s')}; % Chosen run is in cfg.run_label
-% 
-% if ~contains(cfg.run_label,'run-')
-%    error('"run-" is missing in run_label') 
-% end
-% 
-% % clear files names strings stringsz
-% 
-% %% load data
-% 
-% dataBase = load_ECoGdata(cfg,myDataPath);
-
-
 %% CCEP for 2 and 10 stimulations
 % avg_stim : write down the number of stimuli you want to average
 
@@ -61,7 +47,7 @@ if size(dataBase2stim,2) >1         % When SPES was ran in multiple runs
 end
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 11; stim=23;
+chan = 11; stim=1;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -84,11 +70,11 @@ xlabel('time (s)')
 xlim([-.2 1.0])
 
 figure()
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
+%plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(3,stim,1:5,:))','Color','r','LineWidth',1)
 hold on
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color','b','LineWidth',1)
+%plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(3,stim,6:10,:))','Color','b','LineWidth',1)
 hold on
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(3,stim,:)),'k','LineWidth',2)
 hold off
 title('all stimuli')
 xlabel('time (s)')
