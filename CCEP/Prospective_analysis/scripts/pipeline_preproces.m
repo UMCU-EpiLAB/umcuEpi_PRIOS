@@ -102,21 +102,50 @@ xlabel('time (s)')
 xlim([-.1 0.1])
 
 
-% Check whether SPESclin and SPESprop contain the same stimulation pairs
+%% Check whether SPESclin and SPESprop contain the same stimulation pairs
 if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)                    % if SPESclin contains more stimpairs
-    Ncount = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0); 
-    names = dataBase_clin.stimpnames_all(Ncount);
+    [x_all,~ ] = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0); 
+    [x_avg,~] = find(ismember(dataBase_clin.stimpnames_avg' , dataBase_prop.stimpnames_avg' )==0) ;
+   
+    names = dataBase_clin.stimpnames_all(x_all);
 
     stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-    missingNames = sprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
+    sprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
 
+    dataBase_clin.cc_stimsets_all(x_all,:) = [];
+    dataBase_clin.cc_stimchans_all(x_all,:) = [];
+    dataBase_clin.stimpnames_all(:,x_all) = [];
+    dataBase_clin.stimpnames(:,x_all) = [];
+    dataBase_clin.cc_epoch_sorted(:,:,x_all,:) = [];
+    dataBase_clin.tt_epoch_sorted(:,x_all,:) = [];
+    
+    dataBase_clin.cc_stimsets_avg(x_avg,:) = [];
+    dataBase_clin.cc_stimchans_avg(x_avg,:) = [];
+    dataBase_clin.stimpnames_avg(x_avg) = [];
+    dataBase_clin.cc_epoch_sorted_avg(:,x_avg,:) = [];
+    dataBase_clin.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
+    
 elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_all)
-    Ncount = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0);     % if SPESprop contains more stimpairs
-    names = dataBase_prop.stimpnames_all(Ncount);
-
-    stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];;
-    missingNames = sprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
-
+   [x_all,~] = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0);     % if SPESprop contains more stimpairs
+   [x_avg,~] = find(ismember(dataBase_clin.stimpnames_avg' , dataBase_prop.stimpnames_avg' )==0);     % if SPESprop contains more stimpairs
+ 
+   names = dataBase_prop.stimpnames_all(x_all);
+   stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
+   sprintf(['Stimpairs only stimulated in SPESprop and not in SPESclin: \n' stringsz '\n'],names{:})
+    
+   dataBase_prop.cc_stimsets_all(x_all,:) = [];
+   dataBase_prop.cc_stimchans_all(x_all,:) = [];
+   dataBase_prop.stimpnames_all(:,x_all) = [];
+   dataBase_prop.stimpnames(:,x_all) = [];
+   dataBase_prop.cc_epoch_sorted(:,:,x_all,:) = [];
+   dataBase_prop.tt_epoch_sorted(:,x_all,:) = [];
+   
+   dataBase_prop.cc_stimsets_avg(x_avg,:) = [];
+   dataBase_prop.cc_stimchans_avg(x_avg,:) = [];
+   dataBase_prop.stimpnames_avg(x_avg) = [];
+   dataBase_prop.cc_epoch_sorted_avg(:,x_avg,:) = [];
+   dataBase_prop.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
+    
 end
 
 

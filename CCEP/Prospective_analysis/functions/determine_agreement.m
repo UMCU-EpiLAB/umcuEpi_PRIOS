@@ -114,9 +114,9 @@ if size(runs,2) >1
             
             OA = NaN; PA = NaN; NA = NaN;
             
-            if ~strcmp(extractBetween(runs(i).name,'_CCEP_','.mat'), extractBetween(runs(i+j).name,'_CCEP_','.mat')) % if stim size is NOT equal
-                if ~strcmp(extractBetween(runs(i).name,'_run-','_CCEP'),extractBetween(runs(i+j).name,'_run-','_CCEP')) % if run label is not equal
-                    if all(size(runs(i).ccep.n1_peak_amplitude) == size(runs(i+j).ccep.n1_peak_amplitude)) % if size of adjacency matrix is equal
+            if ~strcmp(extractBetween(runs(i).name,'_CCEP_','.mat'), extractBetween(runs(i+j).name,'_CCEP_','.mat'))        % if stim size is NOT equal
+                if ~strcmp(extractBetween(runs(i).name,'_run-','_CCEP'), extractBetween(runs(i+j).name,'_run-','_CCEP'))    % if run label is not equal
+                    if all(size(runs(i).ccep.n1_peak_amplitude) == size(runs(i+j).ccep.n1_peak_amplitude))                  % if size of adjacency matrix is equal
                         
                         titleclin = extractBetween(runs(i).name,'_run-','_CCEP');
                         titleprop = extractBetween(runs(i+j).name,'_run-','_CCEP');

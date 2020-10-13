@@ -95,7 +95,7 @@ for subj = 1:size(dataBase,2)
        warning('%s: a stimulation pair is probably stimulated more than others \n',dataBase(subj).sub_label)
     end
     
-    % find the amount of time most stimulus pairs are stimulated and set
+    %% find the amount of time most stimulus pairs are stimulated and set
     % that as maximal number of stimulus pairs
     max_stim = median(n);
     
@@ -117,11 +117,12 @@ for subj = 1:size(dataBase,2)
                remove_rows(i,:) = find(IC_avg==Ncount(i,:));                    % Row in which the 'single' stimpair is located
              end
              
-              % Remove the rows with single stimpair in the IC_avg
-              IC_avg(remove_rows) =[];                                          
-              cc_stimsets_avg(Ncount,:) =[];                                    
+               % Remove rows with 'single' stimpairs
               cc_stimsets_all(remove_rows,:) = [];   
               sort_cc_stimsets(remove_rows,:) = [];
+              % recalculate IC_avg
+              [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
+
         end
          
     elseif strcmp(cfg.dir_avg,'no')         % dir_avg = 'no' to analyse all signals separately
