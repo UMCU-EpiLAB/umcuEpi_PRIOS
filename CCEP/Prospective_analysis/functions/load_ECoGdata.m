@@ -2,27 +2,25 @@
 % author: Dorien van Blooijs
 % date: June 2019
 
-function dataBase = load_ECoGdata(cfg,myDataPath,files)
+function dataBase = load_ECoGdata(cfg,myDataPath)
 
 dataPath = myDataPath.dataPath;
 sub_labels = cfg.sub_labels;
 ses_label = cfg.ses_label;
 task_label = cfg.task_label;
 
-for j= 1:size(files,1)
-    run_label{j} = files(j).name(strfind(files(j).name,'run-'):strfind(files(j).name,'_events')-1);   
+
+if isfield(cfg,'run_label')
+
+    if size(cfg.run_label{:},2)>4               % if label is more than run-
+        run_label = cfg.run_label;
+    else
+        run_label(1:size(sub_labels,2)) = {'run-*'};
+    end
+else
+    run_label(1:size(sub_labels,2)) = {'run-*'};
 end
 
-% if isfield(cfg,'run_label')
-% 
-%     if size(cfg.run_label{:},2)>4               % if label is more than run-
-%         run_label = cfg.run_label;
-%     else
-%         run_label(1:size(sub_labels,2)) = {'run-*'};
-%     end
-% else
-%     run_label(1:size(sub_labels,2)) = {'run-*'};
-% end
 
 dataBase = struct([]);
 for i=1:size(run_label,2)
@@ -36,18 +34,18 @@ for i=1:size(run_label,2)
     
     % determine run_label
 
-%     if ~isfield(cfg,'run_label') || size(cfg.run_label{:},2)<=4             % || means or
-%         if size(D,1) == 1
-%             run_label{i} = D(1).name(strfind(D(1).name,'run-'):strfind(D(1).name,'_ieeg')-1);
-%         else
-%             run_label{i} = D(1).name(strfind(D(1).name,'run-'):strfind(D(1).name,'_ieeg')-1);
-%             fprintf('WARNING: More runs were available for %s_%s_%s, so determine run_label! \n',sub_labels{i},ses_label,task_label)
-%         end
-%         
-%         dataName = fullfile(D(1).folder, D(1).name);
-%     else
+   if ~isfield(cfg,'run_label') || size(cfg.run_label{:},2)<=4             % || means or
+        if size(D,1) == 1
+            run_label{i} = D(1).name(strfind(D(1).name,'run-'):strfind(D(1).name,'_ieeg')-1);
+        else
+            run_label{i} = D(1).name(strfind(D(1).name,'run-'):strfind(D(1).name,'_ieeg')-1);
+            fprintf('WARNING: More runs were available for %s_%s_%s, so determine run_label! \n',sub_labels{i},ses_label,task_label)
+        end
+        
         dataName = fullfile(D(1).folder, D(1).name);
-%     end
+    else
+        dataName = fullfile(D(1).folder, D(1).name);
+    end
     
     ccep_data = ft_read_data(dataName,'dataformat','brainvision_eeg');
     ccep_header = ft_read_header(dataName);
@@ -97,6 +95,7 @@ for i=1:size(run_label,2)
     dataBase(i).tb_electrodes = tb_electrodes;
     dataBase(i).ch = ch_incl;
     dataBase(i).data = data;
-end
     fprintf('Both runs of subject %s have run...\n',sub_labels{1})
+
+end
 end

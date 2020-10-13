@@ -7,32 +7,60 @@ config_CCEP
 cfg.mode = 'pros';
 myDataPath = setLocalDataPath(cfg);
 
-% select run
+%% Load ECOG data
+% Find if there are multiple runs
 files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg',...
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
+strings = cell(size(names));
 
+% Find run_labels
+for n = 1:size(names,2)
+    strings{n} = names{n}(strfind(names{n},'run-'):strfind(names{n},'run-')+9);
+end
 
-%% load data
+% Load data (also possible for multiple runs)
+for R = 1:size(strings,2)
+    tic;
+    cfg.run_label = strings(R);
+    dataBase(R) = load_ECoGdata(cfg,myDataPath);
+    toc;
+end
+
 % Load for both runs
-dataBase = load_ECoGdata(cfg,myDataPath,files);
+%dataBase = load_ECoGdata(cfg,myDataPath,files);
 
 %% CCEP for SPES-clin stimulations
 % save all stimuli of clinical SPES
+
 for i = 1:size(dataBase,2)
     dataBase(i).task_name = dataBase(i).dataName(strfind(dataBase(i).dataName,'task-'):strfind(dataBase(i).dataName,'_run')-1); 
 
     if ismember(dataBase(i).task_name,'task-SPESclin')
        avg_stim_clin = 5;
        cfg.minstim = 5;
-       dataBase_clin = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim_clin);
-
+       dataBase_clin(i,:) = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim_clin);
+      
     elseif ismember(dataBase(i).task_name,'task-SPESprop')
         avg_stim = 1;               % Average number of stimulations per direction of a stimpair
         cfg.minstim = 1;
-        dataBase_prop = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim);     
+        dataBase_prop(i,:) = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim);     
 
     end
+end
+
+% Remove empty rows in the dataBase structs, sometimes these are formed
+% when there are multiple runs.
+dataBase_clin = dataBase_clin(all(~cellfun(@isempty,struct2cell(dataBase_clin))));
+dataBase_prop = dataBase_prop(all(~cellfun(@isempty,struct2cell(dataBase_prop))));
+
+
+% When a SPES is ran in multiple runs, merge them.
+if size(dataBase_clin,1)>1          % When SPES was ran in multiple runs
+     dataBase_clin = merge_runs(dataBase_clin); 
+elseif size(dataBase_prop,1) >1 
+     dataBase_prop = merge_runs(dataBase_prop);
+     
 end
 
 tt = dataBase_clin.tt;
@@ -78,13 +106,17 @@ xlim([-.1 0.1])
 if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)                    % if SPESclin contains more stimpairs
     Ncount = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0); 
     names = dataBase_clin.stimpnames_all(Ncount);
-    warning('%s: are only stimulated in SPESclin and not in SPESprop \n',[names{:}]);
+
+    stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
+    missingNames = sprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
 
 elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_all)
     Ncount = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0);     % if SPESprop contains more stimpairs
     names = dataBase_prop.stimpnames_all(Ncount);
-    warning('%s: are only stimulated in SPESprop and not in SPESclin \n',[names{:}]);
-    % hier functie miss
+
+    stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];;
+    missingNames = sprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
+
 end
 
 

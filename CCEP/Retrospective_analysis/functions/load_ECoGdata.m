@@ -8,6 +8,7 @@ dataPath = myDataPath.dataPath;
 sub_labels = cfg.sub_labels;
 ses_label = cfg.ses_label;
 task_label = cfg.task_label;
+
 if isfield(cfg,'run_label')
 
     if size(cfg.run_label{:},2)>4               % if label is more than run-
