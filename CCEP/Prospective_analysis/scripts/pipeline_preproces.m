@@ -39,11 +39,13 @@ for i = 1:size(dataBase,2)
     if ismember(dataBase(i).task_name,'task-SPESclin')
        avg_stim_clin = 5;
        cfg.minstim = 5;
+       cfg.max_stim = 5;
        dataBase_clin(i,:) = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim_clin);
       
     elseif ismember(dataBase(i).task_name,'task-SPESprop')
         avg_stim = 1;               % Average number of stimulations per direction of a stimpair
         cfg.minstim = 1;
+        cfg.max_stim = 1;
         dataBase_prop(i,:) = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim);     
 
     end
@@ -66,7 +68,7 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 9; stim=20;
+chan = 12; stim=20;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -126,8 +128,8 @@ if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)  
     dataBase_clin.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
     
 elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_all)
-   [x_all,~] = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0);     % if SPESprop contains more stimpairs
-   [x_avg,~] = find(ismember(dataBase_clin.stimpnames_avg' , dataBase_prop.stimpnames_avg' )==0);     % if SPESprop contains more stimpairs
+   [x_all,~] = find(ismember(dataBase_prop.stimpnames_all' , dataBase_clin.stimpnames_all' )==0);     % if SPESprop contains more stimpairs
+   [x_avg,~] = find(ismember(dataBase_prop.stimpnames_avg' , dataBase_clin.stimpnames_avg' )==0);     % if SPESprop contains more stimpairs
  
    names = dataBase_prop.stimpnames_all(x_all);
    stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
@@ -147,6 +149,13 @@ elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_al
    dataBase_prop.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
     
 end
+
+
+%% Select which stimuli you want to save to average
+% Especially in the propofol-SPES, a lot of artefacts are found.
+% Press 'y' when you want to save the stimulus, press 'n' when you want to
+% delete it.
+
 
 
 %% Use the automatic N1 detector to detect ccep 

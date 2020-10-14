@@ -237,6 +237,84 @@ if ~exist(path, 'dir')
 end
 saveas(gcf,[path,outlabel],'jpg')
 
+%% BC of electrodes, for all stims
+% All stims
+scale_2_BC = (agreement_parameter.BCN_2)';
+scale_10_BC = (agreement_parameter.BCN_10)';
+
+figure2 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
+axes3 = axes('Parent',figure2,'Position',[0.04,0.5,0.9,0.4]);
+hold(axes3,'on');
+plot(topo.x,topo.y,'ok','Parent',axes3,'MarkerSize',15);
+xlim([min(topo.x)-1, max(topo.x)+1])
+ylim([min(topo.y)-0.5, max(topo.y)+0.5])
+axes3.YDir = 'reverse';                                
+axes3.YTick = [];                                      
+axes3.XTick = [];
+axes3.XColor = 'none';
+axes3.YColor = 'none';
+title('\rm BC, all stimuli')
+
+% Plot the outdegree as a colorscale, combine this with the number of
+% ERS evoked per stimulation pair.
+scatter(topo.x, topo.y, 260, scale_10_BC,'filled','MarkerEdgeColor','k')
+c = hot;
+c = flipud(c);
+colormap(c);   
+cb = colorbar();
+text(((topo.x)+0.2),topo.y,ccep.ch, 'FontSize',8,'FontWeight','bold')
+
+% Create the same colormap limits based on the highest protocol with the highest outdegree
+if max(scale_10_BC)>max(scale_2_BC)                                   
+    caxis([0 max(scale_10_BC)]);
+else
+    caxis([0 max(scale_2_BC)]);
+end
+
+
+% 2 stims
+axes4 = axes('Parent',figure2,'Position',[0.04,0.07,0.9,0.4]);
+hold(axes4,'on');
+plot(topo.x,topo.y,'ok','Parent',axes4,'MarkerSize',15);
+xlim([min(topo.x)-1, max(topo.x)+1])
+ylim([min(topo.y)-0.5, max(topo.y)+0.5])
+axes4.YDir = 'reverse';
+axes4.YTick = [];
+axes4.XTick = [];
+axes4.XColor = 'none';
+axes4.YColor = 'none';
+str_main = sprintf('sub-%s', subj{1});
+sgtitle(str_main)
+title('\rm BC, 2 stimuli')
+
+% Plot the outdegree as a colorscale, combine this with the number of
+% ERS evoked per stimulation pair.
+scatter(topo.x, topo.y, 260, scale_2_BC,'filled','MarkerEdgeColor','k')
+c = hot;
+c = flipud(c);
+colormap(c);
+cb = colorbar();
+text(((topo.x)+0.2),topo.y,ccep.ch, 'FontSize',8,'FontWeight','bold')
+
+% Create the same colormap limits based on the highest protocol with the highest outdegree
+if max(scale_10_BC)>max(scale_2_BC)                                   
+    caxis([0 max(scale_10_BC)]);
+else
+    caxis([0 max(scale_2_BC)]);
+end
+
+% Save figure
+outlabel=sprintf('sub-%s_BC.jpg',...
+    subj{1});
+path = [fullfile(myDataPath.CCEPpath,'Visualise_agreement/')];
+
+if ~exist(path, 'dir')
+    mkdir(path);
+end
+saveas(gcf,[path,outlabel],'jpg')
+
+
+
 %% ER's responses to specific stimulus
 if ~exist('plot_fig')
     plot_fig = input('Do you want plot figures with all ERs per stimulation pair? [y/n] ','s');

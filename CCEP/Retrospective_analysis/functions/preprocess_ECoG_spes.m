@@ -75,7 +75,10 @@ for subj = 1:size(dataBase,2)
         
        if n<minstim
            stimremove = n<minstim;               % remove al stimulation pairs that are stimulated less than 5 times
-           % remove stim pairs in both directions
+           
+           % Remove stim pairs with too little stimulations in both
+           % directions, even when the other direction does have enough
+           % stimulations
            remove_elec = cc_stimsets_all(stimremove,:);
            remove_stimp = find(cc_stimsets_all(:,2)==remove_elec(:,2) & cc_stimsets_all(:,1)==remove_elec(:,1) |  cc_stimsets_all(:,2)==remove_elec(:,1) &  cc_stimsets_all(:,1)==remove_elec(:,2));
 
@@ -213,7 +216,6 @@ for subj = 1:size(dataBase,2)
     if isempty(avg_stim)
         avg_stim = maxstim;
     end
-    % cc_EPOCH_SORTED_AVG IS ALSNOG GEWOON 33 IPV 31 VOOR PAT 703...
     
     % preallocation
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
