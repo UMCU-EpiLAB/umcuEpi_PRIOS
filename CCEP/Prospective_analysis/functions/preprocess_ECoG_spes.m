@@ -110,7 +110,7 @@ for subj = 1:size(dataBase,2)
     %% Number of stimulations per stimulus pair
     % find the amount of time most stimulus pairs are stimulated and set
     % that as maximal number of stimulus pairs
-    max_stim = cfg.max_stim;                    %max_stim = median(n);               % The max stim per stimulation pair DIRECTION!
+    max_stim = max(n);                    %max_stim = max(n);               % The max stim per stimulation pair DIRECTION!
     
     if strcmp(cfg.dir_avg,'yes')        % dir_avg = 'yes' analyse the average signal of both the positive and negative stimuli
         
@@ -176,84 +176,47 @@ for subj = 1:size(dataBase,2)
   
    
     %% select epochs
-    t = round(epoch_length*dataBase(subj).ccep_header.Fs);
-    tt = (1:epoch_length*dataBase(subj).ccep_header.Fs)/dataBase(subj).ccep_header.Fs - epoch_prestim;
-    
-    %%% HIER MOET IETS INGEBOUWD WORDEN DAT IK KAN KIEZEN WELKE PROPOFOL STIMULATIE
-    %%% IK WIL, NU IS HET TELKENS DE LAATSTE WAT NIET ALTIJD CORRECT IS.
-    %%% KOMT DOOR MAX STIM = 1, HEB DIT OOK WEL OP 5 GEHAD MAAR DAN KRIJG
-    %%% JE VEEL RIJEN MET NaN EN DAT KLOPT OOK NIET.
-    
-    % allocation
-    cc_epoch_sorted_all = NaN(size(dataBase(subj).data,1),dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t);
-    tt_epoch_sorted_all = NaN(dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t); % samplenumbers for each epoch % Dit is nu een 2xstimpairXtt matrix
-    
-    for elec = 1:size(dataBase(subj).data,1)                    % for all channels
-        for ll = 1:size(dataBase(subj).cc_stimsets_all,1)       % for all stimulation pair directions with the minimum number of stimuli (minstim)
-            if strcmp(cfg.dir,'no')
-                
-                % Find the stimulationnumbers on which a stimulation pair is stimulated in both directions.
-                eventnum1 = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans_all{ll,1}, '-',dataBase(subj).cc_stimchans_all{ll,2}])); % Positive stimulation
-                eventnum2 = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans_all{ll,2}, '-',dataBase(subj).cc_stimchans_all{ll,1}])); % Negative stimulation
-                eventnum = [eventnum1;eventnum2];
-                
-            elseif strcmp(cfg.dir,'yes')
-                
-                eventnum = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans_all{ll,1}, '-',dataBase(subj).cc_stimchans_all{ll,2}]));
+ t = round(epoch_length*dataBase(subj).ccep_header.Fs);
+ tt = (1:epoch_length*dataBase(subj).ccep_header.Fs)/dataBase(subj).ccep_header.Fs - epoch_prestim;
+
+  % allocation
+   cc_epoch_sorted_all = NaN(size(dataBase(subj).data,1),dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t);
+   tt_epoch_sorted_all = NaN(dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t); 
+
+   for elec = 1:size(dataBase(subj).data,1)                    % for all channels 
+       for ll = 1:size(dataBase(subj).cc_stimsets_all,1)       % for all epochs with > minimum number of stimuli (minstim)
+
+           eventnum = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans_all{ll,1}, '-',dataBase(subj).cc_stimchans_all{ll,2}]));
+
+            if size(eventnum,1) > dataBase(subj).max_stim
+                events = dataBase(subj).max_stim;
+            else
+                events = size(eventnum,1);
             end
-      
-
-            if size(eventnum,1) > max_stim
-                sprintf('%s is stimulated %d time(s)', dataBase(subj).stimpnames_all{ll},size(eventnum,1))
-
-               RemEvents =  select_stimuli(dataBase(subj), cfg,ll) ;    
-               dataBase(subj).tb_events.electrical_stimulation_site(RemEvents) = {'NaN'};
-
-            end
-                            
-           
-        end
-        
-    rowsNaN = sort(find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site, 'NaN')==1))
-    
-    % remove all rows with wrong stimulations.
-    dataBase(subj).tb_events(rowsNaN,:) = [];
-            
-            %%% HIER BEN IK NU!!
-            %%% HIER VERVOLGENS AAN TOEVOEGEN DAT OOK VOOR PROPOFOL-SPES
-            %%% ALLE STIMULATIES SAMEN GENOMEN WORDEN, EN NIET MAAR
-            %%% MAX-STIM = 1...
-            
-            
-            %%% Hieronder heb ik een tweede aparte loop gemaakt, die 
-            %%% gescheiden is van de loop hierboven vanwege het verwijderen
-            %%% van TB_events regels. Dit is nog niet getest. 
-            for ll = 1:size(dataBase(subj).cc_stimsets_all,1)
-            
-            
-            
-%             if size(eventnum,1) > dataBase(subj).max_stim
-%                 events = dataBase(subj).max_stim;
-%             else
-                events = size(eventnum,1)-size(RemEvents,2);
-%             end
-            
-                for n = 1:events
-                    if dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1< 0
-                        % do nothing, because epoch starts before the start of
-                        % a file (and gives an error)
-
-                    elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact)
-                        % do nothing, because part of artefact
-                    else
-                        cc_epoch_sorted_all(elec,n,ll,:) = dataBase(subj).data(elec,dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1:dataBase(subj).tb_events.sample_start(eventnum(n))+round((epoch_length-epoch_prestim)*dataBase(subj).ccep_header.Fs));
-                        tt_epoch_sorted_all(n,ll,:) = dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1:dataBase(subj).tb_events.sample_start(eventnum(n))+round((epoch_length-epoch_prestim)*dataBase(subj).ccep_header.Fs);
-                    end
+                
+            for n = 1:events
+                if dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1< 0
+                     % do nothing, because epoch starts before the start of
+                     % a file (and gives an error)
+                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact)
+                       % do nothing, because part of artefact, therefore
+                       % this event is not used
+                else
+                    cc_epoch_sorted_all(elec,n,ll,:) = dataBase(subj).data(elec,dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1:dataBase(subj).tb_events.sample_start(eventnum(n))+round((epoch_length-epoch_prestim)*dataBase(subj).ccep_header.Fs));
+                    tt_epoch_sorted_all(n,ll,:) = dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1:dataBase(subj).tb_events.sample_start(eventnum(n))+round((epoch_length-epoch_prestim)*dataBase(subj).ccep_header.Fs);
+                %%% WAARSCHIJNLIJK ZIJN ER NU TE VEEL N's KLAARGEZET IN DE ALLOCATION, 
+                %%% DUS DIE RIJEN BLIJVEN WAARSCHIJNLIJK NU NaN ALS ER GEEN
+                %%% EVENT IS. 
+                
+                %%% NaNs DUS OMITTEN!!!
+                
                 end
             end
-        end
-%     end
-    
+        
+       end
+       
+   end
+
     %% average epochs
     if isempty(avg_stim)
         avg_stim = max_stim;

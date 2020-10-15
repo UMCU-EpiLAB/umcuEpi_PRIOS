@@ -151,13 +151,6 @@ elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_al
 end
 
 
-%% Select which stimuli you want to save to average
-% Especially in the propofol-SPES, a lot of artefacts are found.
-% Press 'y' when you want to save the stimulus, press 'n' when you want to
-% delete it.
-
-
-
 %% Use the automatic N1 detector to detect ccep 
 dataBase_clin = detect_n1peak_ECoG_ccep(dataBase_clin,cfg);
 dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);
@@ -205,20 +198,20 @@ if strcmp(VisCheck_AllSig,'y')
     % Save the values for the agreement per run (2 and 10 stims)
     targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
 
-    %checked_allSig_clin = [dataBase_clin.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_clin_allSig_checked.mat'];
-    %save([targetFolder,checked_allSig_clin], 'ccep')
+    checked_allSig_clin = [dataBase_clin.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_clin_allSig_checked.mat'];
+    save([targetFolder,checked_allSig_clin], 'ccep')
     
     checked_allSig_prop = [checked_prop.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_prop_allSig_checked.mat'];
     save([targetFolder,checked_allSig_prop], 'ccep')
 
     fprintf('Checked files are saved in %s \n',targetFolder);
 
-    % Perform the determine agreement again.
-    %[agreement_check] = determine_agreement_checked(myDataPath,cfg);   %
-    %dit staat nog ingesteld op de ccep_checked van de checked detected ERs
+    Perform the determine agreement again.
+    [agreement_check] = determine_agreement_checked(myDataPath,cfg);   %
+    dit staat nog ingesteld op de ccep_checked van de checked detected ERs
 
-   % fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
-   % agreement_check.OA, agreement_check.PA, agreement_check.NA)
+   fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
+   agreement_check.OA, agreement_check.PA, agreement_check.NA)
 end
 
 %% save ccep
@@ -293,7 +286,8 @@ end
 
 %% Plot the average signal of all electrodes per stimulation pair
 dataBase_clin.save_fig = input('Do you want plot all average signals to the stimulus per stimpair? [y/n] ','s');
-
-plot_all_ccep(dataBase_clin, dataBase_prop, myDataPath)
+if strcmp(dataBase_clin.save_fig, 'y')
+    plot_all_ccep(dataBase_clin, dataBase_prop, myDataPath)
+end
 % plot_all_ccep( dataBase_prop, myDataPath)
 

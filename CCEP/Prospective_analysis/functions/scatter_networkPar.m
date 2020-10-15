@@ -1,26 +1,25 @@
-function  scatter_networkPar(dataBase, myDataPath)
+function  scatter_networkPar(dataBase,myDataPath)
 
-%%% DIT SCRIPT OMSCHRIJVEN ZODAT HET NIET PER PATIENT IS MAAR PER PARAMETER
+
 for i = 1:size(dataBase,2)
       
     figure('Position',[302,17,938,1039])
     subplot(4,1,1)
-    scatter(dataBase(i).agreement_parameter.ERs_stimp2  ,dataBase(i).agreement_parameter.ERs_stimp10  )
-    xlabel('2 stims')
-    ylabel('10 stims')
+    scatter(dataBase(i).agreement_parameter.ERs_stimpProp  ,dataBase(i).agreement_parameter.ERs_stimpClin  )
+    xlabel('SPES-prop')
+    ylabel('SPES-clin')
     title(sprintf('ERs per stimulation pair, %s, p =  %1.3f',dataBase(i).sub_label, dataBase(i).statistics.p_stimp))
-    h = refline;
-    h.LineWidth = 2;
     legend('ERs per stimulation', sprintf('rho = %1.3f',dataBase(i).statistics.rho_stimp  ));
-     if dataBase(i).statistics.p_stimp < 0.05
+    
+    if dataBase(i).statistics.p_stimp < 0.05
         h = refline;
         h.LineWidth = 2;
     end
-    
+        
     subplot(4,1,2)
-    scatter(dataBase(i).agreement_parameter.indegreeN_2  ,dataBase(i).agreement_parameter.indegreeN_10  )
-    xlabel('2 stims')
-    ylabel('10 stims')
+    scatter(dataBase(i).agreement_parameter.indegreeN_Prop  ,dataBase(i).agreement_parameter.indegreeN_Clin  )
+    xlabel('SPES-prop')
+    ylabel('SPES-clin')
     title(sprintf('indegree normalised, %s, p = %1.3f',dataBase(i).sub_label, dataBase(i).statistics.p_indegree))
     h = refline;
     h.LineWidth = 2;
@@ -31,9 +30,9 @@ for i = 1:size(dataBase,2)
     end
 
     subplot(4,1,3)
-    scatter(dataBase(i).agreement_parameter.outdegreeN_2  ,dataBase(i).agreement_parameter.outdegreeN_10  )
-    xlabel('2 stims')
-    ylabel('10 stims')
+    scatter(dataBase(i).agreement_parameter.outdegreeN_Prop  ,dataBase(i).agreement_parameter.outdegreeN_Clin  )
+    xlabel('SPES-prop')
+    ylabel('SPES-clin')
     title(sprintf('outdegree normalised, %s, p =  %1.3f',dataBase(i).sub_label,  dataBase(i).statistics.p_outdegree))
     h = refline;
     h.LineWidth = 2;
@@ -45,18 +44,17 @@ for i = 1:size(dataBase,2)
 
 
     subplot(4,1,4)
-    scatter(dataBase(i).agreement_parameter.BCN_2  ,dataBase(i).agreement_parameter.BCN_10  )
-    xlabel('2 stims')
-    ylabel('10 stims')
+    scatter(dataBase(i).agreement_parameter.BCN_Prop  ,dataBase(i).agreement_parameter.BCN_Clin  )
+    xlabel('SPES-prop')
+    ylabel('SPES-clin')
     title(sprintf('BC normalised, %s, p = %1.3f',dataBase(i).sub_label, dataBase(i).statistics.p_BC))
     h = refline;
     h.LineWidth = 2;
     legend('BC', sprintf('rho = %1.3f',dataBase(i).statistics.rho_BC  ));
-     if dataBase(i).statistics.p_BC < 0.05
+    if dataBase(i).statistics.p_BC < 0.05
         h = refline;
         h.LineWidth = 2;
     end
-
     
     
     % Save figure
@@ -66,6 +64,8 @@ for i = 1:size(dataBase,2)
         mkdir(path);
     end
     saveas(gcf,[path,outlabel],'jpg')
+
+
 end
 
 end

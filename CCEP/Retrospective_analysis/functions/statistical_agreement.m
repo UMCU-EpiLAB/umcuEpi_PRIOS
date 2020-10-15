@@ -22,12 +22,13 @@ normplot(ER_stimp10)                                % normal distribution is dat
 subplot(2,1,2)
 normplot(ER_stimp2)
 
+
 if NorDis10 == 1 && NorDis2 ==1
     p = signrank(ER_stimp10, ER_stimp2) ;           % tests the null hypothesis that data in x and y are samples from continuous distributions with equal medians
     fprintf('The detected ERs per stimulation pair is NOT normally distributed, Wilcoxon Signed Rank test is used.\n')
 else
-    fprintf('The detected ERs per stimulation pair is normally distributed, Paired T-test is used.\n')
-    [~,p] = ttest(ER_stimp10, ER_stimp2);          % alpha default = 0.05
+    fprintf('The detected ERs per stimulation pair is normally distributed, still the Wilcoxon Signed Rank test is used.\n')
+    p = signrank(ER_stimp10, ER_stimp2);          % alpha default = 0.05
 end
 
 if p<0.05

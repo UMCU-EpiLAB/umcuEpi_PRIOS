@@ -109,7 +109,6 @@ end
 % The variables are saved in an excel in the run folder of the subject number
 close all;
 
-%%% TOT HIER GEBLEVEN MET AANPASSEN VAN 10 NAAR CLIN EN 2 NAAR PROP.
 for subj = 1:size(dataBase,2)
     dataBase(subj).agreement_parameter = agreement_parameters(dataBase(subj).agreement, ...
         dataBase(subj).ccep_prop, dataBase(subj).ccep_clin, myDataPath);
@@ -117,6 +116,8 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).statistics = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep_clin);
 end
 
+%% Visualise the agreement in a scatter plot
+    scatter_networkPar(dataBase,myDataPath)
 
 %% load electrodes positions (xlsx/electrodes.tsv)
 % database (ccep10) is only used for channels and stimpairs and these are

@@ -69,11 +69,6 @@ end
 % short clean up
 clear subj agreement runs
 
-%% Scatter plot of the network parameters
-
-scatter_networkPar(dataBase)
-
-
 
 %% Determine the location of the ones (ER vs. No-ER)
 % ccep10 is only necessary for the channels and stimpairs and those are
@@ -108,10 +103,16 @@ clc
 
 for subj = 1:size(dataBase,2)
     dataBase(subj).agreement_parameter = agreement_parameters(dataBase(subj).agreement, ...
-        dataBase(subj).ccep2, dataBase(subj).ccep10, myDataPath);
+        dataBase(subj).ccep2, dataBase(subj).ccep10);
     
     dataBase(subj).statistics = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep10);
 end
+
+
+%% Scatter plot of the network parameters
+
+scatter_networkPar(dataBase, myDataPath)
+
 
 %% Load electrodes positions (xlsx/electrodes.tsv)
 plot_fig = 'n';                 % 'n' when not all ER responses per stim have to be plot, 'y' when you do want to plot all
