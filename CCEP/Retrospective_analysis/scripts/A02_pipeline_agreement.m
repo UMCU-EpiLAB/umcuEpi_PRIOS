@@ -110,7 +110,7 @@ end
 
 
 %% Scatter plot of the network parameters
-
+close all
 scatter_networkPar(dataBase, myDataPath)
 
 

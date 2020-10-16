@@ -95,7 +95,6 @@ for i=1:size(run_label,2)
     dataBase(i).tb_electrodes = tb_electrodes;
     dataBase(i).ch = ch_incl;
     dataBase(i).data = data;
-    fprintf('Both runs of subject %s have run...\n',sub_labels{1})
 
 end
 end

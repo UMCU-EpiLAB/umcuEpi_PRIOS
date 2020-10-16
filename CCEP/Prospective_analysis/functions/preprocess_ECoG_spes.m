@@ -249,7 +249,6 @@ for subj = 1:size(dataBase,2)
    
     dataBase(subj).stimpnames = cc_stimpnames_all;
     
-    fprintf('...%s has been epoched and averaged... \n',dataBase(subj).sub_label)
     
 end
 end
