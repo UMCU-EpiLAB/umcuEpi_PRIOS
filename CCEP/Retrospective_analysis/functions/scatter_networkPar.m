@@ -51,6 +51,7 @@ for J = 1:size(mode,2)
         hold on
 
     end
+    
 % Save figure
 outlabel=sprintf('All_pat_scatter_%s.jpg',mode{J});
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Scatter/');
@@ -60,8 +61,6 @@ end
 saveas(gcf,[path,outlabel],'jpg')    
     
 end   
-    
- 
     
 end
 

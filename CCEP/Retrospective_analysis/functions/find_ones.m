@@ -4,9 +4,7 @@ function LocOnes = find_ones(dataBase,agreement_run)
 
     % [electrodes,stimpairs]. 
     [x(:,2),x(:,1)] = find(agreement_run.compare_mat ==1);
-    %x_ColN = {'Stimpairs','Electrodes'};
-    %x = array2table(x,'VariableNames',x_ColN);
-
+  
     FindOnes = agreement_run.compare_mat;
     rowNames = dataBase.ch;
     colNames = stimchans;

@@ -21,13 +21,15 @@ end
 
 
 % Load data (also possible for multiple runs)
+dataBase = struct;
 for R = 1:size(strings,2)
     tic;
-   cfg.run_label = strings(R);
-   dataBase(R) = load_ECoGdata(cfg,myDataPath);
+    cfg.run_label = strings(R);
+    dataBase(R) = load_ECoGdata(cfg,myDataPath);
     toc;
 end
 
+fprintf('...Runs of Subject %s have run...\n',cfg.sub_labels{1})
 
 %% CCEP for 2 and 10 stimulations
 % avg_stim : write down the number of stimuli you want to average
@@ -41,12 +43,19 @@ tt = dataBase2stim.tt;
 avg_stim = 5;
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
-if size(dataBase2stim,2) >1         % When SPES was ran in multiple runs
+% When SPES was ran in multiple runs it has to be merge to combine all
+% stimulations into one file.
+% Since dataBase2stim and dataBaseallstim are based on the same 
+% stimulation, it does not matter whether you determine the size of
+% dataBase2stims or dataBaseallstims
+if size(dataBase2stim,2) >1         
     dataBase2stim = merge_runs(dataBase2stim);
     dataBaseallstim = merge_runs(dataBaseallstim);       
 end
 
-% check whether similar stimuli are present in the same stimulus pair
+fprintf('...%s has been preprocessed... \n',dataBase(subj).sub_label)
+
+% Do a quick check by visualizing the stimuli of 2 stims and 10 stims.
 chan = 11; stim=1;
 figure, 
 subplot(2,1,1),
@@ -84,6 +93,7 @@ xlabel('Time (s)')
 ylabel('Voltage (uV)')
 
 clear R stim strings chan n names
+
 %% Use the automatic N1 detector to detect ccep 
 dataBase2stim = detect_n1peak_ECoG_ccep(dataBase2stim,cfg);
 dataBaseallstim = detect_n1peak_ECoG_ccep(dataBaseallstim,cfg);
@@ -118,8 +128,6 @@ ccep2.dataName = dataBase2stim.dataName;
 ccep2.ch = dataBase2stim.ch;
 ccep2.tt = dataBase2stim.tt;
 ccep2.SOZ = dataBase(1).tb_electrodes.soz;
-%ccep2.epoch_sorted_avg = dataBase2stim.cc_epoch_sorted_avg;
-%ccep2.epoch_sorted_select_avg = dataBase2stim.cc_epoch_sorted_select_avg;
 
 if strcmp(savefiles,'y')
     save([targetFolder,fileName], 'ccep2');
@@ -140,8 +148,6 @@ ccep10.ch = dataBaseallstim.ch;
 ccep10.tt = dataBaseallstim.tt;
 ccep10.SOZ = dataBase(1).tb_electrodes.soz;
 
-%ccep10.epoch_sorted_avg = dataBaseallstim.cc_epoch_sorted_avg;          % Deze epoch_sorted heb ik nodig voor plot_all_ccep_and_av maar hierdoor duurt het opslaan mega lang
-%ccep10.epoch_sorted_select_avg = dataBaseallstim.cc_epoch_sorted_select_avg;
 
 if strcmp(savefiles,'y')
     save([targetFolder,fileName5], 'ccep10');

@@ -1,8 +1,8 @@
 % Script pipeline_preproces.m should be performed first to obtain the correct documents.
 
 clear; 
-% %% Select all patients
-cfg.sub_labels = {'sub-RESP0701','sub-RESP0702','sub-RESP0703','sub-RESP0706','sub-RESP0724','sub-RESP0728'}; %{[input('Patient number type (RESPXXXX or PRIOSXX): ','s')]};
+% Select all patients
+cfg.sub_labels = {'sub-RESP0701','sub-RESP0702','sub-RESP0703','sub-RESP0706','sub-RESP0724','sub-RESP0728'}; 
 
 % set paths
 cfg.mode = 'retro';
@@ -20,10 +20,10 @@ for i=1:size(cfg.sub_labels,2)                                                % 
     dataBase(i).sub_label = cfg.sub_labels{i};        
     
     % Find rows with the sub_label of interest 
-    respLoc = find(contains({files(:).name},cfg.sub_labels{i}));        %find(contains({files(:).name},'merged'));
+    respLoc = find(contains({files(:).name},cfg.sub_labels{i}));              
     
     % load all both the 10 stimuli and 2 stimuli of the patient
-    for j=1:size(respLoc,2)                                                      % number of rows with the run_label of interest
+    for j=1:size(respLoc,2)                                                   % number of rows with the run_label of interest
        if contains(files(respLoc(j)).name,'10stims') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep10 = ccep10;
@@ -39,14 +39,10 @@ end
 
 % small cleanup
 clear respLoc k j files ccep10 ccep2 
-%% determine the agreement between 2 and 10 stims per run
-% The determine_agreement function is not only determining the agreement
-% when 2 sessions are compared. It could be possible to compare more, but
-% then the values for W, Z and XandY should be changed. 
+%% Determine the agreement between 2 and 10 stims per run
 close 
 clc
 
-% CHECKEN OF DIT NOG WERKT NU ER PER PATIENT MEERDERE RUNS ZIJN!!!!
 for subj = 1:size(dataBase,2)
     
     % Find the 2 runs matching.
@@ -58,7 +54,7 @@ for subj = 1:size(dataBase,2)
     runs(2).sub_label = dataBase(subj).sub_label;
     
     % Determine the agreement between the two matching runs
-    agreement = determine_agreement(runs);          % Deze agreement nog toevoegen aan ccep! handig voor visualize Gridstructure
+    agreement = determine_agreement(runs);          
     
     dataBase(subj).agreement = agreement;
     
@@ -71,7 +67,7 @@ clear subj agreement runs
 
 
 %% Determine the location of the ones (ER vs. No-ER)
-% ccep10 is only necessary for the channels and stimpairs and those are
+% ccep10 is only used for the channels and stimpairs and those are
 % equal for 2 and 10 stimuli so does not matter which database is used.
 
 for subj = 1:size(dataBase,2)
@@ -125,12 +121,14 @@ end
 %% Display agreement parameters on brain image
 
 %%% DIT IS EVEN VOOR HET VOORBEELD VOOR IN MIJN VERSLAG!!!
+%%% waarbij ik pijlen teken tussen electrodes om de indegree, outdegree en
+%%% BC uit te leggen. Maar ben niet tevreden over het resultaat.
 
 close all;
 clear coordinates
 
 % Show CT scan with the grid (patient specific)
-[I] = imread('top_left.jpg');            
+[I] = imread('CT met grid.jpg');            
 figure1 = figure();
 fig = imshow(I);
 set(figure1, 'Position', [319,7,1241,935]);        % enlarge figure
@@ -146,7 +144,7 @@ coordinates(:,1:2) = [xi(:),yi(:)];
 set(fig, 'AlphaData', 0.6);         % Set transparancy
 % array of random EL names
 
-for i = 1:16
+for i = 1:size(xi,1)
     name_ch{i,:} = ['LC' num2str(i,'%2d')];
     
 end
@@ -191,19 +189,3 @@ for elec1 = 1:length(temp_mat)                                     % This should
        end
     end
 end
-
-
-
-%                
-%             line_elec_x = line([xi(elec1), xi(elec2)], [yi(elec1), yi(elec2)],'Color','m','LineWidth',(bins_lineWidth_ind(elec1)*1.5)) ;   % linewidth moet gebaseerd op norm indegree'LineWidth',bins_lineWidth_2(i));
-%             line_elec_x.Color(4) = bins_lineWidth_ind(elec1)*0.1;                  %the lower the more transparant
-%             
-            %line_elec_x = annotation(figure1,'arrow',[((xi(elec2)-maxX)/maxX)*-1, ((xi(elec1)-maxX)/maxX)*-1], [((yi(elec2)-maxY)/maxY)*-1, ((yi(elec1)-maxY)/maxY*-1)],'Color','b') ;                          
-
- 
-    
-
- 
- 
- 
- 

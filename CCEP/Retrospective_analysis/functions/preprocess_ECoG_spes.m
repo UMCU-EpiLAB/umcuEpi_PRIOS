@@ -47,19 +47,11 @@ for subj = 1:size(dataBase,2)
         end
     end
     
-    % these are set in config_CCEP
-    if strcmp(cfg.dir,'yes') && strcmp(cfg.amp,'yes') % take into account the direction (C1-C2 and C2-C1 separately) and the stimulation current
-        stimcur = dataBase(subj).tb_events.electrical_stimulation_current(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a'));
-        stimelek = [stimnum stimcur];
-        
-    elseif strcmp(cfg.dir,'yes') && strcmp(cfg.amp,'no') % take into account only the direction
+    % these are set in config_CCEP      
+    if strcmp(cfg.dir,'yes')  % take into account only the direction
         stimelek = stimnum;
         
-    elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'yes') % take into account only the stimulation current
-        stimcur = dataBase(subj).tb_events.electrical_stimulation_current(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a'));
-        stimelek = [sort(stimnum,2) stimcur];
-        
-    elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'no') % do not take stimulation current or direction into account
+    elseif strcmp(cfg.dir,'no')  % do not take direction into account
         stimelek = sort(stimnum,2);
         
     end
@@ -249,8 +241,6 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).cc_epoch_sorted_select_avg = cc_epoch_sorted_select;
    
     dataBase(subj).stimpnames = cc_stimpnames_all;
-    
-    fprintf('...%s has been epoched and averaged... \n',dataBase(subj).sub_label)
-    
+        
 end
 end
