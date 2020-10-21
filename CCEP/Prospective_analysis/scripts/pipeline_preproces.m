@@ -1,6 +1,6 @@
 clear; 
 
-%% Choose patient
+% Choose patient
 config_CCEP
 
 % set paths
@@ -215,11 +215,17 @@ end
 
 
 %% Use the automatic N1 detector to detect ccep 
+%%% VOORDAT IK DIT DOE MOET ER IETS GESCHREVEN WORDEN OM DE 50 Hz STORING
+%%% WEG TE HALEN, STAP 1 IS, STIMULATIE ARTEFACT WEG, STAP 2 IS, 50 Hz
+%%% FILTER ERAF
 dataBase_clin = detect_n1peak_ECoG_ccep(dataBase_clin,cfg);
 dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);
 
 disp('Detection of ERs is completed')
 
+%%% hij heeft nu gedetecteerd in gefilterd signaal. maar hieronder bij
+%%% visueel checken gebruikt hij nog wel het originele signaal. hier us ook
+%%% nog toevoegen.
 %% Visually check detected cceps
 % Check the average signal in which an ER was detected
 VisCheck = input('Do you want to visually check the detected CCEPs? [y/n] ','s');

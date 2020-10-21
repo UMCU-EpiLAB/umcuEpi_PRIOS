@@ -30,13 +30,27 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             H=figure(1);
             H.Units = 'normalized';
             H.Position = [0.13 0.31 0.77 0.7];
-            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));      % This is not right, the stimpairs pos and neg are still separated.
+            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));      
 %             this_plot= reshape(this_plot, size(this_plot,1)*size(this_plot,2), size(this_plot,3));
             this_plot(:,tt>-0.01 & tt<0.01) = NaN;            
             
             this_plot_avg = squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:));
-            this_plot_avg(tt>0 & tt<0.009) = NaN;            
+            this_plot_avg(tt>0 & tt<0.009) = 0;            
             
+            %%%  THESE NEED TO BE FILTERED BEFORE PLOTTING.
+             if ismember(dataBase.task_name,'task-SPESprop')
+                
+               Fs = dataBase.ccep_header.Fs;
+               Fn = Fs/2;
+               [bP,aP] = butter(2,[0.1, 33]/Fn,'bandpass');
+               
+               
+               this_plot_filt_pass_avg = filtfilt(bP,aP, this_plot_avg);
+               this_plot_avg = this_plot_filt_pass_avg ;
+               
+             end
+           
+               
             subplot(1,2,1)
             plot(tt,this_plot,':r','linewidth',1);
             hold on
@@ -77,19 +91,19 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
                     
                     
                       % If thre are multiple marks placed, than the one with the
-                        % highest x value is the N2, the Y-value for this one is the amplitude.
-                        N2 =datacursormode(1);
-                        N2_1 = getCursorInfo(N2);
-                        if size(N2_1,2)==2        % If there are more than 1 points marked
-                          if N2_1(2).Position(:,1) > N2_1(1).Position(:,1)              
-                            n2_latency(chan,stimp) = N2_1(2).Position(:,1);             % x-value is latency in ms
-                            n2_amplitude(chan,stimp) = N2_1(2).Position(:,2);           % y-value is amplitude
-                              
-                          elseif N2_1(1).Position(:,1) > N2_1(2).Position(:,1)
-                            n2_latency(chan,stimp) = N2_1(1).Position(:,1);
-                            n2_latency(chan,stimp) = N2_1(1).Position(:,1);
-                          end
-                        end
+%                         % highest x value is the N2, the Y-value for this one is the amplitude.
+%                         N2 =datacursormode(1);
+%                         N2_1 = getCursorInfo(N2);
+%                         if size(N2_1,2)==2        % If there are more than 1 points marked
+%                           if N2_1(2).Position(:,1) > N2_1(1).Position(:,1)              
+%                             n2_latency(chan,stimp) = N2_1(2).Position(:,1);             % x-value is latency in ms
+%                             n2_amplitude(chan,stimp) = N2_1(2).Position(:,2);           % y-value is amplitude
+%                               
+%                           elseif N2_1(1).Position(:,1) > N2_1(2).Position(:,1)
+%                             n2_latency(chan,stimp) = N2_1(1).Position(:,1);
+%                             n2_latency(chan,stimp) = N2_1(1).Position(:,1);
+%                           end
+%                         end
                 
                         
                         
@@ -130,6 +144,6 @@ end
 
 dataBase.ccep.n1_peak_amplitude_check = n1_peak_amplitude_check;
 dataBase.ccep.n1_peak_sample_check = n1_peak_sample_check;
-dataBase.ccep.n2_amplitude = n2_amplitude;
-dataBase.ccep.n2_latency = n2_latency;
+% dataBase.ccep.n2_amplitude = n2_amplitude;
+% dataBase.ccep.n2_latency = n2_latency;
 

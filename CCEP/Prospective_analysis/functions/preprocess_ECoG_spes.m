@@ -36,6 +36,25 @@ for subj = 1:size(dataBase,2)
     
     clear i
     
+    
+    
+    %% Define Burst suppression periods 
+    BS_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'burstsup'));
+    BS_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'burstsup'));
+
+    if iscell(BS_start)
+        BS_start = str2double(BS_start);
+    end
+    if iscell(BS_stop)
+        BS_stop = str2double(BS_stop);
+    end
+    
+    BS_sig = [];
+    for i=1:size(BS_start,1)
+        dataBase(subj).Burstsup = [BS_sig, BS_start(i):BS_stop(i)]; 
+    end
+    
+    
     %% Remove stimulus pairs with less than minimal interstim time
     % Stimulations with too little interstimulus time need to be removed
     % since it cannot be guaranteed that the signal went back to baseline
@@ -47,8 +66,8 @@ for subj = 1:size(dataBase,2)
      idx_keep5s = [true(1); diff([tb_stim.onset])>=4.9];
      dataBase.tb_events = tb_stim(idx_keep5s,:);
        
-     
-    %% unique stimulation pairs
+         
+    %% Unique stimulation pairs
     stimpair = dataBase(subj).tb_events.electrical_stimulation_site(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a')) ;
     
     stimnum = NaN(size(stimpair,1),2);
@@ -78,7 +97,7 @@ for subj = 1:size(dataBase,2)
     
     [cc_stimsets_all,~,IC_all] = unique(stimelek,'rows');      
      
-    %% remove stimulus pairs with less than minimum number of stimulations
+    %% Remove stimulus pairs with less than minimum number of stimulations
     n = histcounts(IC_all,'BinMethod','integers');                      
     
     if any(diff(n) ~= 0) % if any pair is stimulated a different amount
@@ -142,7 +161,7 @@ for subj = 1:size(dataBase,2)
     end
     
     
-    %% determine stimulation pair names
+    %% Determine stimulation pair names
     % pre-allocation
     cc_stimchans_all = cell(size(cc_stimsets_all,1),2);
     cc_stimchans_avg = cell(size(cc_stimsets_avg,1),2);
@@ -175,7 +194,7 @@ for subj = 1:size(dataBase,2)
     
   
    
-    %% select epochs
+    %% Select epochs
  t = round(epoch_length*dataBase(subj).ccep_header.Fs);
  tt = (1:epoch_length*dataBase(subj).ccep_header.Fs)/dataBase(subj).ccep_header.Fs - epoch_prestim;
 
@@ -201,6 +220,11 @@ for subj = 1:size(dataBase,2)
                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact)
                        % do nothing, because part of artefact, therefore
                        % this event is not used
+                       
+                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),BS_sig)
+                    % do nothing because stimulation is part of burst
+                    % suppression period and therefore not thrustworthy
+                    
                 else
                     cc_epoch_sorted_all(elec,n,ll,:) = dataBase(subj).data(elec,dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1:dataBase(subj).tb_events.sample_start(eventnum(n))+round((epoch_length-epoch_prestim)*dataBase(subj).ccep_header.Fs));
                     tt_epoch_sorted_all(n,ll,:) = dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1:dataBase(subj).tb_events.sample_start(eventnum(n))+round((epoch_length-epoch_prestim)*dataBase(subj).ccep_header.Fs);
@@ -217,7 +241,7 @@ for subj = 1:size(dataBase,2)
        
    end
 
-    %% average epochs
+    %% Average epochs
     if isempty(avg_stim)
         avg_stim = max_stim;
     end

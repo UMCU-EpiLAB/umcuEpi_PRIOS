@@ -91,10 +91,10 @@ for subj = 1:length(dataBase)
         size(dataBase(subj).cc_epoch_sorted_avg,2),2);
     
     % for every averaged stimulation
-    for jj = 1:size(dataBase(subj).stimpnames_avg,2)                    %size(dataBase(subj).cc_epoch_sorted_avg,2)       % for every averaged stimulation
+    for jj = 1:size(dataBase(subj).stimpnames_avg,2)                         % for every averaged stimulation
         
         % for every channel
-        for ii = 1:size(dataBase(subj).ch,1)                     %size(dataBase(subj).cc_epoch_sorted_avg,1)   % for every channel
+        for ii = 1:size(dataBase(subj).ch,1)                                 % for every channel
             
             % create time struct
             tt = (1:epoch_length*dataBase(subj).ccep_header.Fs) / ...
@@ -103,7 +103,8 @@ for subj = 1:length(dataBase)
             % baseline subtraction: take median of part of the averaged signal for
             % this stimulation pair before stimulation, which is the half of the
             % epoch
-            baseline_tt = tt>-2 & tt<-.1;
+            baseline_tt = tt>-2 & tt<-.3;                   %%%% THIS WAS UNTIL 0.1%%%%
+            
             signal_median = median(dataBase(subj).cc_epoch_sorted_avg(ii,jj,baseline_tt),3);
             
             % subtract median baseline from signal
@@ -119,6 +120,139 @@ for subj = 1:length(dataBase)
                 pre_stim_sd = 50;
             end
             
+            
+           if ismember(dataBase.task_name,'task-SPESprop')
+                
+               Fs = dataBase.ccep_header.Fs;
+               Fn = Fs/2;
+               
+             % Take a small part of the signal before the stimulation artefact to determine the frequencies
+%              baseline_tt = tt>-1.0 & tt<-.1;
+%              baseline_tt_plot = tt(baseline_tt ==1);
+%              new_signal_part = new_signal(baseline_tt);
+%              norm_part = sqrt(new_signal_part.^2);
+%              [b,a] = butter(2,[32/Fn 39/Fn],'stop');
+%              
+%              norm_part_filt = filtfilt(b,a,norm_part);
+%              [pwwP,fP] = periodogram(norm_part, rectwin(length(norm_part)), [], Fs);                                % without filter           
+%              [pwwP30Hz,fP30Hz] = periodogram(norm_part_filt, rectwin(length(norm_part_filt)), [], Fs);              % with filter           
+% 
+%              figure()
+%              subplot(2,1,1)
+%              plot(fP,pwwP);
+%              ylabel('PSD'); xlabel('Frequency (Hz)');
+%              xlim([0 80]);    
+%              ylim([0 200])
+%              title('Part of signal before stim artefact')
+%              
+%              subplot(2,1,2)
+%              plot(fP30Hz,pwwP30Hz);
+%              ylabel('PSD'); xlabel('Frequency (Hz)');
+%              xlim([0 80]);    
+%              ylim([0 200])
+%              title('Part of signal before stim artefact, 30 Hz filtered')
+%               
+%             % check
+%             figure()
+%             subplot(2,1,1)
+%             plot(tt, new_signal_stimart)
+%             title('Original, without stimulation artefact')
+%             ylim([-600 600]); xlim([-1 -0.1])
+%             
+%             subplot(2,1,2)
+%             plot(baseline_tt_plot, norm_part_filt)
+%             title('Filtered 36 Hz')
+%             ylim([-600 600])
+%             
+%               
+              
+            % Remove period of the stimulation artefact
+            % replace with zero 
+            new_signal_stimart = new_signal;
+            new_signal_stimart(tt>-0.005 & tt<0.005) = 0;
+
+
+            % 50 Hz filter combined with a bandstop filter between 33 and
+            % 38 Hz, and a bandpass filter for all EEG-like frequencies
+%             signal_norm = sqrt(new_signal_stimart.^2);
+            
+            % Butterworth
+%              [b50,a50] = butter(2,[49/Fn 50/Fn],'stop');
+%              [b36,a36] = butter(2,[33/Fn 38/Fn],'stop');
+% %              
+             [bP,aP] = butter(2,[0.1, 33]/Fn,'bandpass');
+           
+            % concatenate two filters for two known incorrect frequencies
+%             new_signal_filt = filtfilt(b50,a50,signal_norm);
+%             new_signal_filt_B = filtfilt(b36,a36,new_signal_filt);
+%             
+            % band pass filter for EEG valid frequencies
+            new_signal_filt_pass = filtfilt(bP,aP, new_signal_stimart);
+            
+% %             new_signal__withoutNorm = filtfilt(b,a,new_signal_stimart);
+%             
+% %             [pww,f] = periodogram(new_signal,rectwin(length(new_signal)),[],Fs);                                % with stimulation artefact, without filter           
+% %             [pwwStimA,fStimA] = periodogram(new_signal_stimart,rectwin(length(new_signal_stimart)),[],Fs);    % without stimulation artefact, without filter
+% %              [pwwAF,fAF] = periodogram(new_signal_filt_ori,rectwin(length(new_signal_filt_ori)),[],Fs);        % with stimulation artefact, with filter 
+%             [pwwF,fF] = periodogram(new_signal_filt_B,rectwin(length(new_signal_filt_B)),[],Fs);                    % without stimulation artefact, with filter
+%             [pwwP,fP] = periodogram(new_signal_filt_pass, [], [], Fs);
+%             
+% %             [pwwWN,fWN] = periodogram(new_signal__withoutNorm,rectwin(length(new_signal__withoutNorm)),[],Fs);                    % without stimulation artefact, with filter
+
+%             
+%             figure() 
+%             subplot(2,1,1)
+%             plot(fF,pwwF);
+%             ylabel('PSD'); xlabel('Frequency (Hz)');
+%             xlim([2 60]); ylim([0 200])
+%             title('Without stimulation artefact and with 50 and 36 Hz filter')
+%             
+%             subplot(2,1,2)
+%             plot(fP,pwwP);
+%             ylabel('PSD'); xlabel('Frequency (Hz)');
+%             xlim([2 60]); ylim([0 200])
+%             title('Without stimulation artefact and with bandpass filter')
+% 
+%             
+%              % Check
+%             figure()
+%             subplot(3,1,1)
+%             plot(tt, new_signal_stimart)
+%             title('without stimulation artefact, not filtered')
+%             ylim([-600 600]); xlim([-0.2 1.5])
+%             
+%             subplot(3,1,2)
+%             plot(tt,new_signal_filt_B)
+%             title('50 & 36 Hz filtered signal')
+%             ylim([-600 600]); xlim([-0.2 1.5])
+%          
+%             subplot(3,1,3)
+%           % Check
+%             figure(1)
+%             subplot(3,1,1)
+%             plot(tt,new_signal)
+%             title(sprintf('original %s, %s',dataBase.stimpnames_avg{jj},dataBase.ch{ii}))
+% %             ylim([-600 600])
+%             subplot(3,1,2)
+%             plot(tt, new_signal_stimart)
+%             title('without stimulation artefact, zeros')
+% %             ylim([-600 600])
+%             
+%            subplot(3,1,3)           
+%             plot(tt,new_signal_filt_pass)
+%             title('bandpass filtered signal')
+% %             ylim([-300 1000]); 
+%             xlim([-1.2 1.4])
+%             
+%             figure(3)
+%             plot(tt,new_signal_stimart,tt,new_signal_filt_pass,'LineWidth',5)
+%             legend('original','filtered')
+% %          
+              new_signal = new_signal_filt_pass ;
+           end
+        
+           
+     
             % Place NaN when the electrode is stimulated
             if  ii == dataBase(subj).cc_stimsets_avg(jj,1) || ...
                     ii == dataBase(subj).cc_stimsets_avg(jj,2)
