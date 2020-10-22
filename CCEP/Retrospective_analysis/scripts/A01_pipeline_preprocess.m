@@ -21,7 +21,7 @@ end
 
 
 % Load data (also possible for multiple runs)
-dataBase = struct;
+% dataBase = struct;
 for R = 1:size(strings,2)
     tic;
     cfg.run_label = strings(R);
@@ -53,10 +53,10 @@ if size(dataBase2stim,2) >1
     dataBaseallstim = merge_runs(dataBaseallstim);       
 end
 
-fprintf('...%s has been preprocessed... \n',dataBase(subj).sub_label)
+fprintf('...%s has been preprocessed... \n',dataBase(1).sub_label)
 
 % Do a quick check by visualizing the stimuli of 2 stims and 10 stims.
-chan = 11; stim=1;
+chan = 20; stim=23;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
