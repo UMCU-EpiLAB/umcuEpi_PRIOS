@@ -39,8 +39,8 @@ for subj = 1:size(dataBase,2)
     
     
     %% Define Burst suppression periods 
-    BS_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'burstsup'));
-    BS_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'burstsup'));
+    BS_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
+    BS_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
 
     if iscell(BS_start)
         BS_start = str2double(BS_start);
