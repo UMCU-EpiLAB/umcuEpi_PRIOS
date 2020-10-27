@@ -83,9 +83,9 @@ plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(3,stim,1:5,:))','Colo
 hold on
 plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(3,stim,6:10,:))','Color','b','LineWidth',1)
 hold on
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(3,stim,:)),'k','LineWidth',2)
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(3,stim,:)),'k','LineWidth',3)
 hold off
-title('all stimuli')
+title('All 10 signals and their average')
 xlabel('time (s)')
 xlim([-0.1 0.2])
 ylim([-750 750])

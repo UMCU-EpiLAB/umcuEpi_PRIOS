@@ -28,6 +28,11 @@ for R = 1:size(strings,2)
 end
 
     fprintf('Both runs of subject %s have run...\n',cfg.sub_labels{1})
+    
+    
+%% Filter
+data_filt = filter_bedArt(dataBase, cfg);
+
 
 %% CCEP for SPES-clin stimulations
 % save all stimuli of clinical SPES

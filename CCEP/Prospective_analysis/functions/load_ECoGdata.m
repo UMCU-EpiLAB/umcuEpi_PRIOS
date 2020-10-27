@@ -94,6 +94,7 @@ for i=1:size(run_label,2)
     dataBase(i).tb_channels = tb_channels;
     dataBase(i).tb_electrodes = tb_electrodes;
     dataBase(i).ch = ch_incl;
+    dataBase(i).raw_data = data;
     dataBase(i).data = data;
 
 end
