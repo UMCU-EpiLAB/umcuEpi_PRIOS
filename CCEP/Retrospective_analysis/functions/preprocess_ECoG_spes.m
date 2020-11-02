@@ -31,7 +31,7 @@ for subj = 1:size(dataBase,2)
     
     ev_artefact = [];
     for i=1:size(ev_artefact_start,1)
-        ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)]; %#ok<AGROW>
+        ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)]; 
     end
     
     clear i
@@ -213,7 +213,7 @@ for subj = 1:size(dataBase,2)
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
     cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples
     
-    for ll = 1:max(IC_avg)                      % Takes every value between 1 and unique stimpairnumber (some numbers are not used therefore the remove_sorted)
+    for ll = 1:max(IC_avg)                       % Takes every value between 1 and highest unique stimpairnumber, though some numbers are not used therefore the remove_sorted below)
          if sum(IC_avg==ll)>1                    % When ll is not a single stimpair 
             selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
             selection_avg =  squeeze(nanmean(selection,2));

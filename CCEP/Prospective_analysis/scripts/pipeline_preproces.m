@@ -21,19 +21,19 @@ end
 
 % Load data (also possible for multiple runs)
 for R = 1:size(strings,2)
-    tic;
     cfg.run_label = strings(R);
     dataBase(R) = load_ECoGdata(cfg,myDataPath);
-    toc;
 end
 
-    fprintf('Both runs of subject %s have run...\n',cfg.sub_labels{1})
+    fprintf('Both runs of subject %s have run. \n',cfg.sub_labels{1})
     
     
 %% Filter
-data_filt = filter_bedArt(dataBase, cfg);
+% When this is used, dataBase.data will change into the fltered data
+% DataBase.raw_data will not be changed and will keep the raw data
+dataBase = filter_bedArt(dataBase, cfg);
 
-
+fprintf('Both runs of subject %s are filtered. \n',cfg.sub_labels{1})
 %% CCEP for SPES-clin stimulations
 % save all stimuli of clinical SPES
 
@@ -74,7 +74,7 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 12; stim=20;
+chan = 12; stim=3;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -84,7 +84,6 @@ hold off
 title('SPES prop')
 xlabel('time (s)')
 xlim([-.2 1.0])
-
             
 subplot(2,1,2),
 plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
@@ -111,114 +110,7 @@ xlim([-.1 0.1])
 
 
 %% Check whether SPESclin and SPESprop contain the same stimulation pairs
-%%% dit naar een functie wegschrijven want dit is erg slordig hier.
-if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)                    % if SPESclin contains more stimpairs
-    [x_all,~ ] = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0); 
-    [x_avg,~] = find(ismember(dataBase_clin.stimpnames_avg' , dataBase_prop.stimpnames_avg' )==0) ;
-   
-    names = dataBase_clin.stimpnames_all(x_all);
-
-    stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-    sprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
-
-    dataBase_clin.cc_stimsets_all(x_all,:) = [];
-    dataBase_clin.cc_stimchans_all(x_all,:) = [];
-    dataBase_clin.stimpnames_all(:,x_all) = [];
-    dataBase_clin.stimpnames(:,x_all) = [];
-    dataBase_clin.cc_epoch_sorted(:,:,x_all,:) = [];
-    dataBase_clin.tt_epoch_sorted(:,x_all,:) = [];
-    
-    dataBase_clin.cc_stimsets_avg(x_avg,:) = [];
-    dataBase_clin.cc_stimchans_avg(x_avg,:) = [];
-    dataBase_clin.stimpnames_avg(x_avg) = [];
-    dataBase_clin.cc_epoch_sorted_avg(:,x_avg,:) = [];
-    dataBase_clin.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
-    
-    % Check if the same number of stimpairs are used now.
-    if length(dataBase_clin.stimpnames_all) ~=  length(dataBase_prop.stimpnames_all) 
-        if length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_all)
-           [x_all,~] = find(ismember(dataBase_prop.stimpnames_all' , dataBase_clin.stimpnames_all' )==0);     % if SPESprop contains more stimpairs
-           [x_avg,~] = find(ismember(dataBase_prop.stimpnames_avg' , dataBase_clin.stimpnames_avg' )==0);     % if SPESprop contains more stimpairs
-
-           names = dataBase_prop.stimpnames_all(x_all);
-           stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-           sprintf(['Stimpairs only stimulated in SPESprop and not in SPESclin: \n' stringsz '\n'],names{:})
-
-           dataBase_prop.cc_stimsets_all(x_all,:) = [];
-           dataBase_prop.cc_stimchans_all(x_all,:) = [];
-           dataBase_prop.stimpnames_all(:,x_all) = [];
-           dataBase_prop.stimpnames(:,x_all) = [];
-           dataBase_prop.cc_epoch_sorted(:,:,x_all,:) = [];
-           dataBase_prop.tt_epoch_sorted(:,x_all,:) = [];
-
-           dataBase_prop.cc_stimsets_avg(x_avg,:) = [];
-           dataBase_prop.cc_stimchans_avg(x_avg,:) = [];
-           dataBase_prop.stimpnames_avg(x_avg) = [];
-           dataBase_prop.cc_epoch_sorted_avg(:,x_avg,:) = [];
-           dataBase_prop.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
-            
-        end
-    end
-    
-        if length(dataBase_clin.stimpnames_all) ~=  length(dataBase_prop.stimpnames_all) 
-            fprintf('%s still has unequal stimulation pairs.. \n',dataBase_clin.sub_label)
-        end
-        
-elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_all)
-   [x_all,~] = find(ismember(dataBase_prop.stimpnames_all' , dataBase_clin.stimpnames_all' )==0);     % if SPESprop contains more stimpairs
-   [x_avg,~] = find(ismember(dataBase_prop.stimpnames_avg' , dataBase_clin.stimpnames_avg' )==0);     % if SPESprop contains more stimpairs
- 
-   names = dataBase_prop.stimpnames_all(x_all);
-   stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-   sprintf(['Stimpairs only stimulated in SPESprop and not in SPESclin: \n' stringsz '\n'],names{:})
-    
-   dataBase_prop.cc_stimsets_all(x_all,:) = [];
-   dataBase_prop.cc_stimchans_all(x_all,:) = [];
-   dataBase_prop.stimpnames_all(:,x_all) = [];
-   dataBase_prop.stimpnames(:,x_all) = [];
-   dataBase_prop.cc_epoch_sorted(:,:,x_all,:) = [];
-   dataBase_prop.tt_epoch_sorted(:,x_all,:) = [];
-   
-   dataBase_prop.cc_stimsets_avg(x_avg,:) = [];
-   dataBase_prop.cc_stimchans_avg(x_avg,:) = [];
-   dataBase_prop.stimpnames_avg(x_avg) = [];
-   dataBase_prop.cc_epoch_sorted_avg(:,x_avg,:) = [];
-   dataBase_prop.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
-    
-    % Check if the same number of stimpairs are used now.
-    if length(dataBase_clin.stimpnames_all) ==  length(dataBase_prop.stimpnames_all) 
-        if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)
-             [x_all,~ ] = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0); 
-            [x_avg,~] = find(ismember(dataBase_clin.stimpnames_avg' , dataBase_prop.stimpnames_avg' )==0) ;
-
-            names = dataBase_clin.stimpnames_all(x_all);
-
-            stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-            sprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
-
-            dataBase_clin.cc_stimsets_all(x_all,:) = [];
-            dataBase_clin.cc_stimchans_all(x_all,:) = [];
-            dataBase_clin.stimpnames_all(:,x_all) = [];
-            dataBase_clin.stimpnames(:,x_all) = [];
-            dataBase_clin.cc_epoch_sorted(:,:,x_all,:) = [];
-            dataBase_clin.tt_epoch_sorted(:,x_all,:) = [];
-
-            dataBase_clin.cc_stimsets_avg(x_avg,:) = [];
-            dataBase_clin.cc_stimchans_avg(x_avg,:) = [];
-            dataBase_clin.stimpnames_avg(x_avg) = [];
-            dataBase_clin.cc_epoch_sorted_avg(:,x_avg,:) = [];
-            dataBase_clin.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
-    
-        end
-    end
-
-    
-        if length(dataBase_clin.stimpnames_all) ~=  length(dataBase_prop.stimpnames_all) 
-            fprintf('%s still has unequal stimulation pairs.. \n',dataBase_clin.sub_label)
-        end
-end
-
-
+[dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop);
 
 %% Use the automatic N1 detector to detect ccep 
 
@@ -237,53 +129,58 @@ if strcmp(VisCheck,'y')
     dataBase_prop = visualRating_ccep(dataBase_prop);
 
     % Save the values for the agreement per run (2 and 10 stims)
-    targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
+    targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/'];
 
-    checked_clin = [dataBase_clin.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_clin_checked.mat'];
-    save([targetFolder,checked_clin], 'ccep')
+    clin_ccep_checked.checked_amplitude = dataBase_clin.ccep.n1_peak_amplitude_check;
+    clin_ccep_checked.checked_sample = dataBase_clin.ccep.n1_peak_sample_check;  
+    checked_clin = [dataBase_clin.sub_label, '_',dataBase_clin.run_label, '_CCEP_' ,'clin_checked.mat'];
+    save([targetFolder,checked_clin], 'clin_ccep_checked')
+         
     
-    checked_prop = [checked_prop.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_prop_checked.mat'];
-    save([targetFolder,checked_prop], 'ccep')
+    prop_ccep_checked.checked_amplitude = dataBase_prop.ccep.n1_peak_amplitude_check;
+    prop_ccep_checked.checked_sample = dataBase_prop.ccep.n1_peak_sample_check  ;
+    checked_prop = [dataBase_prop.sub_label, '_',dataBase_prop.run_label, '_CCEP_' ,'prop_checked.mat'];
+    save([targetFolder,checked_prop], 'prop_ccep_checked')
 
 %     checked_2 = [dataBase2stim.sub_label, '_', dataBase(1).run_label, '_CCEP_', dataBase2stim.NmbrofStims ,'_checked.mat'];
 %     save([targetFolder,checked_2], 'ccep')
     fprintf('Checked files are saved in %s \n',targetFolder);
 
     % Perform the determine agreement again.
-    [agreement_check] = determine_agreement_checked(myDataPath,cfg);
+%     [agreement_check] = determine_agreement_checked(myDataPath,cfg);
 
-    fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
-    agreement_check.OA, agreement_check.PA, agreement_check.NA)
+%     fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
+%     agreement_check.OA, agreement_check.PA, agreement_check.NA)
 end
 
 
 
 %% Visually check ALL signals to test the detector
-VisCheck_AllSig = input('Do you want to visually check ALL PROPOFOL SIGNALS [y/n] ','s');
-% PROBEER OM TE VOORKOMEN DAT SIGNALEN DIE EEN ARTEFACT BEVATTEN GEPLOT
-% WORDEN. 
-if strcmp(VisCheck_AllSig,'y')
-    %dataBase_clin = plot_all_signals(dataBase_clin);
-    dataBase_prop = plot_all_signals(dataBase_prop);
-
-    % Save the values for the agreement per run (2 and 10 stims)
-    targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
-
-    checked_allSig_clin = [dataBase_clin.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_clin_allSig_checked.mat'];
-    save([targetFolder,checked_allSig_clin], 'ccep')
-    
-    checked_allSig_prop = [checked_prop.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_prop_allSig_checked.mat'];
-    save([targetFolder,checked_allSig_prop], 'ccep')
-
-    fprintf('Checked files are saved in %s \n',targetFolder);
-
-    Perform the determine agreement again.
-    [agreement_check] = determine_agreement_checked(myDataPath,cfg);   %
-    dit staat nog ingesteld op de ccep_checked van de checked detected ERs
-
-   fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
-   agreement_check.OA, agreement_check.PA, agreement_check.NA)
-end
+% VisCheck_AllSig = input('Do you want to visually check ALL PROPOFOL SIGNALS [y/n] ','s');
+% % PROBEER OM TE VOORKOMEN DAT SIGNALEN DIE EEN ARTEFACT BEVATTEN GEPLOT
+% % WORDEN. 
+% if strcmp(VisCheck_AllSig,'y')
+%     %dataBase_clin = plot_all_signals(dataBase_clin);
+%     dataBase_prop = plot_all_signals(dataBase_prop);
+% 
+%     % Save the values for the agreement per run (2 and 10 stims)
+%     targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
+% 
+%     checked_allSig_clin = [dataBase_clin.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_clin_allSig_checked.mat'];
+%     save([targetFolder,checked_allSig_clin], 'ccep')
+%     
+%     checked_allSig_prop = [checked_prop.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_prop_allSig_checked.mat'];
+%     save([targetFolder,checked_allSig_prop], 'ccep')
+% 
+%     fprintf('Checked files are saved in %s \n',targetFolder);
+% 
+%     Perform the determine agreement again.
+%     [agreement_check] = determine_agreement_checked(myDataPath,cfg);   %
+%     dit staat nog ingesteld op de ccep_checked van de checked detected ERs
+% 
+%    fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
+%    agreement_check.OA, agreement_check.PA, agreement_check.NA)
+% end
 
 %% save ccep
 savefiles = input('Do you want to save the ccep-structures? [y/n] ','s');

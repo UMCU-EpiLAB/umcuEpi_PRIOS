@@ -18,8 +18,8 @@ n1_peak_sample = dataBase.ccep.n1_peak_sample;
 n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
 n1_peak_sample_check = NaN(size(n1_peak_sample));
 
-n2_latency = NaN(size(n1_peak_amplitude));
-n2_amplitude = NaN(size(n1_peak_sample));
+% n2_latency = NaN(size(n1_peak_amplitude));
+% n2_amplitude = NaN(size(n1_peak_sample));
 
 for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
         
@@ -30,25 +30,30 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             H=figure(1);
             H.Units = 'normalized';
             H.Position = [0.13 0.31 0.77 0.7];
-            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));      
+            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));           
+            
+            %%% DIT WORDT NU GEPLOT MET STIMULATIE ARTEFACT, MAARRRRR
+            %%% STIMULATIEARTEFACT IS WEGGEINTERPOLEERD DUS DIE KAN IK NIET
+            %%% PLOTTEN....
+            
 %             this_plot= reshape(this_plot, size(this_plot,1)*size(this_plot,2), size(this_plot,3));
-            this_plot(:,tt>-0.01 & tt<0.01) = NaN;            
+%             this_plot(:,tt>-0.01 & tt<0.01) = NaN;            
             
             this_plot_avg = squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:));
-            this_plot_avg(tt>0 & tt<0.009) = 0;            
+%             this_plot_avg(tt>-0.01 & tt<0.01) = NaN;            
             
-            %%%  THESE NEED TO BE FILTERED BEFORE PLOTTING.
-             if ismember(dataBase.task_name,'task-SPESprop')
-                
-               Fs = dataBase.ccep_header.Fs;
-               Fn = Fs/2;
-               [bP,aP] = butter(2,[0.1, 33]/Fn,'bandpass');
-               
-               
-               this_plot_filt_pass_avg = filtfilt(bP,aP, this_plot_avg);
-               this_plot_avg = this_plot_filt_pass_avg ;
-               
-             end
+%             %%%  THESE NEED TO BE FILTERED BEFORE PLOTTING.
+%              if ismember(dataBase.task_name,'task-SPESprop')
+%                 
+%                Fs = dataBase.ccep_header.Fs;
+%                Fn = Fs/2;
+%                [bP,aP] = butter(2,[0.1, 33]/Fn,'bandpass');
+%                
+%                
+%                this_plot_filt_pass_avg = filtfilt(bP,aP, this_plot_avg);
+%                this_plot_avg = this_plot_filt_pass_avg ;
+%                
+%              end
            
                
             subplot(1,2,1)

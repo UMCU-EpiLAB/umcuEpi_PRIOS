@@ -17,28 +17,33 @@ end
 
 for subj = 1:size(dataBase,2)
     
-    %% define artefact period - stimuli during an artefact become NaNs
-    
+%% define artefact period - stimuli during an artefact become NaNs
     ev_artefact_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));
     ev_artefact_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));
-    
+
     if iscell(ev_artefact_start)
         ev_artefact_start = str2double(ev_artefact_start);
     end
+
     if iscell(ev_artefact_stop)
         ev_artefact_stop = str2double(ev_artefact_stop);
     end
-    
+
     ev_artefact = [];
+    % When there are multiple SZ, then the times samples are concatenaded
+    % in the same array. So ev_artefact is not overwritten
     for i=1:size(ev_artefact_start,1)
-        dataBase(subj).ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)]; 
+        ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)];   
     end
-    
+
+    dataBase(subj).ev_artefact = ev_artefact;
+
     clear i
     
     
     
-    %% Define Burst suppression periods 
+    
+    %% Remove Burst suppression periods 
     BS_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
     BS_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
 
@@ -48,12 +53,33 @@ for subj = 1:size(dataBase,2)
     if iscell(BS_stop)
         BS_stop = str2double(BS_stop);
     end
-    
-    BS_sig = [];
+
+    BS_sig = zeros(1,max(dataBase(subj).tb_events.sample_end));
     for i=1:size(BS_start,1)
-        dataBase(subj).Burstsup = [BS_sig, BS_start(i):BS_stop(i)]; 
+        BS_sig = [BS_sig, BS_start(i):BS_stop(i)]; 
     end
+
+    dataBase(subj).Burstsup = BS_sig;
+
     
+     %% Remove seizure periods 
+    SZ_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'seizure'));
+    SZ_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'seizure'));
+
+    if iscell(SZ_start)
+        SZ_start = str2double(SZ_start);
+    end
+    if iscell(SZ_stop)
+        SZ_stop = str2double(SZ_stop);
+    end
+
+    SZ_sig = zeros(1,max(dataBase(subj).tb_events.sample_end));
+    for i=1:size(SZ_start,1)
+       SZ_sig  = [SZ_sig, SZ_start(i):SZ_stop(i)];              % When there are multiple SZ, then the times samples are concatenaded in the same array
+    end
+
+    dataBase(subj).Seizure = SZ_sig;
+
     
     %% Remove stimulus pairs with less than minimal interstim time
     % Stimulations with too little interstimulus time need to be removed
@@ -63,7 +89,7 @@ for subj = 1:size(dataBase,2)
      idx_tbelec = contains(dataBase.tb_events.trial_type,'electrical_stimulation');
      tb_stim = dataBase.tb_events(idx_tbelec,:);
      
-     idx_keep5s = [true(1); diff([tb_stim.onset])>=4.9];
+     idx_keep5s = [true(1); diff([tb_stim.onset])>=3];
      dataBase.tb_events = tb_stim(idx_keep5s,:);
        
          
@@ -224,6 +250,10 @@ for subj = 1:size(dataBase,2)
                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),BS_sig)
                     % do nothing because stimulation is part of burst
                     % suppression period and therefore not thrustworthy
+                    
+                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),SZ_sig)
+                    % do nothing because stimulation is part of a seizure
+                    % seizure periods can therefore not be scored
                     
                 else
                     cc_epoch_sorted_all(elec,n,ll,:) = dataBase(subj).data(elec,dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1:dataBase(subj).tb_events.sample_start(eventnum(n))+round((epoch_length-epoch_prestim)*dataBase(subj).ccep_header.Fs));

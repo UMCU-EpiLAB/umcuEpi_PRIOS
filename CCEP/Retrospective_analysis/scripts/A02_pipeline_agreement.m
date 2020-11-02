@@ -39,6 +39,7 @@ end
 
 % small cleanup
 clear respLoc k j files ccep10 ccep2 
+
 %% Determine the agreement between 2 and 10 stims per run
 close 
 clc
@@ -106,12 +107,14 @@ end
 
 
 %% Scatter plot of the network parameters
+% function corrplot cannot be used because I don't have the Econometrics
+% Toolbox, though refline also works perfectly.
 close all
 scatter_networkPar(dataBase, myDataPath)
 
 
 %% Load electrodes positions (xlsx/electrodes.tsv)
-plot_fig = 'n';                 % 'n' when not all ER responses per stim have to be plot, 'y' when you do want to plot all
+plot_fig = 'n';                 % 'n' when you don't want all ER responses per stim, and the SOZ to be plot
 close all;
 
 for subj = 1:size(dataBase,2)

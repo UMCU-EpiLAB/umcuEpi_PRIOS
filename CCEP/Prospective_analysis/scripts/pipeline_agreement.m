@@ -84,8 +84,6 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).LocOnes = LocOnes;
 end
 
- 
-
 
 %% Plot all 10 stimuli and the average for the 10 stims and the 2 stims
 % This does not work without epoch_sorted information, though, matlab

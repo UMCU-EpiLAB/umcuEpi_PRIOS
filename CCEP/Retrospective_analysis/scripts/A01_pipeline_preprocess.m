@@ -43,10 +43,8 @@ tt = dataBase2stim.tt;
 avg_stim = 5;
 dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
 
-% When SPES was ran in multiple runs it has to be merge to combine all
-% stimulations into one file.
-% Since dataBase2stim and dataBaseallstim are based on the same 
-% stimulation, it does not matter whether you determine the size of
+% When SPES was ran in multiple runs it has to be merge to combine all stimulations into one file.
+% Since dataBase2stim and dataBaseallstim are based on the same stimulation, it does not matter whether you determine the size of
 % dataBase2stims or dataBaseallstims
 if size(dataBase2stim,2) >1         
     dataBase2stim = merge_runs(dataBase2stim);
@@ -79,9 +77,9 @@ xlabel('time (s)')
 xlim([-.2 1.0])
 
 figure()
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(3,stim,1:5,:))','Color','r','LineWidth',1)
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(3,stim,1:5,:))','Color','b','LineWidth',1)
 hold on
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(3,stim,6:10,:))','Color','b','LineWidth',1)
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(3,stim,6:10,:))','Color','r','LineWidth',1)
 hold on
 plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(3,stim,:)),'k','LineWidth',3)
 hold off
