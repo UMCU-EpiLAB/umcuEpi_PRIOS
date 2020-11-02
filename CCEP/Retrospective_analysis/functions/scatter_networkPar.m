@@ -44,7 +44,8 @@ for J = 1:size(mode,2)
         legend(sprintf('%s',mode{J}),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)
       
         if pval < 0.05
-            h = refline(rho,0);
+            intercept_zero = mean(par2(par10 ==0));           % Find the mean value for the interception point with the zero line for the reference line
+            h = refline(rho,intercept_zero);
             h.LineWidth = 2;
             title(sprintf('%s, p = <0.05', dataBase(i).sub_label))
             legend(sprintf('%s',mode{J}), sprintf('r_s = %1.3f',rho  ),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)
