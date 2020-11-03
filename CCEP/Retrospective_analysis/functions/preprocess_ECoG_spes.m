@@ -31,7 +31,7 @@ for subj = 1:size(dataBase,2)
     
     ev_artefact = [];
     for i=1:size(ev_artefact_start,1)
-        ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)]; %#ok<AGROW>
+        ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)]; 
     end
     
     clear i
@@ -47,19 +47,11 @@ for subj = 1:size(dataBase,2)
         end
     end
     
-    % these are set in config_CCEP
-    if strcmp(cfg.dir,'yes') && strcmp(cfg.amp,'yes') % take into account the direction (C1-C2 and C2-C1 separately) and the stimulation current
-        stimcur = dataBase(subj).tb_events.electrical_stimulation_current(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a'));
-        stimelek = [stimnum stimcur];
-        
-    elseif strcmp(cfg.dir,'yes') && strcmp(cfg.amp,'no') % take into account only the direction
+    % these are set in config_CCEP      
+    if strcmp(cfg.dir,'yes')  % take into account only the direction
         stimelek = stimnum;
         
-    elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'yes') % take into account only the stimulation current
-        stimcur = dataBase(subj).tb_events.electrical_stimulation_current(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a'));
-        stimelek = [sort(stimnum,2) stimcur];
-        
-    elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'no') % do not take stimulation current or direction into account
+    elseif strcmp(cfg.dir,'no')  % do not take direction into account
         stimelek = sort(stimnum,2);
         
     end
@@ -75,7 +67,10 @@ for subj = 1:size(dataBase,2)
         
        if n<minstim
            stimremove = n<minstim;               % remove al stimulation pairs that are stimulated less than 5 times
-           % remove stim pairs in both directions
+           
+           % Remove stim pairs with too little stimulations in both
+           % directions, even when the other direction does have enough
+           % stimulations
            remove_elec = cc_stimsets_all(stimremove,:);
            remove_stimp = find(cc_stimsets_all(:,2)==remove_elec(:,2) & cc_stimsets_all(:,1)==remove_elec(:,1) |  cc_stimsets_all(:,2)==remove_elec(:,1) &  cc_stimsets_all(:,1)==remove_elec(:,2));
 
@@ -95,7 +90,7 @@ for subj = 1:size(dataBase,2)
        warning('%s: a stimulation pair is probably stimulated more than others \n',dataBase(subj).sub_label)
     end
     
-    % find the amount of time most stimulus pairs are stimulated and set
+    %% find the amount of time most stimulus pairs are stimulated and set
     % that as maximal number of stimulus pairs
     max_stim = median(n);
     
@@ -104,15 +99,34 @@ for subj = 1:size(dataBase,2)
     if strcmp(cfg.dir_avg,'yes')      % dir_avg = 'yes' analyse the average signal of both the positive and negative stimuli
         
         sort_cc_stimsets = sort(cc_stimsets_all,2);
-        [cc_stimsets_avg,~,IC_avg] = unique(sort_cc_stimsets,'rows');
-        
+        [cc_stimsets_avg,~,IC_avg] = unique(sort_cc_stimsets,'rows');               % This should be an even number since all stimpairs should be stimulated in both dirs
+       
+        % Remove stimparis which are not stimulated in both directions
+        % ('single stimpar')
+        if 2*length(cc_stimsets_avg) ~= length(cc_stimsets_all)                         % When 2 times unique(average) is more than the all, than some stimpairs are not stimulated in both dirs
+             Ncount = find(histcounts(IC_avg,length(cc_stimsets_avg))~=2)' ;                  
+             
+             % Allocation
+             remove_rows = zeros(length(Ncount),1);
+             for i = 1:length(Ncount)
+               remove_rows(i,:) = find(IC_avg==Ncount(i,:));                    % Row in which the 'single' stimpair is located
+             end
+             
+               % Remove rows with 'single' stimpairs
+              cc_stimsets_all(remove_rows,:) = [];   
+              sort_cc_stimsets(remove_rows,:) = [];
+              % recalculate IC_avg
+              [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
+
+        end
+         
     elseif strcmp(cfg.dir_avg,'no')         % dir_avg = 'no' to analyse all signals separately
         
         cc_stimsets_avg = cc_stimsets_all;
         IC_avg = IC_all;
     end
     
-    clear stimremove remove_elec remove_stimp remove sort_cc_stimsets
+    clear stimremove remove_elec remove_stimp remove 
     
     %% determine stimulation pair names
     % pre-allocation
@@ -197,21 +211,28 @@ for subj = 1:size(dataBase,2)
     
     % preallocation
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
-    cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples[
+    cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples
     
-    for ll = 1:max(IC_avg)
-        
-        selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
-        selection_avg =  squeeze(nanmean(selection,2));
-        
-        while size(size(selection_avg),2) >2
-            selection_avg =  squeeze(nanmean(selection_avg,2));
-        end
-               
-        cc_epoch_sorted_avg(:,ll,:) = selection_avg;
-        cc_epoch_sorted_select(:,ll,:,:) = reshape(selection,size(selection,1),size(selection,2)*size(selection,3),size(selection,4));
-           
+    for ll = 1:max(IC_avg)                       % Takes every value between 1 and highest unique stimpairnumber, though some numbers are not used therefore the remove_sorted below)
+         if sum(IC_avg==ll)>1                    % When ll is not a single stimpair 
+            selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
+            selection_avg =  squeeze(nanmean(selection,2));
+
+            while size(size(selection_avg),2) >2
+                selection_avg =  squeeze(nanmean(selection_avg,2));
+            end
+
+            cc_epoch_sorted_avg(:,ll,:) = selection_avg;
+            cc_epoch_sorted_select(:,ll,:,:) = reshape(selection,size(selection,1),size(selection,2)*size(selection,3),size(selection,4));
+         end
     end
+        % Remove rows which are still NaN since they are no stimulation
+        % pair.
+        [~,col_nan] = find(isnan(cc_epoch_sorted_avg(:,:,1)));          
+        remove_sorted = unique(col_nan);
+        cc_epoch_sorted_avg(:,remove_sorted,:) = [];
+        cc_epoch_sorted_select(:,remove_sorted,:,:) = [];
+        
     
     dataBase(subj).cc_epoch_sorted = cc_epoch_sorted_all;
     dataBase(subj).tt_epoch_sorted = tt_epoch_sorted_all;
@@ -220,8 +241,6 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).cc_epoch_sorted_select_avg = cc_epoch_sorted_select;
    
     dataBase(subj).stimpnames = cc_stimpnames_all;
-    
-    fprintf('...%s has been epoched and averaged... \n',dataBase(subj).sub_label)
-    
+        
 end
 end

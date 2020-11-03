@@ -1,87 +1,131 @@
-function plot_all_ccep(dataBase, myDataPath, LocOnes, stimchans, dif_mat)
+function plot_all_ccep(ccep_clin, ccep_prop, myDataPath)
 
-tic;
-ccep_plot = zeros(10,8192);
-tt = dataBase.tt;    
-LocaOnes = LocOnes{:,:}; 
+tt = ccep_clin.tt;    
+set(groot,'defaultFigureVisible','on') % 'on' to turn figures showing on, 'off' to not show the figures.  
 
-% ER in 10 stims = 1, ER in 2 stims = -1 (dif_mat = 10stim - 2stim --> ER in 10stim (1) - non-ER in 2 stim(0) = 1)
-[ER_in10(:,2), ER_in10(:,1)] = find(dif_mat == 1);            % [stimpairs electrodes]
+% When the status of the channel is bad, not visualise the response
+bad_sig_clin(:,1) = find(contains(ccep_clin.tb_channels.status, {'bad'}));  
+ccep_clin.cc_epoch_sorted_avg(bad_sig_clin,:,:) = NaN;
 
-for i = 1:size(ER_in10(:,2))                            % For the number of ones detected
-    ER_in10st(i,1) = stimchans(ER_in10(i,1))';
-    ER_in10st(i,2) = dataBase.ch(ER_in10(i,2));    
+bad_sig_prop(:,1) = find(contains(ccep_prop.tb_channels.status, {'bad'}));
+ccep_prop.cc_epoch_sorted_avg(bad_sig_prop,:,:) = NaN;
+
+% Find rows (stimpair) which are not equal for both runs  
+if sum(~ismember(ccep_clin.stimpnames_avg, ccep_prop.stimpnames_avg)) ~= 0
+    
+    diff_row = find(~ismember(ccep_clin.stimpnames_avg, ccep_prop.stimpnames_avg));     % Find stimpairs which are in clin-SPES but not in prop-SPES
+    names = ccep_clin.stimpnames_avg(diff_row);                                         % Find names which are different for both protocols (could be a typo)
+    stringsz = [repmat('%s, ',1,size(names,2)-1),'%s '];                                % Create array in the lenght of the number of diff stimpairs
+    num_select = sprintf(['Runs present in SPESclin and NOT in SPESprop: \n' stringsz '\n'],names{:})  % stimpairs not in both runs
+    
+%     strings2 = [repmat('%d, ',1,size(names,2)-1),'%d '];                                % Create array in the lenght of the number of diff stimpairs
+    % Select the rownumber corresponding to the incorrect stimulation pair
+%     remv_elec(:,:) = input(sprintf(['Select which number correspond to the stimpair which is wrong, in [] when multiple: \n' strings2 '\n'],diff_row))  
+    
+    % The above selected incorrect stimulation pair is removed from the
+    % matrices
+    ccep_clin.stimpnames_avg(diff_row) = [];
+    ccep_clin.cc_epoch_sorted_avg(:,diff_row,:) = [];
+    ccep_clin.cc_stimsets_avg(diff_row,:) = [];
+    
+    
+    
+    % Find stimpairs which are in SPES-prop but not in SPES-clin
+    diff_row_prop = find(~ismember(ccep_prop.stimpnames_avg, ccep_clin.stimpnames_avg));
+    names_prop = ccep_prop.stimpnames_avg(diff_row_prop);
+    stringsz = [repmat('%s, ',1,size(names_prop,2)-1),'%s '];
+    sprintf(['Runs present in SPESprop and NOT in SPESclin: \n' stringsz '\n'],names_prop{:})  % stimpairs not in both runs
+    ccep_prop.stimpnames_avg(diff_row_prop) = [];
+    ccep_prop.cc_epoch_sorted_avg(:,diff_row_prop,:) = [];
+    ccep_prop.cc_stimsets_avg(diff_row_prop,:) = [];
+
 end
 
 
-set(groot,'defaultFigureVisible','on') % 'on' to turn figures showing on, 'off' to not show the figures.  
+% Plot all averaged responses to the stimuli of one stimulation pair
+% Left the Clinical SPES, right the Propofol SPES
+% Only plot the stimulation pairs which are stimulated in both protocols
 
-[indivstimp,~,stimprow] = unique(sort(dataBase.cc_stimsets,2),'rows');
+%%% GAAT NOG FOUT VOOR PRIOS05, STIMPAIR WORDT AFGEBEELD DUS GAAT IETS NIET
+%%% GOED IN HET STUK, UITZOEKEN WELK STIMPAAR HET IS.
+
+for stimp = 1:length(ccep_clin.stimpnames_avg)            % For each stimulation pair should now be similar for prop and clin, see above                            
+    Stimpnm_clin = ccep_clin.stimpnames_avg{stimp};     
+    Stimpnm_prop = ccep_prop.stimpnames_avg{stimp};     
+
+        %%% Clinical SPES
+        % Electrodes in the stimulation pair
+        stim_elec = ccep_clin.cc_stimsets_avg(stimp,:);
+       
+        % Remove electrodes which are stimulated
+        plot_ccep = ccep_clin.cc_epoch_sorted_avg(:,:,:);
+        plot_ccep(stim_elec,:,:) = NaN;
+
+        plot_ccep_clin = squeeze(plot_ccep(:,stimp,:));
+        plot_ccep_clin(:,tt>-0.01 & tt<0.02) = NaN;                 % remove stimulation artefact for easier visual check
+
+        %%% Propofol SPES
+        % Electrodes in the stimulation pair
+        stim_elec_prop = ccep_prop.cc_stimsets_avg(stimp,:);
+        
+        % Remove electrodes which are stimulated
+        plot_ccep_prop = ccep_prop.cc_epoch_sorted_avg(:,:,:);
+        plot_ccep_prop(stim_elec_prop,:,:) = NaN;
+
+        plot_ccep_prop = squeeze(plot_ccep_prop(:,stimp,:));
+        plot_ccep_prop(:,tt>-0.01 & tt<0.02) = NaN;
+        
+        
+        % Plot Clinical SPES (left) and Propofol SPES (right)
+        figure('Position',[673,21,1227,1041])
+        sub1 =  subplot(1,2,1);
+        sub1.Position = [0.07,0.11,0.41,0.82];
+        plot(tt, plot_ccep_clin' + [0:1000:size(plot_ccep_clin,1)*1000-1])
+
+        str = sprintf('%s Clinical SPES', Stimpnm_clin);
+        title(str)
+        set(gca,'YTick',[0:1000:size(plot_ccep_clin,1)*1000-1],'YTickLabel',ccep_clin.ch) ;                  
+        xlim([-.2 1.5])
+        ylim([-1000 size(plot_ccep_clin,1)*1000-1])
+        ylabel('All stimuli of this stimulation pair' )
+        xlabel('time (s)') 
 
 
-for stimp = 1:length(indivstimp)                            %1:max(indivstimp)
-           
-        Stimpnm = stimchans{stimp};     
-        stimpnm = find(stimprow == stimp);
+        % plot propofol SPES
+        sub2 = subplot(1,2,2);
+        sub2.Position = [0.57,0.11,0.41,0.82];
+        plot(tt, plot_ccep_prop' + [0:1000:size(plot_ccep_prop,1)*1000-1])
 
-       for elec = 1:size(dataBase.cc_epoch_sorted_avg,1)                     % for every electrode
-            elecnm = dataBase.ch{elec};
-            
-            for i = 1:size(LocaOnes)     
-                if ismember({Stimpnm}, LocaOnes{i,1}) && ismember(dataBase.ch{elec}, LocaOnes(i,2)) 
+        str = sprintf('%s Propofol SPES', Stimpnm_prop);
+        title(str)
+        set(gca,'YTick',[0:1000:size(plot_ccep_prop,1)*1000-1],'YTickLabel',ccep_prop.ch) ;                  
+        xlim([-.2 1.5])
+        ylim([-1000 size(plot_ccep_clin,1)*1000-1])
+        ylabel('All stimuli of this stimulation pair' )
+        xlabel('time (s)') 
 
-                    test = squeeze(dataBase.cc_epoch_sorted(elec,:,stimpnm,:));
-                    test2 = reshape(test, size(test,1)*size(test,2), size(test,3));
-                    test2(:,tt>-0.01 & tt<0.02) = NaN;
-                
-                    figure('Position',[1100 0 700 700])
-                    plot(tt,test2'+[0:500:size(test2,1)*500-1]);                    
-                    str = sprintf('ER in 2 stims. Stimulation pair %s for electrode %s', Stimpnm, elecnm);
-                    title(str)
-                    hold on
-                    
-                    for j = 1:length(ER_in10st)
-                        if ismember({Stimpnm}, ER_in10st{j,1}) && ismember(dataBase.ch{elec}, ER_in10st(j,2)) 
-                            plot(tt, test2'+[0:500:size(test2,1)*500-1]);           
-                            str = sprintf('ER in 10 stims. Stimulation pair %s for electrode %s', Stimpnm, elecnm);
-                            title(str)
-                        end
-                    end
-                    
 
-                    %set(gca,'YTick',500*(0:size(ccep_plot)-1))
-                    set(gca,'YTick',2500,'YTickLabel',elecnm) ;                  
 
-                    xlim([-.2 1.5])
-                    ylabel('All stimuli of this stimulation pair' )
-                    xlabel('time (s)') 
-                    hold off
-
-        % Save the figures
-            if dataBase.save_fig==1
+       % Save the figures
+            if ccep_clin.save_fig=='y'
                 % create folder to save figures
-                if ~ exist(fullfile(myDataPath.CCEPpath,'all_ccep_figures',dataBase.sub_label,Stimpnm),'dir')
+                if ~ exist(fullfile(myDataPath.CCEPpath,'all_CCEP_StimP',ccep_clin.sub_label),'dir')
 
-                    mkdir(fullfile(myDataPath.CCEPpath,'all_ccep_figures',dataBase.sub_label,Stimpnm));
+                    mkdir(fullfile(myDataPath.CCEPpath,'all_CCEP_StimP',ccep_clin.sub_label));
                 end
 
                 % filename
-                figureName = fullfile(myDataPath.CCEPpath,'all_ccep_figures',dataBase.sub_label,Stimpnm,...
-                    [dataBase.sub_label '_stimp_' Stimpnm '_elec_' elecnm ]);
+                figureName = fullfile(myDataPath.CCEPpath,'all_CCEP_StimP',ccep_clin.sub_label,...
+                    [ccep_clin.sub_label '_stimp_' Stimpnm_clin ]);
                 set(gcf,'PaperPositionMode','auto');
                 print('-dpng','-r300',figureName);
             else
                 pause
             end
-            
-        end
-     end
-            
-            
-       end
-        close all          
-   end
-    toc
+        
 end
+close all
+end
+            
 
           

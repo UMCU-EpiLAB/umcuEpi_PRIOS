@@ -1,6 +1,9 @@
 function write2excelTables(dataBase, myDataPath, agreement_parameter)
 
 % Sorted table with the number of ERs per stimulation pair
+
+%%% HIER VERDER MET 10 OMZETTTEN NAAR CLIN EN 2 OMZETTEN NAAR PROP
+
     ColN = {'number of ERs'};
     rowNames = dataBase.stimpnames_avg' ;
     rank_stimp10 = array2table(agreement_parameter.ERs_stimp10,'RowNames',rowNames,'VariableNames',ColN);   % Number of outgoing stimulations (ERs evoked per stimpair)
