@@ -1,31 +1,42 @@
+%% this script loads all runs of one subject, 
+% divides the data into epochs around stimuli,
+% averages all 10 stimuli or two stimuli (first positive (F1-F2) and first negative (F2-F1) stimulus)
+% detects N1s after each averaged stimulus
+% and saves it
+
 clear; 
+
+% set paths
+cfg.mode = 'retro';
+
+% patient characteristics
+cfg.sub_labels = {['sub-' input('Patient number (RESPXXXX): ','s')]};
+cfg.ses_label = input('Session number (ses-X): ','s');
+cfg.task_label = 'task-SPESclin';
+
+myDataPath = setLocalDataPath(cfg);         % When retrospective analysis is run, folders of prospective are removed from path.    
 
 % Choose patient
 config_CCEP
 
-% set paths
-cfg.mode = 'retro';
-myDataPath = setLocalDataPath(cfg);         % When retrospective analysis is run, folders of prospective are removed from path.    
-
 %% Load ECOG data
-% Find if there are multiple runs
+% Find runs
 files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg',...
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
-strings = cell(size(names));
 
-% Find run_labels
+% ---- Find run_labels ----
+% pre-allocation
+strings = cell(size(names));
 for n = 1:size(names,2)
     strings{n} = names{n}(strfind(names{n},'run-'):strfind(names{n},'run-')+9);
 end
 
-
-% Load data (also possible for multiple runs)
-% dataBase = struct;
+% Load data 
 for R = 1:size(strings,2)
     tic;
     cfg.run_label = strings(R);
-    dataBase(R) = load_ECoGdata(cfg,myDataPath);
+    dataBase(R) = load_ECoGdata(cfg,myDataPath); %#ok<SAGROW>
     toc;
 end
 

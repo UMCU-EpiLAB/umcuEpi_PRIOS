@@ -1,5 +1,8 @@
-% Script pipeline_preproces.m should be performed first to obtain the correct documents.
+%% Script pipeline_preproces.m should be performed first to obtain the correct documents.
+% This script analyses the agreement when 2 or 10 stimuli are averaged and
+% N1s are detected.
 
+%%
 clear; 
 % Select all patients
 cfg.sub_labels = {'sub-RESP0701','sub-RESP0702','sub-RESP0703','sub-RESP0706','sub-RESP0724','sub-RESP0728'}; 
@@ -9,7 +12,8 @@ cfg.mode = 'retro';
 myDataPath = setLocalDataPath(cfg);
 
 %% Load all ccep files in the folder CCEP_files_allPat
-% Be aware that for some patients, SPES is saved in multiple runs
+% Be aware that for some patients, SPES is saved in multiple runs, but
+% these are already merged in the previous step
 
 files = dir(fullfile(myDataPath.CCEP_allpat));
 
@@ -111,7 +115,6 @@ end
 % Toolbox, though refline also works perfectly.
 close all
 scatter_networkPar(dataBase, myDataPath)
-
 
 %% Load electrodes positions (xlsx/electrodes.tsv)
 plot_fig = 'n';                 % 'n' when you don't want all ER responses per stim, and the SOZ to be plot

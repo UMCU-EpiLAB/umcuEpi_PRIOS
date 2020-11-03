@@ -4,7 +4,7 @@ stim1 = stimsets(:,1);
 stim2 = stimsets(:,2);
 ERs_col = Amat';                                                            % Electrodes in columns, stimpairs in rows
 
-elec_mat = zeros(size(ERs_col,2),size(ERs_col,2));                          % adjacency matrix with electrodes to electrodes
+elec_mat = zeros(size(ERs_col,2),size(ERs_col,2));                          % adjacency matrix with electrodes to electrodes [stimulated electrodes x response electrodes]
 for chan = 1:size(ERs_col,2)
 
     if ismember(chan,stim1,'rows') &&  ismember(chan,stim2,'rows')          % True --> electrode is part of two stimpairs
@@ -13,20 +13,20 @@ for chan = 1:size(ERs_col,2)
         [~,loc2] = ismember(chan,stim2,'rows') ;                            % Find row with the electrode of the second stimair
         elec_mat(chan,:) = ERs_col(loc1,:) + ERs_col(loc2,:);               % Number of ERs detected per electrode present in two stimpairs
         
-    elseif ismember(chan,stim1,'rows')                                      % electrode is only in one stimpair
+    elseif ismember(chan,stim1,'rows')     &&  ~ismember(chan,stim2,'rows')                                   % electrode is only in one stimpair
         
         [~,loc1] =  ismember(chan,stim1,'rows') ;
         elec_mat(chan,:) = ERs_col(loc1,:);
         
-    elseif ismember(chan,stim2,'rows')
+    elseif ~ismember(chan,stim1,'rows')     &&ismember(chan,stim2,'rows')
         
         [~,loc2] =  ismember(chan,stim2,'rows') ;
         elec_mat(chan,:) = ERs_col(loc2,:);
     end
 end
 
-ColN = dataBase.ch';
-rowNames = dataBase.ch;
+% ColN = dataBase.ch';
+% rowNames = dataBase.ch;
 
 dataBase.elec_Amat = elec_mat;
 end
