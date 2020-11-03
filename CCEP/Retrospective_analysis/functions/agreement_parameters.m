@@ -32,32 +32,32 @@ function agreement_parameter = agreement_parameters(agreement, dataBase10, dataB
     
 %%% Normalisation %%%
     % total number of electrodes
-    stimelektot = size(dataBase10.ch,1);
+    elektot = size(dataBase10.ch,1);
     % total number of stimpairs
     stimptot = size(dataBase10.stimpnames_avg,2);
     
     % Number of times an electrode is used in a stimulation pair  
-    trialelek = zeros(1,stimelektot);
-    for el=1:size(elec_mat10,1)
+    trialelek = zeros(1,elektot);
+    for el=1:elektot
         trialelek(el) = size(find(dataBase10.stimsets_avg==el),1);
     end
     
     % total number of possible connections
-    n_outtot = zeros(1,stimelektot);
-    n_intot = zeros(1,stimelektot);
+    n_outtot = zeros(1,elektot);
+    n_intot = zeros(1,elektot);
     for el=1:size(elec_mat10,1)
-        n_outtot(el) = trialelek(el)*(stimelektot-2); % number of stimulated x total number of elecrodes - stimulated electrodes
+        n_outtot(el) = trialelek(el)*(elektot-2); % number of stimulated x (total number of elecrodes - stimulated electrodes)
         n_intot(el) = 2*(stimptot - trialelek(el)); % both stimulated electrodes x (total number of stimuli - number of stimulated)
     end
     
     % NETWERKMATEN   
-    outdegreenorm10 = zeros(1,stimelektot);
-    indegreenorm10 = zeros(1,stimelektot);
-    BCnorm10 = zeros(1,stimelektot); 
+    outdegreenorm10 = zeros(1,elektot);
+    indegreenorm10 = zeros(1,elektot);
+    BCnorm10 = zeros(1,elektot); 
     
-    outdegreenorm2 = zeros(1,stimelektot);
-    indegreenorm2 = zeros(1,stimelektot);
-    BCnorm2 = zeros(1,stimelektot); 
+    outdegreenorm2 = zeros(1,elektot);
+    indegreenorm2 = zeros(1,elektot);
+    BCnorm2 = zeros(1,elektot); 
     
     for el=1:size(elec_mat10,1)
         outdegreenorm10(el) = Outdegree_10(el)/n_outtot(el);

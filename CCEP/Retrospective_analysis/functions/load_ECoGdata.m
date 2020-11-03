@@ -11,7 +11,7 @@ task_label = cfg.task_label;
 
 if isfield(cfg,'run_label')
 
-    if size(cfg.run_label{:},2)>4               % if label is more than run-
+    if size(cfg.run_label{:},2)>4               % if label is more than "run-" and contains run-info like run-021234
         run_label = cfg.run_label;
     else
         run_label(1:size(sub_labels,2)) = {'run-*'};

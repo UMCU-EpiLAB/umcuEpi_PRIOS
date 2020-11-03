@@ -1,9 +1,5 @@
 %% config_CCEP
 
-%% patient characteristics
-cfg.sub_labels = {['sub-' input('Patient number (RESPXXXX of PRIOSXX): ','s')]};
-cfg.ses_label = input('Session number (ses-X): ','s');
-cfg.task_label = 'task-SPESclin';
 
 %% pre-allocation
 % preprocessing step
