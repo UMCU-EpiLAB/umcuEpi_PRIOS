@@ -91,5 +91,6 @@ for i=1:size(sub_labels,2)
     dataBase(i).tb_electrodes = tb_electrodes;
     dataBase(i).ch = ch_incl;
     dataBase(i).data = data;
+    dataBase(i).raw_data = data;
 end
 end

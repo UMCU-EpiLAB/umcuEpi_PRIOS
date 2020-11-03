@@ -1,7 +1,4 @@
-
 function dataBase = visualRating_ccep(dataBase)
-
-
 % INSTRUCTIONS
 % select new point: select new point > enter or y
 % correct: y
@@ -18,15 +15,9 @@ n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
 n1_peak_sample_check = NaN(size(n1_peak_sample));
 
 
-% [indivstimp,~,stimprow] = unique(sort(dataBase.cc_stimsets_all,2),'rows');
-
-
 for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
-%     Stimpnm = stimchans{stimp};     
-%     stimpnm = stimprow == stimp;
-        
+
     for chan =1 :size(dataBase.cc_epoch_sorted_avg,1)
-%         Channm = dataBase.ch{chan};
         
         if ~isnan(dataBase.ccep.n1_peak_sample(chan,stimp))
             % figure with left the epoch, and right zoomed in
@@ -34,11 +25,10 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             H.Units = 'normalized';
             H.Position = [0.13 0.31 0.77 0.7];
             this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));     
-            %             this_plot= reshape(this_plot, size(this_plot,1)*size(this_plot,2), size(this_plot,3));
-            this_plot(:,tt>-0.01 & tt<0.01) = NaN;            
+%             this_plot(:,tt>-0.01 & tt<0.01) = NaN;            
             
             this_plot_avg = squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:));
-            this_plot_avg(tt>0 & tt<0.009) = NaN;            
+%             this_plot_avg(tt>0 & tt<0.009) = NaN;            
             
             subplot(1,2,1)
             plot(tt,this_plot,':r','linewidth',1);

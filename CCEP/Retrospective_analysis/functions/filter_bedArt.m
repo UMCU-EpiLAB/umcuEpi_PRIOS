@@ -18,19 +18,18 @@ epoch_prestim = cfg.epoch_prestim;
 
 % Remove all stimulation artefacts. 
 % Interpolate for the stimulation artefact  
-for i = 1:size(dataBase,2)
-    data = dataBase(i).raw_data;
+    data = dataBase.raw_data;
     
-    for event = 1:size(dataBase(i).tb_events,1)
-         if strcmp(dataBase(i).tb_events.trial_type(event), 'electrical_stimulation')
+    for event = 1:size(dataBase.tb_events,1)
+         if strcmp(dataBase.tb_events.trial_type(event), 'electrical_stimulation')
              % To remove the stimulation artefact = nr_samples = t_stimart/Ts
       %%%% Verslag Dorien zegt 19 samples!!!!
              % Ts = 1/Fs = 0.0005 sec
              % t_stimart = 0.02 sec
              % nr_samples = 0.02/0.0005 = 40 samples
              
-            stimart_start = dataBase(i).tb_events.sample_start(event) - 3;       % Stim_start is almost correctly the start time of the stimulation artefact
-            stimart_stop =  dataBase(i).tb_events.sample_start(event) +19;         % the true stimulation artefact is ~40 samples instead of the 3 suggested by the sample_end
+            stimart_start = dataBase.tb_events.sample_start(event) - 3;       % Stim_start is almost correctly the start time of the stimulation artefact
+            stimart_stop =  dataBase.tb_events.sample_start(event) +40;         % the true stimulation artefact is ~40 samples instead of the 3 suggested by the sample_end
  
             % Remove the stimulation artefact in every channel
             for channel = 1:size(data,1)                                   
@@ -45,18 +44,18 @@ for i = 1:size(dataBase,2)
              
                  data(channel, ((stimart_start - 40) : (stimart_stop + 40))) = Interpol_period;
                   
-                 figure()
-                 plot(dataBase(i).raw_data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
-                 hold on
-                 plot(data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
-                 hold off
+%                  figure()
+%                  plot(dataBase.raw_data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
+%                  hold on
+%                  plot(data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
+%                  hold off
             end
          end        
     end
     
 %     % plot the whole signal without stimulation artefacts
 %     figure()
-%     plot(dataBase(i).raw_data(ch,:))
+%     plot(dataBase.raw_data(ch,:))
 %     hold on
 %     plot(data(ch,:))
 %     legend('original','without artefact')
@@ -66,14 +65,14 @@ for i = 1:size(dataBase,2)
 %       % plot the whole signal without stimulation artefacts
 %     figure()
 %     subplot(2,1,1)
-%     plot(dataBase(i).raw_data(ch,:))
+%     plot(dataBase.raw_data(ch,:))
 %     legend('original')
 %     subplot(2,1,2)
 %     plot(data(ch,:))
 %     legend('without artefact')
 %     title('Whole signal with and without the stimulation artefacts')
 %     xlabel('time (samples')
-%     
+    
     
     
     % Filter every signal
@@ -95,8 +94,8 @@ for i = 1:size(dataBase,2)
 
     
 %     % Periodograms to determine the frequencies in the whole signal
-%     t_start = 1704324
-%     t_stop = 2553463
+%     t_start = 3704324;
+%     t_stop = 4553463;
 % 
 %     [pww,f] = periodogram(signal(ch,((t_start) : (t_stop))),[],[],Fs);                     % original with bed art
 %     [pww_filt,f_filt] = periodogram(signal_filt_pass(ch,((t_start) : (t_stop))), [], [], Fs);      % Filtered signal    
@@ -108,14 +107,14 @@ for i = 1:size(dataBase,2)
 %     legend('Original')
 %     xlim([12 122])
 %     xlabel('Frequencies (Hz)')
-%     title(sprintf('%s, %s, channel: %s',dataBase(i).sub_label, dataBase(i).run_label,dataBase(i).ch{ch}))
+%     title(sprintf('%s, %s, channel: %s',dataBase.sub_label, dataBase.run_label,dataBase.ch{ch}))
 % 
 %     subplot(2,2,3)
 %     plot(f_filt ,pww_filt,'LineWidth',2)
 %     legend('Filtered')
 % %     ylim([0 300])
 %     xlim([12 122])
-%     title(sprintf('%s, %s, channel: %s',dataBase(i).sub_label, dataBase(i).run_label,dataBase(i).ch{ch}))
+%     title(sprintf('%s, %s, channel: %s',dataBase.sub_label, dataBase.run_label,dataBase.ch{ch}))
 %     xlabel('Frequencies (Hz)')
 % 
 %     % Plot the signal response filtered and original  
@@ -125,8 +124,8 @@ for i = 1:size(dataBase,2)
 %     plot(signal(ch,(t_start : t_start+500)));
 % %     ylim([-1000 2000])
 %     legend('Filtered','Original')
-%     title(sprintf('%s, %s, channel: %s',dataBase(i).sub_label, dataBase(i).run_label,dataBase(i).ch{ch}))
-%     
+%     title(sprintf('%s, %s, channel: %s',dataBase.sub_label, dataBase.run_label,dataBase.ch{ch}))
+    
 %     % Save figure
 %     Frequencies = fullfile(myDataPath.CCEPpath,dataBase(i).sub_label,'/',...
 %     [dataBase(i).sub_label '_' dataBase(i).run_label '_frequencies_withoutBedArt' ])
@@ -135,11 +134,5 @@ for i = 1:size(dataBase,2)
 %     savefig(Frequencies);
 
       
-dataBase(i).data = signal_filt_pass;    
-end
-
-
-    
-
-% subtract the median .
+dataBase.data = signal_filt_pass;    
 end

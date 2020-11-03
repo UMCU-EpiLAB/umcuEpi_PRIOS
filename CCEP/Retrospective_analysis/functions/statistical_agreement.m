@@ -139,7 +139,6 @@ end
 [RHO_stmp,PVAL_stmp] = corr(rank.unsort_stims10(:,4) , rank.unsort_stims2(:,4) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
 fprintf('Spearman Corr between stimpair ranking of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
 
-
 %% Spearman correlation
 % For the indegree, outdegree and betweenness centrality per electrode
 measure = {'indegree','outdegree','BC'};
