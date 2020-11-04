@@ -31,7 +31,7 @@ end
 %% Filter
 % When this is used, dataBase.data will change into the fltered data
 % DataBase.raw_data will not be changed and will keep the raw data
-dataBase = filter_bedArt(dataBase, cfg);
+dataBase = filter_bedArt(dataBase);
 
 fprintf('Both runs of subject %s are filtered. \n',cfg.sub_labels{1})
 %% CCEP for SPES-clin stimulations
@@ -74,7 +74,7 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 12; stim=3;
+chan = 1; stim=6;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -109,6 +109,11 @@ xlabel('time (s)')
 xlim([-.1 0.1])
 
 
+figure()
+plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,1:2,:))','Color','r','LineWidth',1)
+
+
+
 %% Check whether SPESclin and SPESprop contain the same stimulation pairs
 [dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop);
 
@@ -129,18 +134,18 @@ if strcmp(VisCheck,'y')
     dataBase_prop = visualRating_ccep(dataBase_prop);
 
     % Save the values for the agreement per run (2 and 10 stims)
-    targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/'];
-
-    clin_ccep_checked.checked_amplitude = dataBase_clin.ccep.n1_peak_amplitude_check;
-    clin_ccep_checked.checked_sample = dataBase_clin.ccep.n1_peak_sample_check;  
-    checked_clin = [dataBase_clin.sub_label, '_',dataBase_clin.run_label, '_CCEP_' ,'clin_checked.mat'];
-    save([targetFolder,checked_clin], 'clin_ccep_checked')
-         
-    
-    prop_ccep_checked.checked_amplitude = dataBase_prop.ccep.n1_peak_amplitude_check;
-    prop_ccep_checked.checked_sample = dataBase_prop.ccep.n1_peak_sample_check  ;
-    checked_prop = [dataBase_prop.sub_label, '_',dataBase_prop.run_label, '_CCEP_' ,'prop_checked.mat'];
-    save([targetFolder,checked_prop], 'prop_ccep_checked')
+%     targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/'];
+% 
+%     clin_ccep_checked.checked_amplitude = dataBase_clin.ccep.n1_peak_amplitude_check;
+%     clin_ccep_checked.checked_sample = dataBase_clin.ccep.n1_peak_sample_check;  
+%     checked_clin = [dataBase_clin.sub_label, '_',dataBase_clin.run_label, '_CCEP_' ,'clin_checked.mat'];
+%     save([targetFolder,checked_clin], 'clin_ccep_checked')
+%          
+%     
+%     prop_ccep_checked.checked_amplitude = dataBase_prop.ccep.n1_peak_amplitude_check;
+%     prop_ccep_checked.checked_sample = dataBase_prop.ccep.n1_peak_sample_check  ;
+%     checked_prop = [dataBase_prop.sub_label, '_',dataBase_prop.run_label, '_CCEP_' ,'prop_checked.mat'];
+%     save([targetFolder,checked_prop], 'prop_ccep_checked')
 
 %     checked_2 = [dataBase2stim.sub_label, '_', dataBase(1).run_label, '_CCEP_', dataBase2stim.NmbrofStims ,'_checked.mat'];
 %     save([targetFolder,checked_2], 'ccep')
@@ -203,7 +208,7 @@ end
 % [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save propofol SPES
-fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop.mat'];
+fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_check.mat'];
 ccep_prop = dataBase_prop.ccep;
 ccep_prop.stimchans_all = dataBase_prop.cc_stimchans_all;
 ccep_prop.stimchans_avg = dataBase_prop.cc_stimchans_avg;
@@ -229,7 +234,7 @@ if ~exist(targetFolder_clin, 'dir')
 end
 
 % save all stims
-fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin.mat'];
+fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_filt_check.mat'];
 ccep_clin = dataBase_clin.ccep;
 ccep_clin.stimchans_all = dataBase_clin.cc_stimchans_all;
 ccep_clin.stimchans_avg = dataBase_clin.cc_stimchans_avg;

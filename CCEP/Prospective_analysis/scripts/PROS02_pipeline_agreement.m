@@ -23,12 +23,12 @@ for i = 1:size(ccep_allPat.sub_labels,2)
   
      % load all both the SPESclin and SPESprop of the patient
     for j=1:size(respLoc,2)                                                      % number of rows with the run_label of interest
-       if contains(files(respLoc(j)).name,'clin') 
+       if contains(files(respLoc(j)).name,'clin_filt_check.') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep_clin = ccep_clin;
           dataBase(i).filenameClin = files(respLoc(j)).name;
           
-       elseif contains(files(respLoc(j)).name,'prop') 
+       elseif contains(files(respLoc(j)).name,'prop_filt_check.') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep_prop = ccep_prop;   
           dataBase(i).filenameProp = files(respLoc(j)).name;
@@ -80,8 +80,8 @@ for subj = 1:size(dataBase,2)
     ccep_clin = dataBase(subj).ccep_clin;
     agreement = dataBase(subj).agreement;
     
-    LocOnes = find_ones(ccep_clin, agreement.agreement_stim);
-    dataBase(subj).LocOnes = LocOnes;
+%     LocOnes = find_ones(ccep_clin, agreement.agreement_stim);
+%     dataBase(subj).LocOnes = LocOnes;
 end
 
 

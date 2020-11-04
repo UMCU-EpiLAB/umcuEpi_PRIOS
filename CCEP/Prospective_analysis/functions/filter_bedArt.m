@@ -1,10 +1,10 @@
-function dataBase = filter_bedArt(dataBase, cfg)
+function dataBase = filter_bedArt(dataBase)
 
 % Filter
 Fs = dataBase(1).ccep_header.Fs;
 Fn = Fs/2;
-epoch_length = cfg.epoch_length;         
-epoch_prestim = cfg.epoch_prestim;
+% epoch_length = cfg.epoch_length;         
+% epoch_prestim = cfg.epoch_prestim;
 % tt = (1:epoch_length*Fs) / Fs - epoch_prestim;
 
 % Filters: Butterworth, 4th order
@@ -45,16 +45,16 @@ for i = 1:size(dataBase,2)
              
                  data(channel, ((stimart_start - 40) : (stimart_stop + 40))) = Interpol_period;
                   
-                 figure()
-                 plot(dataBase(i).raw_data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
-                 hold on
-                 plot(data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
-                 hold off
+%                  figure()
+%                  plot(dataBase(i).raw_data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
+%                  hold on
+%                  plot(data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
+%                  hold off
             end
          end        
     end
     
-%     % plot the whole signal without stimulation artefacts
+    % plot the whole signal without stimulation artefacts
 %     figure()
 %     plot(dataBase(i).raw_data(ch,:))
 %     hold on
@@ -74,7 +74,7 @@ for i = 1:size(dataBase,2)
 %     title('Whole signal with and without the stimulation artefacts')
 %     xlabel('time (samples')
 %     
-    
+%     
     
     % Filter every signal
     % Preallocation
