@@ -14,14 +14,15 @@ Tinterstim=5;   % Time between stimulations
 Tstim=0.005;    % Length of the blockpulse
 Amp=1500;       % Amplitude of the blockpulse
 
-FI_gain = [0, 12, 25, 50, 75, 100];     % Fast inhibitory synaptic gain (norm = 25 mV)
-SI_gain = [-7, 0, 7, 14, 21, 28];       % Slow inhibitory synaptic gain (norm = 7 mV)
-SI_reci = [0, 5, 10, 20];               % Reciprocal of slow inhibitory time constant (norm = 10 s-1)
-FI_reci = [0, 150, 300, 600];           % Reciprocal of fast inhibitory time constant (norm = 300 s-1)
+FI_gain = [0, 12, 25, 50, 75, 100];     % Fast inhibitory synaptic gain (norm = 25 mV) G
+SI_gain = [-7, 0, 7, 14, 21, 28];       % Slow inhibitory synaptic gain (norm = 7 mV) B
+SI_reci = [0, 5, 10, 20];               % Reciprocal of slow inhibitory time constant (norm = 10 s-1) b
+FI_reci = [0, 150, 300, 600];           % Reciprocal of fast inhibitory time constant (norm = 300 s-1) g
 
 
 %% Varying the Fast Inhibitory Gain value
 % Simulating the potential of the pyramidal cells of NM1 and NM2
+% strout=create_NM(A,a,B,b,G,g,C,sd,alpha,beta,gamma)
 
 for i = FI_reci
 
