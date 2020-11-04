@@ -1,4 +1,4 @@
-function dataBase = filter_bedArt(dataBase, cfg)
+function dataBase = filter_bedArt(dataBase, cfg, myDataPath)
 
 % Filter
 Fs = dataBase(1).ccep_header.Fs;
@@ -9,8 +9,8 @@ epoch_prestim = cfg.epoch_prestim;
 
 % Filters: Butterworth, 4th order
 [b50,a50] =butter(4,[49/Fn 51/Fn],'stop');
-[b36,a36] = butter(4,[33/Fn 38/Fn],'stop');
-[b110,a110] = butter(4,[108/Fn 112/Fn], 'stop');
+% [b36,a36] = butter(4,[33/Fn 38/Fn],'stop');
+% [b110,a110] = butter(4,[108/Fn 112/Fn], 'stop');
 [bP,aP] = butter(4,120/Fn,'low');
  
 % fvtool(b36,a36)
@@ -29,7 +29,7 @@ epoch_prestim = cfg.epoch_prestim;
              % nr_samples = 0.02/0.0005 = 40 samples
              
             stimart_start = dataBase.tb_events.sample_start(event) - 3;       % Stim_start is almost correctly the start time of the stimulation artefact
-            stimart_stop =  dataBase.tb_events.sample_start(event) +40;         % the true stimulation artefact is ~40 samples instead of the 3 suggested by the sample_end
+            stimart_stop =  dataBase.tb_events.sample_start(event) +19;         % the true stimulation artefact is ~40 samples instead of the 3 suggested by the sample_end
  
             % Remove the stimulation artefact in every channel
             for channel = 1:size(data,1)                                   
@@ -78,24 +78,24 @@ epoch_prestim = cfg.epoch_prestim;
     % Filter every signal
     % Preallocation
     signal = zeros(size(data,1), size(data,2));
-    signal_filt_36 = zeros(size(data,1), size(data,2));
-    signal_filt_3650 = zeros(size(data,1), size(data,2));
-    signal_filt_3650110 = zeros(size(data,1), size(data,2));
+   % signal_filt_36 = zeros(size(data,1), size(data,2));
+    signal_filt_50 = zeros(size(data,1), size(data,2));               % signal_filt_3650
+    %signal_filt_3650110 = zeros(size(data,1), size(data,2));
     signal_filt_pass = zeros(size(data,1), size(data,2));
     
     for ch = 1:size(data,1)   
         signal(ch,:) = data(ch,:);                                          % use the data without stimulation artefact.
-        signal_filt_36(ch,:) = filtfilt(b36,a36,signal(ch,:));              % First filter the 36 Hz artefact out
-        signal_filt_3650(ch,:) = filtfilt(b50,a50,signal_filt_36(ch,:));
-        signal_filt_3650110(ch,:) = filtfilt(b110,a110,signal_filt_3650(ch,:));
-        signal_filt_pass(ch,:) = filtfilt(bP,aP, signal_filt_3650110(ch,:));   % Then use the 120 Hz low pass filter to remove all frequencies above 120 Hz.
+%         signal_filt_36(ch,:) = filtfilt(b36,a36,signal(ch,:));              % First filter the 36 Hz artefact out
+        signal_filt_50(ch,:) = filtfilt(b50,a50,signal(ch,:));
+%         signal_filt_3650110(ch,:) = filtfilt(b110,a110,signal_filt_3650(ch,:));
+        signal_filt_pass(ch,:) = filtfilt(bP,aP, signal_filt_50(ch,:));   % Then use the 120 Hz low pass filter to remove all frequencies above 120 Hz.
               
     end
 
     
 %     % Periodograms to determine the frequencies in the whole signal
-%     t_start = 3704324;
-%     t_stop = 4553463;
+%     t_start = 42009;
+%     t_stop = 6139547;
 % 
 %     [pww,f] = periodogram(signal(ch,((t_start) : (t_stop))),[],[],Fs);                     % original with bed art
 %     [pww_filt,f_filt] = periodogram(signal_filt_pass(ch,((t_start) : (t_stop))), [], [], Fs);      % Filtered signal    
@@ -125,10 +125,10 @@ epoch_prestim = cfg.epoch_prestim;
 % %     ylim([-1000 2000])
 %     legend('Filtered','Original')
 %     title(sprintf('%s, %s, channel: %s',dataBase.sub_label, dataBase.run_label,dataBase.ch{ch}))
-    
+%     
 %     % Save figure
-%     Frequencies = fullfile(myDataPath.CCEPpath,dataBase(i).sub_label,'/',...
-%     [dataBase(i).sub_label '_' dataBase(i).run_label '_frequencies_withoutBedArt' ])
+%     Frequencies = fullfile(myDataPath.CCEPpath,dataBase.sub_label,'/',...
+%          [dataBase.sub_label '_' dataBase.run_label '_frequencies' ]);
 %     set(gcf,'PaperPositionMode','auto');
 %     print('-dpng','-r300',Frequencies);
 %     savefig(Frequencies);

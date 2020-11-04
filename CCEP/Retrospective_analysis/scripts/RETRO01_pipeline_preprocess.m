@@ -34,10 +34,8 @@ end
 
 % Load data 
 for R = 1:size(strings,2)
-    tic;
     cfg.run_label = strings(R);
-    dataBase(R) = load_ECoGdata(cfg,myDataPath); %#ok<SAGROW>
-    toc;
+    dataBase(R) = load_ECoGdata(cfg,myDataPath); 
 end
 
 fprintf('...Runs of Subject %s have run...\n',cfg.sub_labels{1})
@@ -46,10 +44,12 @@ fprintf('...Runs of Subject %s have run...\n',cfg.sub_labels{1})
 %% Filter
 % When this is used, dataBase.data will change into the fltered data
 % DataBase.raw_data will not be changed and will keep the raw data
-dataBase = filter_bedArt(dataBase, cfg);
 
-fprintf('Subject %s is filtered. \n',cfg.sub_labels{1})
-
+% 50 Hz filter and 120 low pass filter
+% dataBase = filter_bedArt(dataBase(1), cfg, myDataPath);
+% 
+% fprintf('Subject %s is filtered. \n',cfg.sub_labels{1})
+% 
 %% CCEP for 2 and 10 stimulations
 % avg_stim : write down the number of stimuli you want to average
 
@@ -73,7 +73,7 @@ end
 fprintf('...%s has been preprocessed... \n',dataBase(1).sub_label)
 
 % Do a quick check by visualizing the stimuli of 2 stims and 10 stims.
-chan = 16; stim=51;
+chan = 16; stim=12;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -138,7 +138,7 @@ end
 [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save 2 stims
-fileName=[extractBefore(filename,'_ieeg'),'_CCEP_2stims_filtered.mat'];
+fileName=[extractBefore(filename,'_ieeg'),'_CCEP_2stims_2ndstim.mat'];
 ccep2 = dataBase2stim.ccep;
 ccep2.stimchans_all = dataBase2stim.cc_stimchans_all;
 ccep2.stimchans_avg = dataBase2stim.cc_stimchans_avg;

@@ -18,8 +18,8 @@ for i=1:size(runs,2)-1
                     title10 = extractBetween(runs(i).name,'_CCEP_','.mat');     % 10 stims
                     title2 = extractBetween(runs(i+j).name,'_CCEP_','.mat');    % 2 stims
                     run_label = extractBetween(runs(i).name,'_run-','_CCEP');
-                    Amat10 = runs(i).ccep.n1_peak_amplitude;
-                    Amat2 = runs(i+j).ccep.n1_peak_amplitude;
+                    Amat10 = runs(i).ccep.n1_peak_amplitude_check;
+                    Amat2 = runs(i+j).ccep.n1_peak_amplitude_check;
                     
                     Amat10(~isnan(Amat10)) = 1;                   % all non-NaNs are amplitudes, so N1s --> 1
                     Amat10(isnan(Amat10)) = 0;                    % all NaNs are no N1s --> 0

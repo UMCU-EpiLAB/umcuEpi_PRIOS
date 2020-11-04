@@ -12,12 +12,6 @@ cfg.mode = 'retro';
 myDataPath = setLocalDataPath(cfg);
 
 %% Load all ccep files in the folder CCEP_files_allPat
-<<<<<<< HEAD:CCEP/Retrospective_analysis/scripts/RETRO02_pipeline_agreement.m
-=======
-% Be aware that for some patients, SPES is saved in multiple runs, but
-% these are already merged in the previous step
-
->>>>>>> upstream/master:CCEP/Retrospective_analysis/scripts/A02_pipeline_agreement.m
 files = dir(fullfile(myDataPath.CCEP_allpat));
 
 % Create database with the CCEP information of all patients of all runs and
@@ -31,12 +25,12 @@ for i=1:size(cfg.sub_labels,2)                                                % 
     
     % load all both the 10 stimuli and 2 stimuli of the patient
     for j=1:size(respLoc,2)                                                   % number of rows with the run_label of interest
-       if contains(files(respLoc(j)).name,'10stims_filtered') 
+       if contains(files(respLoc(j)).name,'10stims_filtered.') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep10 = ccep10;
           dataBase(i).filename10 = files(respLoc(j)).name;
           
-       elseif contains(files(respLoc(j)).name,'2stims_filtered') 
+       elseif contains(files(respLoc(j)).name,'2stims_2ndstim.') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep2 = ccep2;   
           dataBase(i).filename2 = files(respLoc(j)).name;
@@ -72,22 +66,6 @@ end
 
 % short clean up
 clear subj agreement runs
-
-
-%% Determine the location of the ones (ER vs. No-ER)
-% ccep10 is only used for the channels and stimpairs and those are
-% equal for 2 and 10 stimuli so does not matter which database is used.
-
-for subj = 1:size(dataBase,2)
-    ccep10 = dataBase(subj).ccep10;
-    agreement = dataBase(subj).agreement;
-    
-    LocOnes = find_ones(ccep10, agreement.agreement_run);
-    dataBase(subj).LocOnes = LocOnes;
-end
-
-% clean up
-clear ccep10 agreement LocOnes subj
 
 
 %% Rewrite the adjacency matrices to electrode x electrode instead of electrode x stimulation pair

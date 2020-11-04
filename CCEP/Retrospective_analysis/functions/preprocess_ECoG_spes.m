@@ -215,7 +215,7 @@ for subj = 1:size(dataBase,2)
     
     for ll = 1:max(IC_avg)                       % Takes every value between 1 and highest unique stimpairnumber, though some numbers are not used therefore the remove_sorted below)
          if sum(IC_avg==ll)>1                    % When ll is not a single stimpair 
-            selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);        
+            selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);         % 1:avg_stim       
             selection_avg =  squeeze(nanmean(selection,2));
 
             while size(size(selection_avg),2) >2

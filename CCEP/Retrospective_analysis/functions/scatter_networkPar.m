@@ -45,11 +45,9 @@ for J = 1:size(mode,2)
         xmax = round(max(par10)+0.1*max(par10),2);
         
         if pval < 0.05
-<<<<<<< HEAD
-            num_at_zero  = numel(par2(par10 ==0))+1;
-            intercept_zero = sum(par2(par10 ==0))/num_at_zero;           % Find the mean value for the interception point with the zero line for the reference line
-            h = refline(rho,intercept_zero);
-=======
+%             num_at_zero  = numel(par2(par10 ==0))+1;
+%             intercept_zero = sum(par2(par10 ==0))/num_at_zero;           % Find the mean value for the interception point with the zero line for the reference line
+%             h = refline(rho,intercept_zero);
             idx_nan = isnan(par10) | isnan(par2);
             P = polyfit(par10(~idx_nan),par2(~idx_nan),1);
             X = xmin:0.1*xmax:xmax+0.2*xmax;
@@ -60,7 +58,6 @@ for J = 1:size(mode,2)
             hold on
             h=plot(X,Y);
             hold off
->>>>>>> upstream/master
             h.LineWidth = 2;
             title(sprintf('%s, p = <0.05', dataBase(i).sub_label))
             legend(sprintf('%s',mode{J}), sprintf('r_s = %1.3f',rho  ),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)
