@@ -1,4 +1,4 @@
-function dataBase = preprocess_ECoG_spes(dataBase,cfg,avg_stim)
+function dataBase = preprocess_ECoG_spes(dataBase,cfg)
 
 epoch_length = cfg.epoch_length;
 epoch_prestim = cfg.epoch_prestim;
@@ -29,7 +29,7 @@ for subj = 1:size(dataBase,2)
         ev_artefact_stop = str2double(ev_artefact_stop);
     end
 
-    ev_artefact = [];
+    ev_artefact = zeros(1,max(dataBase(subj).tb_events.sample_end));        % This type of preallocation is necessary because in pipeline_preprocess, structs with empty cells are removed.
     % When there are multiple SZ, then the times samples are concatenaded
     % in the same array. So ev_artefact is not overwritten
     for i=1:size(ev_artefact_start,1)
@@ -100,7 +100,7 @@ for subj = 1:size(dataBase,2)
     for stimp = 1:size(stimpair,1)
         stimchans = strsplit(stimpair{stimp},'-');
         for chan = 1:2
-            stimnum(stimp,chan) = find(strcmp(stimchans{chan},dataBase(subj).ch)==1);
+            stimnum(stimp,chan) = find(strcmp(stimchans{chan}, dataBase(subj).ch)==1);
         end
     end
     
@@ -272,26 +272,28 @@ for subj = 1:size(dataBase,2)
    end
 
     %% Average epochs
-    if isempty(avg_stim)
-        avg_stim = max_stim;
-    end
+%     if isempty(avg_stim)
+%         avg_stim = max_stim;
+%     end
     
     % preallocation
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
-    cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==2),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples[
+    cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1), size(cc_stimsets_avg,1), max_stim*2, size(cc_epoch_sorted_all,4));   % avg_stim*sum(IC_avg==2)   Wat nergens op slaat trouwens...
     
     for ll = 1:max(IC_avg)                     % Takes every value between 1 and max while some numbers are not used, therefore the next line
         if sum(IC_avg==ll)>1                   % Check whether the stimpair is stimulated in both directions.
             
-            selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
+            % Average ALL stimuli given to certain stimpair
+            selection = cc_epoch_sorted_all(:,:,IC_avg==ll,:);         
             selection_avg =  squeeze(nanmean(selection,2));
-
+            
             while size(size(selection_avg),2) >2
                 selection_avg =  squeeze(nanmean(selection_avg,2));
             end
 
             cc_epoch_sorted_avg(:,ll,:) = selection_avg;
-            cc_epoch_sorted_select(:,ll,:,:) = reshape(selection,size(selection,1),size(selection,2)*size(selection,3),size(selection,4));
+            cc_epoch_sorted_select(:,ll,:,:) = reshape(selection,size(selection,1), size(selection,2)*size(selection,3) ,size(selection,4));          
+                      
         end
     end
     

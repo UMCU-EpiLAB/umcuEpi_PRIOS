@@ -41,16 +41,16 @@ for i = 1:size(dataBase,2)
     dataBase(i).task_name = dataBase(i).dataName(strfind(dataBase(i).dataName,'task-'):strfind(dataBase(i).dataName,'_run')-1); 
 
     if ismember(dataBase(i).task_name,'task-SPESclin')
-       avg_stim_clin = 5;
+%        avg_stim_clin = 5;
        cfg.minstim = 5;
-       cfg.max_stim = 5;
-       dataBase_clin(i,:) = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim_clin);
+%        cfg.max_stim = 5;
+       dataBase_clin(i,:) = preprocess_ECoG_spes(dataBase(i),cfg);
       
     elseif ismember(dataBase(i).task_name,'task-SPESprop')
-        avg_stim = 1;               % Average number of stimulations per direction of a stimpair
+%         avg_stim = 1;                                                         %%% This was necessary for Retro, NOT for prospective
         cfg.minstim = 1;
-        cfg.max_stim = 1;
-        dataBase_prop(i,:) = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim);     
+%         cfg.max_stim = 1;
+        dataBase_prop(i,:) = preprocess_ECoG_spes(dataBase(i),cfg);     
 
     end
 end
@@ -74,7 +74,7 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 1; stim=6;
+chan = 6; stim=12;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -109,11 +109,6 @@ xlabel('time (s)')
 xlim([-.1 0.1])
 
 
-figure()
-plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,1:2,:))','Color','r','LineWidth',1)
-
-
-
 %% Check whether SPESclin and SPESprop contain the same stimulation pairs
 [dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop);
 
@@ -124,7 +119,6 @@ dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);
 
 disp('Detection of ERs is completed')
 
-
 %% Visually check detected cceps
 % Check the average signal in which an ER was detected
 VisCheck = input('Do you want to visually check the detected CCEPs? [y/n] ','s');
@@ -132,60 +126,9 @@ VisCheck = input('Do you want to visually check the detected CCEPs? [y/n] ','s')
 if strcmp(VisCheck,'y')
     dataBase_clin = visualRating_ccep(dataBase_clin);
     dataBase_prop = visualRating_ccep(dataBase_prop);
-
-    % Save the values for the agreement per run (2 and 10 stims)
-%     targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/'];
-% 
-%     clin_ccep_checked.checked_amplitude = dataBase_clin.ccep.n1_peak_amplitude_check;
-%     clin_ccep_checked.checked_sample = dataBase_clin.ccep.n1_peak_sample_check;  
-%     checked_clin = [dataBase_clin.sub_label, '_',dataBase_clin.run_label, '_CCEP_' ,'clin_checked.mat'];
-%     save([targetFolder,checked_clin], 'clin_ccep_checked')
-%          
-%     
-%     prop_ccep_checked.checked_amplitude = dataBase_prop.ccep.n1_peak_amplitude_check;
-%     prop_ccep_checked.checked_sample = dataBase_prop.ccep.n1_peak_sample_check  ;
-%     checked_prop = [dataBase_prop.sub_label, '_',dataBase_prop.run_label, '_CCEP_' ,'prop_checked.mat'];
-%     save([targetFolder,checked_prop], 'prop_ccep_checked')
-
-%     checked_2 = [dataBase2stim.sub_label, '_', dataBase(1).run_label, '_CCEP_', dataBase2stim.NmbrofStims ,'_checked.mat'];
-%     save([targetFolder,checked_2], 'ccep')
-    fprintf('Checked files are saved in %s \n',targetFolder);
-
-    % Perform the determine agreement again.
-%     [agreement_check] = determine_agreement_checked(myDataPath,cfg);
-
-%     fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
-%     agreement_check.OA, agreement_check.PA, agreement_check.NA)
 end
 
-
-
-%% Visually check ALL signals to test the detector
-% VisCheck_AllSig = input('Do you want to visually check ALL PROPOFOL SIGNALS [y/n] ','s');
-% % PROBEER OM TE VOORKOMEN DAT SIGNALEN DIE EEN ARTEFACT BEVATTEN GEPLOT
-% % WORDEN. 
-% if strcmp(VisCheck_AllSig,'y')
-%     %dataBase_clin = plot_all_signals(dataBase_clin);
-%     dataBase_prop = plot_all_signals(dataBase_prop);
-% 
-%     % Save the values for the agreement per run (2 and 10 stims)
-%     targetFolder = [myDataPath.CCEPpath, dataBase(1).sub_label,'/',dataBase(1).ses_label,'/', dataBase(1).run_label,'/'];
-% 
-%     checked_allSig_clin = [dataBase_clin.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_clin_allSig_checked.mat'];
-%     save([targetFolder,checked_allSig_clin], 'ccep')
-%     
-%     checked_allSig_prop = [checked_prop.sub_label, '_',dataBase(1).run_label, '_CCEP_' ,'_prop_allSig_checked.mat'];
-%     save([targetFolder,checked_allSig_prop], 'ccep')
-% 
-%     fprintf('Checked files are saved in %s \n',targetFolder);
-% 
-%     Perform the determine agreement again.
-%     [agreement_check] = determine_agreement_checked(myDataPath,cfg);   %
-%     dit staat nog ingesteld op de ccep_checked van de checked detected ERs
-% 
-%    fprintf('Overall agreement = %1.2f, positive agreement = %1.2f, negative agreement = %1.2f \n',...
-%    agreement_check.OA, agreement_check.PA, agreement_check.NA)
-% end
+disp('CCEPs are checked')      
 
 %% save ccep
 savefiles = input('Do you want to save the ccep-structures? [y/n] ','s');
@@ -208,7 +151,7 @@ end
 % [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save propofol SPES
-fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_check.mat'];
+fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop.mat'];
 ccep_prop = dataBase_prop.ccep;
 ccep_prop.stimchans_all = dataBase_prop.cc_stimchans_all;
 ccep_prop.stimchans_avg = dataBase_prop.cc_stimchans_avg;
@@ -234,7 +177,7 @@ if ~exist(targetFolder_clin, 'dir')
 end
 
 % save all stims
-fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_filt_check.mat'];
+fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin.mat'];
 ccep_clin = dataBase_clin.ccep;
 ccep_clin.stimchans_all = dataBase_clin.cc_stimchans_all;
 ccep_clin.stimchans_avg = dataBase_clin.cc_stimchans_avg;

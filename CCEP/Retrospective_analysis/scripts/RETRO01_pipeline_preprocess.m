@@ -46,9 +46,9 @@ fprintf('...Runs of Subject %s have run...\n',cfg.sub_labels{1})
 % DataBase.raw_data will not be changed and will keep the raw data
 
 % 50 Hz filter and 120 low pass filter
-% dataBase = filter_bedArt(dataBase(1), cfg, myDataPath);
+dataBase = filter_bedArt(dataBase(1), cfg, myDataPath);
 % 
-% fprintf('Subject %s is filtered. \n',cfg.sub_labels{1})
+fprintf('Subject %s is filtered. \n',cfg.sub_labels{1})
 % 
 %% CCEP for 2 and 10 stimulations
 % avg_stim : write down the number of stimuli you want to average

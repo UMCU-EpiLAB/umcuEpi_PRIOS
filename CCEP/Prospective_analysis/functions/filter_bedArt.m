@@ -56,13 +56,12 @@ for i = 1:size(dataBase,2)
     
     % plot the whole signal without stimulation artefacts
 %     figure()
-%     plot(dataBase(i).raw_data(ch,:))
-%     hold on
-%     plot(data(ch,:))
-%     legend('original','without artefact')
+%     plot(dataBase(i).raw_data(ch, ((stimart_start - 2040) : (stimart_start +2040))))
 %     title('Whole signal with and without the stimulation artefacts')
 %     xlabel('time (samples')
-%     
+%     ylabel('Voltage (uV)')
+%     title(sprintf('%s, %s, channel: %s',dataBase(i).sub_label, dataBase(i).run_label,dataBase(i).ch{ch}))
+% %     
 %       % plot the whole signal without stimulation artefacts
 %     figure()
 %     subplot(2,1,1)
