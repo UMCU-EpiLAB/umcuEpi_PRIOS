@@ -33,23 +33,36 @@ for J = 1:size(mode,2)
             rho = dataBase(i).statistics.rho_BC;
        end
         
-   
         subplot(size(dataBase,2),1,i)
-        scatter(par2  , par10  )
-        ylabel('Clinical SPES')
-        xlabel("Propofol SPES"+newline+"   ")
+        scatter(par10  , par2  )
+        ylabel('2 stimuli setting')
+        xlabel("10 stimuli setting"+newline+"   ")
         str_main = sprintf('%s', mode{J});
         sgtitle(str_main)
         title(sprintf('%s, p =  %1.3f', dataBase(i).sub_label, pval))
-        legend(sprintf('%s',mode{J}))
-      
+        legend(sprintf('%s',mode{J}),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)
+        xmin = 0;
+        xmax = round(max(par10)+0.1*max(par10),2);
+        
         if pval < 0.05
-            h = refline;
+            idx_nan = isnan(par10) | isnan(par2);
+            P = polyfit(par10(~idx_nan),par2(~idx_nan),1);
+            X = xmin:0.1*xmax:xmax+0.2*xmax;
+            Y = P(1)*X + P(2);
+            
+            hold on
+            h=plot(X,Y);
+            hold off
             h.LineWidth = 2;
-            legend(sprintf('%s',mode{J}), sprintf('rho = %1.3f',rho  ));
+            title(sprintf('%s, p = <0.05', dataBase(i).sub_label))
+            legend(sprintf('%s',mode{J}), sprintf('r_s = %1.3f',rho  ),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)
+            if pval < 0.01
+                title(sprintf('%s, p = <0.01', dataBase(i).sub_label))
+            end
+            
         end
-        hold on
-
+        xlim([xmin xmax])
+        
     end
     
     % Save figure

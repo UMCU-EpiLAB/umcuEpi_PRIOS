@@ -105,4 +105,15 @@ elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_al
             fprintf('%s still has unequal stimulation pairs.. \n',dataBase_clin.sub_label)
         end
 end
+
+    % Check for same channels
+    if size(dataBase_clin.ch,1) > size(dataBase_prop.ch,1)                      % If channels in clinical SPES are diff from channels propofol SPES
+        diff_elec = find(~ismember(dataBase_clin.ch, dataBase_prop.ch));
+        dataBase_clin.ch(diff_elec,:) = [];     
+        
+    elseif size(dataBase_prop.ch,1) > size(dataBase_clin.ch,1)
+        diff_elec = find(~ismember(dataBase_prop.ch, dataBase_clin.ch));
+        dataBase_prop.ch(diff_elec,:) = [];
+    end
+
 end

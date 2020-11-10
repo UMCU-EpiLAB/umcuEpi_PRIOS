@@ -45,16 +45,11 @@ for J = 1:size(mode,2)
         xmax = round(max(par10)+0.1*max(par10),2);
         
         if pval < 0.05
-%             num_at_zero  = numel(par2(par10 ==0))+1;
-%             intercept_zero = sum(par2(par10 ==0))/num_at_zero;           % Find the mean value for the interception point with the zero line for the reference line
-%             h = refline(rho,intercept_zero);
             idx_nan = isnan(par10) | isnan(par2);
             P = polyfit(par10(~idx_nan),par2(~idx_nan),1);
-            X = xmin:0.1*xmax:xmax+0.2*xmax;
+            X = xmin : 0.1*xmax : xmax+0.2*xmax;
             Y = P(1)*X + P(2);
             
-            %             intercept_zero = mean(par2(par10 ==0));           % Find the mean value for the interception point with the zero line for the reference line
-            %             h = refline(rho,intercept_zero);
             hold on
             h=plot(X,Y);
             hold off

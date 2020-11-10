@@ -37,10 +37,10 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             %%% PLOTTEN....
             
 %             this_plot= reshape(this_plot, size(this_plot,1)*size(this_plot,2), size(this_plot,3));
-             this_plot(:,tt>-0.01 & tt<0.01) = NaN;            
+             this_plot(:,tt>-0.001 & tt<0.01) = NaN;            
             
             this_plot_avg = squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:));
-             this_plot_avg(tt>-0.01 & tt<0.01) = NaN;                      
+             this_plot_avg(tt>-0.001 & tt<0.01) = NaN;                      
                
             subplot(1,2,1)
             plot(tt,this_plot,':r','linewidth',1);

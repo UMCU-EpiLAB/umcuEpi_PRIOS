@@ -20,12 +20,14 @@ for n = 1:size(names,2)
 end
 
 % Load data (also possible for multiple runs)
+
+% dataBase = struct;
 for R = 1:size(strings,2)
     cfg.run_label = strings(R);
     dataBase(R) = load_ECoGdata(cfg,myDataPath);
 end
 
-    fprintf('Both runs of subject %s have run. \n',cfg.sub_labels{1})
+fprintf('Both runs of subject %s have run. \n',cfg.sub_labels{1})
     
     
 %% Filter
@@ -36,6 +38,8 @@ dataBase = filter_bedArt(dataBase);
 fprintf('Both runs of subject %s are filtered. \n',cfg.sub_labels{1})
 %% CCEP for SPES-clin stimulations
 % save all stimuli of clinical SPES
+%  dataBase_clin = struct;
+%  dataBase_prop = struct;
 
 for i = 1:size(dataBase,2)
     dataBase(i).task_name = dataBase(i).dataName(strfind(dataBase(i).dataName,'task-'):strfind(dataBase(i).dataName,'_run')-1); 
@@ -74,7 +78,7 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 6; stim=12;
+chan = 13; stim=1;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -110,6 +114,8 @@ xlim([-.1 0.1])
 
 
 %% Check whether SPESclin and SPESprop contain the same stimulation pairs
+% Stimpairs and electrodes which are different in the clinical and propofol
+% SPES are removed.
 [dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop);
 
 %% Use the automatic N1 detector to detect ccep 
@@ -151,7 +157,7 @@ end
 % [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save propofol SPES
-fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop.mat'];
+fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_check.mat'];
 ccep_prop = dataBase_prop.ccep;
 ccep_prop.stimchans_all = dataBase_prop.cc_stimchans_all;
 ccep_prop.stimchans_avg = dataBase_prop.cc_stimchans_avg;
@@ -177,7 +183,7 @@ if ~exist(targetFolder_clin, 'dir')
 end
 
 % save all stims
-fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin.mat'];
+fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_filt_check.mat'];
 ccep_clin = dataBase_clin.ccep;
 ccep_clin.stimchans_all = dataBase_clin.cc_stimchans_all;
 ccep_clin.stimchans_avg = dataBase_clin.cc_stimchans_avg;

@@ -126,4 +126,10 @@ for subj = 1:size(dataBase,2)
 end
 
 
+%% Make boxplots of the latency and amplitude of the N1 peaks. 
+for subj = 1:size(dataBase,2)
+    boxplot_N1_peak(dataBase(subj).ccep_clin, dataBase(subj).ccep_prop, myDataPath)
+end
+
+close all
 

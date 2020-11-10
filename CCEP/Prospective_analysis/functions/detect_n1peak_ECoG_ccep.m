@@ -78,7 +78,7 @@ n1_peak_range = cfg.n1_peak_range;
 epoch_prestim = cfg.epoch_prestim;
 epoch_length = cfg.epoch_length;
 
-bad_channels = find(contains(dataBase.tb_channels.status,'bad')==1);
+bad_channels = find(contains(dataBase.tb_channels.status,'bad')==1); 
 
 %% Script
 % iterate over all subjects in database

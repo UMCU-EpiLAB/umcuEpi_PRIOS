@@ -18,15 +18,15 @@ if size(runs,2) >1
             
             if ~strcmp(extractBetween(runs(i).name,'_CCEP_','.mat'), extractBetween(runs(i+j).name,'_CCEP_','.mat'))        % if stim size is NOT equal
                 if ~strcmp(extractBetween(runs(i).name,'_run-','_CCEP'), extractBetween(runs(i+j).name,'_run-','_CCEP'))    % if run label is not equal
-                    if all(size(runs(i).ccep.n1_peak_amplitude) == size(runs(i+j).ccep.n1_peak_amplitude))                  % if size of adjacency matrix is equal
+                    if all(size(runs(i).ccep.n1_peak_amplitude_check) == size(runs(i+j).ccep.n1_peak_amplitude_check))                  % if size of adjacency matrix is equal
                         
                         titleclin = extractBetween(runs(i).name,'_run-','_CCEP');
                         titleprop = extractBetween(runs(i+j).name,'_run-','_CCEP');
                         run_labelClin = extractBetween(runs(i).name,'_CCEP_','.mat');
                         run_labelProp = extractBetween(runs(i+j).name,'_CCEP_','.mat');
 
-                        AmatClin = runs(i).ccep.n1_peak_amplitude;
-                        AmatProp = runs(i+j).ccep.n1_peak_amplitude;
+                        AmatClin = runs(i).ccep.n1_peak_amplitude_check;
+                        AmatProp = runs(i+j).ccep.n1_peak_amplitude_check;
                         
                         AmatClin(~isnan(AmatClin)) = 1; % all non-NaNs are amplitudes, so N1s --> 1
                         AmatClin(isnan(AmatClin)) = 0; % all NaNs are no N1s --> 0
