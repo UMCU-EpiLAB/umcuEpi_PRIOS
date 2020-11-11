@@ -18,9 +18,17 @@ end
 for subj = 1:size(dataBase,2)
     
 %% define artefact period - stimuli during an artefact become NaNs
-    ev_artefact_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));
-    ev_artefact_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));
+% This must be defined for all electrodes or for specified electrodes.
 
+elec_art = find(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));                % Find rows with artefact in them
+elec_art_all = find(strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all'));  % Find the artefacts which concern all electrodes
+elec_art_in_all = find(ismember(elec_art, elec_art_all));                               % done because notes like STIM_on also concern 'all'.
+
+% Determine the start- and stop-moment of the artefact concerning all
+% electrodes
+ev_artefact_start = dataBase(subj).tb_events.sample_start(elec_art_in_all,:);
+ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
+   
     if iscell(ev_artefact_start)
         ev_artefact_start = str2double(ev_artefact_start);
     end
@@ -29,20 +37,44 @@ for subj = 1:size(dataBase,2)
         ev_artefact_stop = str2double(ev_artefact_stop);
     end
 
-    ev_artefact = zeros(1,max(dataBase(subj).tb_events.sample_end));        % This type of preallocation is necessary because in pipeline_preprocess, structs with empty cells are removed.
-    % When there are multiple SZ, then the times samples are concatenaded
+    ev_artefact_all = zeros(1,max(dataBase(subj).tb_events.sample_end));                % This type of preallocation is necessary because in pipeline_preprocess, structs with empty cells are removed.
+    % When there are multiple artefacts, then the times samples are concatenaded
     % in the same array. So ev_artefact is not overwritten
     for i=1:size(ev_artefact_start,1)
-        ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)];   
+        ev_artefact_all = [ev_artefact_all, ev_artefact_start(i):ev_artefact_stop(i)];   
     end
 
-    dataBase(subj).ev_artefact = ev_artefact;
+    dataBase(subj).ev_artefact_all = ev_artefact_all;
+    
 
-    clear i
-    
-    
-    
-    
+% % When artefact is specified per electrode
+% % Electrode contains label artefact, though does not contain label all
+% row_spec_elek = find(ismember(elec_art, (find(~strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all')))));
+% art_spec_elek = dataBase(subj).tb_events.electrodes_involved_onset(row_spec_elek);
+% art_elek_start = dataBase(subj).tb_events.sample_start(row_spec_elek);
+% art_elek_stop = dataBase(subj).tb_events.sample_end(row_spec_elek);
+% 
+% newStr = extractBetween(art_spec_elek(1,:),',')   
+% 
+%     if iscell(art_elek_start)
+%         art_elek_start = str2double(art_elek_start);
+%     end
+% 
+%     if iscell(art_elek_stop)
+%         art_elek_stop = str2double(art_elek_stop);
+%     end
+% 
+%     ev_artefact_elek = zeros(1,max(dataBase(subj).tb_events.sample_end));        % This type of preallocation is necessary because in pipeline_preprocess, structs with empty cells are removed.
+%     % When there are multiple artefacts, then the times samples are concatenaded
+%     % in the same array. So ev_artefact is not overwritten
+%     for i=1:size(art_elek_start,1)
+%         ev_artefact_elek = [ev_artefact_elek, art_elek_start(i):art_elek_stop(i)];   
+%     end
+% 
+%     dataBase(subj).ev_artefact_elek = ev_artefact_elek;
+% 
+%     clear i
+     
     %% Remove Burst suppression periods 
     BS_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
     BS_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
@@ -243,10 +275,16 @@ for subj = 1:size(dataBase,2)
                 if dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1< 0
                      % do nothing, because epoch starts before the start of
                      % a file (and gives an error)
-                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact)
+                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact_all)
                        % do nothing, because part of artefact, therefore
                        % this event is not used
                        
+%                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact_elek)
+%                     if ismember(dataBase.ch{elec}, art_spec_elek{:})                                       % When the concerning electrode is part of a specified artefact
+%                        % do nothing, because part of an electrode specified artefact, therefore
+%                        % this event is not used
+%                     end
+                        
                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),BS_sig)
                     % do nothing because stimulation is part of burst
                     % suppression period and therefore not thrustworthy

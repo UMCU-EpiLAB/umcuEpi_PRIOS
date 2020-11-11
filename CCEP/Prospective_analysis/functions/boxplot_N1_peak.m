@@ -163,14 +163,9 @@ for mode_N1 = 1:size(mode,2)
                 end
 
             end
-           xlim([xmin, xmax])
+           xlim([xmin, xmax]) 
            
-           
-     end
-    
-    
-    
-    
+     end 
     
 end 
       % Save figure
@@ -181,6 +176,4 @@ end
     end
     saveas(gcf,[path,outlabel],'jpg')
 
-    
-    
 end

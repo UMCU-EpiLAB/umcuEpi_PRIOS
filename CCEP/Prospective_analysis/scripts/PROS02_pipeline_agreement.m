@@ -73,28 +73,6 @@ for subj = 1:size(dataBase,2)
 end
 
 
-%% Determine the location of the ones (ER vs. No-ER)
-% ccep10 is only necessary for the channels and stimpairs and those are
-% equal for 2 and 10 stimuli so does not matter which database is used.
-% for subj = 1:size(dataBase,2)
-%     ccep_clin = dataBase(subj).ccep_clin;
-%     agreement = dataBase(subj).agreement;
-%     
-%      LocOnes = find_ones(ccep_clin, agreement.agreement_stim);
-%      dataBase(subj).LocOnes = LocOnes;
-% end
-
-
-%% Plot all 10 stimuli and the average for the 10 stims and the 2 stims
-% This does not work without epoch_sorted information, though, matlab
-% cannot save since it is to big.
-% plot_fig = input('Do you want plot the 10 stimuli and the average signals? [y/n] ','s');
-% 
-% if strcmp(plot_fig,'y')
-%     ccep_clin.save_fig = str2double(input('Do you want to save the figures? [yes = 1, no = 0]: ','s'));
-%     plot_all_ccep_and_av(ccep_clin, ccep_prop, myDataPath, LocOnes, agreement);
-% end
-
 %% Calculate agreement parameters
 close all;
 

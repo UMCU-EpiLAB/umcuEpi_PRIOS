@@ -47,9 +47,9 @@ if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)  
             
         end
     end
-    
-        if length(dataBase_clin.stimpnames_all) ~=  length(dataBase_prop.stimpnames_all) 
-            fprintf('%s still has unequal stimulation pairs.. \n',dataBase_clin.sub_label)
+        % When the stimulation pairs are still unequal, print warning
+        if sum(ismember(dataBase_clin.stimpnames_all, dataBase_prop.stimpnames_all)) ~= size(dataBase_clin.stimpnames_all,2)  || sum(ismember(dataBase_clin.stimpnames_all, dataBase_prop.stimpnames_all)) ~= size(dataBase_prop.stimpnames_all,2)
+            warning('%s still has unequal stimulation pairs.. \n',dataBase_clin.sub_label)
         end
         
 elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_all)
@@ -100,10 +100,11 @@ elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_al
         end
     end
 
-    
-        if length(dataBase_clin.stimpnames_all) ~=  length(dataBase_prop.stimpnames_all) 
-            fprintf('%s still has unequal stimulation pairs.. \n',dataBase_clin.sub_label)
+        % When the stimulation pairs are still unequal, print warning
+        if sum(ismember(dataBase_clin.stimpnames_all, dataBase_prop.stimpnames_all)) ~= size(dataBase_clin.stimpnames_all,2)  || sum(ismember(dataBase_clin.stimpnames_all, dataBase_prop.stimpnames_all)) ~= size(dataBase_prop.stimpnames_all,2)
+            warning('%s still has unequal stimulation pairs.. \n',dataBase_clin.sub_label)
         end
+        
 end
 
     % Check for same channels
@@ -115,5 +116,11 @@ end
         diff_elec = find(~ismember(dataBase_prop.ch, dataBase_clin.ch));
         dataBase_prop.ch(diff_elec,:) = [];
     end
+    
+    % When the stimulation pairs are still unequal, print warning
+        if sum(ismember(dataBase_clin.ch, dataBase_prop.ch)) ~= size(dataBase_clin.ch,1)  || sum(ismember(dataBase_clin.ch, dataBase_prop.ch)) ~= size(dataBase_prop.ch,1)
+            warning('%s still has unequal electrodes \n',dataBase_clin.sub_label)
+        end
+        
 
 end

@@ -1,5 +1,5 @@
 
-function dataBase = visualRating_ccep(dataBase)
+function dataBase = visualRating_all_ccep(dataBase)
 
 
 % INSTRUCTIONS
@@ -11,45 +11,42 @@ close all
 
 tt = dataBase.tt;
 
-n1_peak_amplitude = dataBase.ccep.n1_peak_amplitude;
-n1_peak_sample = dataBase.ccep.n1_peak_sample;
-
+ n1_peak_amplitude = dataBase.ccep.n1_peak_amplitude;
+ n1_peak_sample = dataBase.ccep.n1_peak_sample;
+% 
 % Preallocation
-n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
-n1_peak_sample_check = NaN(size(n1_peak_sample));
-
-% n2_latency = NaN(size(n1_peak_amplitude));
-% n2_amplitude = NaN(size(n1_peak_sample));
+n1_peak_amplitude_all_check = NaN(size(n1_peak_amplitude));
+n1_peak_sample_all_check = NaN(size(n1_peak_sample));
 
 for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
         
     for chan =1 :size(dataBase.cc_epoch_sorted_avg,1)
         
-        if ~isnan(dataBase.ccep.n1_peak_sample(chan,stimp))
+%         if ~isnan(dataBase.ccep.n1_peak_sample(chan,stimp))
             % figure with left the epoch, and right zoomed in
             H=figure(1);
             H.Units = 'normalized';
             H.Position = [0.13 0.31 0.77 0.7];
-            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));           
+            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));                                
+            this_plot(:,tt>-0.001 & tt<0.01) = NaN;            
             
-%             %%% DIT WORDT NU GEPLOT MET STIMULATIE ARTEFACT, MAARRRRR
-%             %%% STIMULATIEARTEFACT IS WEGGEINTERPOLEERD DUS DIE KAN IK NIET
-%             %%% PLOTTEN....
-%             
-% %             this_plot= reshape(this_plot, size(this_plot,1)*size(this_plot,2), size(this_plot,3));
-%              this_plot(:,tt>-0.001 & tt<0.01) = NaN;            
-%             
             this_plot_avg = squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:));
-%              this_plot_avg(tt>-0.001 & tt<0.01) = NaN;                      
+            this_plot_avg(tt>-0.001 & tt<0.01) = NaN;                      
                
             subplot(1,2,1)
             plot(tt,this_plot,':r','linewidth',1);
             hold on
             plot(tt,this_plot_avg,'k','linewidth',2);
-            plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',3)
+            
+            % If a ER was detected with the detector, then plot a blue dot
+            % at the N1 peak
+            if ~isnan(dataBase.ccep.n1_peak_sample(chan,stimp))
+                plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',3)
+            end
+            
             hold off
-            xlim([-1 2])
-            ylim([-3000 2000])
+            xlim([-2 2])
+            ylim([-2000 2000])
             xlabel('time(s)')
             ylabel('amplitude(uV)')
             title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},dataBase.stimpnames_avg{stimp}))
@@ -58,7 +55,13 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             plot(tt,this_plot,':r','linewidth',1);
             hold on
             plot(tt,this_plot_avg,'k','linewidth',2);
-            plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b')
+            
+            % If a ER was detected with the detector, then plot a blue dot
+            % at the N1 peak
+            if ~isnan(dataBase.ccep.n1_peak_sample(chan,stimp))
+                plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b')
+            end
+            
             hold off
             xlim([-0.2 0.5])
             ylim([-750 750])
@@ -67,7 +70,7 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             ylabel('Voltage (uV)')
             
             currkey = 0;
-            fprintf('N1 [y/n], if incorrect N1, select correct N1 and press enter \n')
+            fprintf('When a blue dot is already shown, press y/n. No ER, press n, When ER, select the correct N1 and press enter. \n')
             
             % select new N1 or categorize as good N1 or no N1
             % When incorrect N1 is selected, click on correct N1, a blue
@@ -94,27 +97,24 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
                     plot(tt(locsamp),this_plot_avg(locsamp),'bo','MarkerFaceColor','b','MarkerSize',4); drawnow;
                     hold off
                     
-                    n1_peak_sample_check(chan,stimp) = locsamp ;
-                    n1_peak_amplitude_check(chan,stimp) = this_plot_avg(locsamp) ;
+                    n1_peak_sample_all_check(chan,stimp) = locsamp ;
+                    n1_peak_amplitude_all_check(chan,stimp) = this_plot_avg(locsamp) ;
                     
                 elseif w == 1
                     currkey = get(gcf,'CurrentCharacter');
                     
                     if strcmp(currkey,'y') && isempty(cp)
-                        n1_peak_amplitude_check(chan,stimp) = n1_peak_amplitude(chan,stimp) ;
-                        n1_peak_sample_check(chan,stimp) = n1_peak_sample(chan,stimp) ;
+                        n1_peak_amplitude_all_check(chan,stimp) = n1_peak_amplitude(chan,stimp) ;
+                        n1_peak_sample_all_check(chan,stimp) = n1_peak_sample(chan,stimp) ;
                     elseif strcmp(currkey,'n')
-                        n1_peak_amplitude_check(chan,stimp) = NaN ;
-                        n1_peak_sample_check(chan,stimp) = NaN ;
+                        n1_peak_amplitude_all_check(chan,stimp) = NaN ;
+                        n1_peak_sample_all_check(chan,stimp) = NaN ;
                     end
                 end
             end
-            
-        end
-        
     end
 end
 
-dataBase.ccep.n1_peak_amplitude_check = n1_peak_amplitude_check;
-dataBase.ccep.n1_peak_sample_check = n1_peak_sample_check;
+dataBase.ccep.n1_peak_amplitude_all_check = n1_peak_amplitude_all_check;
+dataBase.ccep.n1_peak_sample_all_check = n1_peak_sample_all_check;
 
