@@ -80,7 +80,7 @@ plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color
 hold on
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
-title('two stimuli')
+title('2 signals')
 xlabel('time (s)')
 xlim([-.2 1.0])
            
@@ -91,7 +91,7 @@ plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','
 hold on
 plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
-title('all stimuli')
+title('All signals')
 xlabel('time (s)')
 xlim([-.2 1.0])
 
@@ -120,9 +120,9 @@ dataBaseallstim.NmbrofStims = '10_stims';
 disp('Detection of ERs is completed')                
 
 %% visually check the automatically detected CCEPs
-
-dataBase2stim = visualRating_ccep(dataBase2stim);
-dataBaseallstim = visualRating_ccep(dataBaseallstim);
+% 
+% dataBase2stim = visualRating_ccep(dataBase2stim);
+% dataBaseallstim = visualRating_ccep(dataBaseallstim);
 
 
 %% save ccep
@@ -138,7 +138,7 @@ end
 [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save 2 stims
-fileName=[extractBefore(filename,'_ieeg'),'_CCEP_2stims_2ndstim.mat'];
+fileName=[extractBefore(filename,'_ieeg'),'_CCEP_2stims_filtered.mat'];
 ccep2 = dataBase2stim.ccep;
 ccep2.stimchans_all = dataBase2stim.cc_stimchans_all;
 ccep2.stimchans_avg = dataBase2stim.cc_stimchans_avg;

@@ -73,7 +73,7 @@ for subj = 1:size(dataBase,2)
 end
 
 
-%% Calculate agreement parameters
+%% Rewrite the adjacency matrices to calculate agreement parameters
 close all;
 
 for subj = 1:size(dataBase,2)
@@ -105,9 +105,8 @@ end
 
 
 %% Make boxplots of the latency and amplitude of the N1 peaks. 
-for subj = 1:size(dataBase,2)
-    boxplot_N1_peak(dataBase(subj).ccep_clin, dataBase(subj).ccep_prop, myDataPath)
-end
+    boxplot_N1_peak(dataBase, myDataPath)
+
 
 close all
 

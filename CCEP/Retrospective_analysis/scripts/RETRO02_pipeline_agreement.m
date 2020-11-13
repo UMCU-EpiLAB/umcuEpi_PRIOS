@@ -30,7 +30,7 @@ for i=1:size(cfg.sub_labels,2)                                                % 
           dataBase(i).ccep10 = ccep10;
           dataBase(i).filename10 = files(respLoc(j)).name;
           
-       elseif contains(files(respLoc(j)).name,'2stims_2ndstim.') 
+       elseif contains(files(respLoc(j)).name,'2stims_filtered.') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep2 = ccep2;   
           dataBase(i).filename2 = files(respLoc(j)).name;

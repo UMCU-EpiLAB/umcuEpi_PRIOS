@@ -78,7 +78,7 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 9; stim=2;
+chan = 9; stim=7;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -88,6 +88,7 @@ hold off
 title('SPES prop')
 xlabel('time (s)')
 xlim([-.2 0.5])
+
             
 subplot(2,1,2),
 plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
@@ -137,25 +138,25 @@ end
 disp('CCEPs are checked')      
 
 %% Visually detect N2's
-% Check the signals with a checked N1 if they have an N2.
-VisCheck_n2 = input('Do you want to visually detect N2s? [y/n] ','s');
-
-% load saved files because otherwise i have to do the whole check again.
-load('sub-PRIOS03_ses-1_task-SPESclin_run-021318_CCEP_clin_filt_check.mat')
-load('sub-PRIOS03_ses-1_task-SPESprop_run-050816_CCEP_prop_filt_check.mat')
-
-if strcmp(VisCheck_n2,'y')
-    dataBase_clin = visualRating_N2(dataBase_clin,ccep_clin);
-    dataBase_prop = visualRating_N2(dataBase_prop,ccep_prop);
-end
-
-disp('CCEPs are checked')      
+% % Check the signals with a checked N1 if they have an N2.
+% VisCheck_n2 = input('Do you want to visually detect N2s? [y/n] ','s');
+% 
+% % load saved files because otherwise i have to do the whole check again.
+% load('sub-PRIOS03_ses-1_task-SPESclin_run-021318_CCEP_clin_filt_check.mat')
+% load('sub-PRIOS03_ses-1_task-SPESprop_run-050816_CCEP_prop_filt_check.mat')
+% 
+% if strcmp(VisCheck_n2,'y')
+%     dataBase_clin = visualRating_N2(dataBase_clin,ccep_clin);
+%     dataBase_prop = visualRating_N2(dataBase_prop,ccep_prop);
+% end
+% 
+% disp('CCEPs are checked')      
 
 %% Visually check all stimuli of a SPES
 % The ERs detected with the detector are shown with a blue dot.
 % This is very time consuming! only perform when the ER-detector results
 % are not as expected.
-VisCheck_all = input('Do you want to visually check ALL signals? [y/n] ','s');
+% VisCheck_all = input('Do you want to visually check ALL signals? [y/n] ','s');
 
 % if strcmp(VisCheck_all,'y')
 % %     dataBase_clin = visualRating_all_ccep(dataBase_clin);
@@ -185,7 +186,7 @@ end
 % [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save propofol SPES
-fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_check_N2.mat'];
+fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_check.mat'];
 ccep_prop = dataBase_prop.ccep;
 ccep_prop.stimchans_all = dataBase_prop.cc_stimchans_all;
 ccep_prop.stimchans_avg = dataBase_prop.cc_stimchans_avg;
@@ -211,7 +212,7 @@ if ~exist(targetFolder_clin, 'dir')
 end
 
 % save all stims
-fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_filt_check_N2.mat'];
+fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_filt_check.mat'];
 ccep_clin = dataBase_clin.ccep;
 ccep_clin.stimchans_all = dataBase_clin.cc_stimchans_all;
 ccep_clin.stimchans_avg = dataBase_clin.cc_stimchans_avg;

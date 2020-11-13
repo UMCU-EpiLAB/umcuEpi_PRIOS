@@ -48,8 +48,8 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             plot(tt,this_plot_avg,'k','linewidth',2);
             plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',3)
             hold off
-            xlim([-1 2])
-            ylim([-3000 2000])
+            xlim([-1 1])
+%             ylim([-3000 2000])
             xlabel('time(s)')
             ylabel('amplitude(uV)')
             title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},dataBase.stimpnames_avg{stimp}))
