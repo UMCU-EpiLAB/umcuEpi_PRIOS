@@ -78,28 +78,28 @@ end
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
-chan = 9; stim=7;
-figure, 
+figure('Position',[515,333,1034,707]); 
+
+chan = 49; stim=41;
+tt(:,tt>-0.001 & tt<0.01) = NaN; 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
-title('SPES prop')
+title(sprintf('SPES prop, %s, %s, %s',dataBase(1).sub_label, dataBase_prop.stimpnames_avg{stim},  dataBase_prop.ch{chan}))
 xlabel('time (s)')
 xlim([-.2 0.5])
-
+           
             
 subplot(2,1,2),
-plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
-hold on
-plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color','b','LineWidth',1)
+plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
 plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
-title('SPES clin')
+title(sprintf('SPES clin, %s, %s, %s',dataBase(1).sub_label, dataBase_clin.stimpnames_avg{stim},  dataBase_clin.ch{chan}))
 xlabel('time (s)')
-xlim([-.2 1.0])
+xlim([-.2 0.5])
 
 
 figure()

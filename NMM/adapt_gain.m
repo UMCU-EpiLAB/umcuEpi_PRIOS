@@ -25,7 +25,7 @@ FI_reci = [0, 150, 300, 600];           % Reciprocal of fast inhibitory time con
 
 for i = FI_reci
 
-        NM(1)=create_NM(4.5,100,7,10,25,i,135,1,0,1,0.7);          % This is NMM 1
+        NM(1)=create_NM(4.5,100,7,10,25,i,135,1,0,1,0.7);          % This is NMM 1      create_NM(A,a,B,b,G,g,C,sd,alpha,beta,gamma)
         NM(2)=create_NM(4.5,100,7,10,25,i,135,1,0,1,0.7);          % This is NMM 2
 
         %Add stimulation
@@ -45,20 +45,32 @@ for i = FI_reci
 
         %% show results
         tvec=0:deltat*Np:Tend;      % Create time vector
-        gcf = figure();
-        plot(tvec,u2([1:4:end],:)') % Plots u_PY of Both NMM1(u2(1)) and NMM2(u2(5))
-        % So rows 1:4:end contain the potential of the pyramidal cells.
+        gcf = figure('Position',[414,412,1273,650]);
+        %plot(tvec,u2([1:4:end],:)') % Plots u_PY of Both NMM1(u2(1)) and NMM2(u2(5))
+        
+        subplot(1,2,1)
+        plot(tvec,u2([1],:)')
         xlabel ('Time (s)')
         ylabel ('Potential')
         legend('NM1','NM2')
         title(['Simulated Potential PY, FI time constant = ',sprintf('%d',i)])
+        
+        subplot(1,2,2)
+        plot(tvec,u2([1],:)')
+        xlim([2.5 4])
+       
+        % So rows 1:4:end contain the potential of the pyramidal cells.
+        xlabel ('Time (s)')
+        ylabel ('Potential')
+        legend('NM1','NM2')
+        title(['Zoom-in of Simulated Potential PY, FI time constant = ',sprintf('%d',i)])
         %title('Simulated Potential of Pyramidal cells of NM1 and NM2')
         outlabel=sprintf('Simulated Potential PY %d.jpg',...
         i);
 
-        path = 'C:\Users\Sifraaaaa\Documents\utwente\M3\NMM\g_and_b_changes\';
-        saveas(gcf,[path,'/FI_reci(g)/',outlabel],'jpg')
-        saveas(gcf,[path,'/FI_reci(g)/',outlabel])
+%         path = 'C:\Users\Sifraaaaa\Documents\utwente\M3\NMM\g_and_b_changes\';
+%         saveas(gcf,[path,'/FI_reci(g)/',outlabel],'jpg')
+%         saveas(gcf,[path,'/FI_reci(g)/',outlabel])
 end
 
 %% Varying the Slow Inhibitory Gain value
@@ -67,7 +79,7 @@ end
 for i = SI_reci
 
         NM(1)=create_NM(4.5,100,7,i,25,300,135,1,0,1,0.7);          % This is NMM 1
-        NM(2)=create_NM(4.5,100,7,i,25,300,135,1,0,1,0.7);        % This is NMM 2
+        NM(2)=create_NM(4.5,100,7,i,25,300,135,1,0,1,0.7);          % This is NMM 2
 
         %Add stimulation
         NM(1).Ivar=@(t) (mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);    % Stimulation at NM 1
@@ -86,20 +98,30 @@ for i = SI_reci
 
         %% show results
         tvec=0:deltat*Np:Tend;      % Create time vector
-        gcf = figure();
-        plot(tvec,u2([1:4:end],:)') % Plots u_PY of Both NMM1(u2(1)) and NMM2(u2(5))
-        % So rows 1:4:end contain the potential of the pyramidal cells.
+        gcf = figure('Position',[414,412,1273,650]);
+        
+        subplot(1,2,1)
+        plot(tvec,u2([1],:)')           % Plots u_PY of Both NMM1(u2(1)) and NMM2(u2(5)) % So rows 1:4:end contain the potential of the pyramidal cells.
+               
         xlabel ('Time (s)')
         ylabel ('Potential')
         legend('NM1','NM2')
         title(['Simulated Potential PY, SI time constant = ',sprintf('%d',i)])
+        
+        subplot(1,2,2)
+        plot(tvec,u2([1],:)')           % Plots u_PY of Both NMM1(u2(1)) and NMM2(u2(5)) % So rows 1:4:end contain the potential of the pyramidal cells.
+        xlabel ('Time (s)')
+        xlim([2.5 4])
+        ylabel ('Potential')
+        legend('NM1','NM2')
+        title(['Zoom-in of Simulated Potential PY, SI time constant = ',sprintf('%d',i)])
         %title('Simulated Potential of Pyramidal cells of NM1 and NM2')
         outlabel=sprintf('Simulated Potential PY %d.jpg',...
         i);
 
-        path = 'C:\Users\Sifraaaaa\Documents\utwente\M3\NMM\g_and_b_changes\';
-        saveas(gcf,[path,'/SI_reci(b)/',outlabel],'jpg')
-        saveas(gcf,[path,'/SI_reci(b)/',outlabel])
+%         path = 'C:\Users\Sifraaaaa\Documents\utwente\M3\NMM\g_and_b_changes\';
+%         saveas(gcf,[path,'/SI_reci(b)/',outlabel],'jpg')
+%         saveas(gcf,[path,'/SI_reci(b)/',outlabel])
 
 end
 

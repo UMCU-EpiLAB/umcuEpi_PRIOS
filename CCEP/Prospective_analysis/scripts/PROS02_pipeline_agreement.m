@@ -41,7 +41,6 @@ end
 %load(fullfile(file_clin.folder, file_clin.name));
 %load(fullfile(file_prop.folder, file_prop.name));
 
-
 %% determine the agreement between 2 and 10 stims per run
 % The determine_agreement function is not only determining the agreement
 % when 2 sessions are compared. It could be possible to compare more, but

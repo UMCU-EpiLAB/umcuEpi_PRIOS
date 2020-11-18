@@ -1,6 +1,6 @@
 function  scatter_networkPar(dataBase,myDataPath)
 
-mode = {'ERs per stimulation pair','indegree','outdegree','Betweenness Centrality'};
+mode = {'ERs per stimulation pair','Indegree','Outdegree','Betweenness Centrality'};
 
 for J = 1:size(mode,2)
 
@@ -9,44 +9,44 @@ for J = 1:size(mode,2)
 
     for i = 1:size(dataBase,2)
        if strcmp(mode{J},'ERs per stimulation pair')
-            par10 = dataBase(i).agreement_parameter.ERs_stimpClin;
-            par2 = dataBase(i).agreement_parameter.ERs_stimpProp;
+            clin = dataBase(i).agreement_parameter.ERs_stimpClin;
+            prop = dataBase(i).agreement_parameter.ERs_stimpProp;
             pval = dataBase(i).statistics.p_stimp;
             rho = dataBase(i).statistics.rho_stimp;
 
-        elseif strcmp(mode{J},'indegree')
-            par10 = dataBase(i).agreement_parameter.indegreeN_Clin;
-            par2 = dataBase(i).agreement_parameter.indegreeN_Prop;
+        elseif strcmp(mode{J},'Indegree')
+            clin = dataBase(i).agreement_parameter.indegreeN_Clin;
+            prop = dataBase(i).agreement_parameter.indegreeN_Prop;
             pval = dataBase(i).statistics.p_indegree;
             rho = dataBase(i).statistics.rho_indegree;
 
-        elseif strcmp(mode{J},'outdegree')
-            par10 = dataBase(i).agreement_parameter.outdegreeN_Clin;
-            par2 = dataBase(i).agreement_parameter.outdegreeN_Prop;
+        elseif strcmp(mode{J},'Outdegree')
+            clin = dataBase(i).agreement_parameter.outdegreeN_Clin;
+            prop = dataBase(i).agreement_parameter.outdegreeN_Prop;
             pval = dataBase(i).statistics.p_outdegree;
             rho = dataBase(i).statistics.rho_outdegree;
 
         elseif strcmp(mode{J},'Betweenness Centrality')
-            par10 = dataBase(i).agreement_parameter.BCN_Clin;
-            par2 = dataBase(i).agreement_parameter.BCN_Prop;
+            clin = dataBase(i).agreement_parameter.BCN_Clin;
+            prop = dataBase(i).agreement_parameter.BCN_Prop;
             pval = dataBase(i).statistics.p_BC;
             rho = dataBase(i).statistics.rho_BC;
        end
         
         subplot(size(dataBase,2),1,i)
-        scatter(par10  , par2  )
-        ylabel('2 stimuli setting')
-        xlabel("10 stimuli setting"+newline+"   ")
+        scatter(clin  , prop  )
+        ylabel('SPES-prop')
+        xlabel("Clinical-SPES"+newline+"   ")
         str_main = sprintf('%s', mode{J});
         sgtitle(str_main)
         title(sprintf('%s, p =  %1.3f', dataBase(i).sub_label, pval))
         legend(sprintf('%s',mode{J}),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)
         xmin = 0;
-        xmax = round(max(par10)+0.1*max(par10),2);
+        xmax = round(max(clin)+0.1*max(clin),2);
         
         if pval < 0.05
-            idx_nan = isnan(par10) | isnan(par2);
-            P = polyfit(par10(~idx_nan),par2(~idx_nan),1);
+            idx_nan = isnan(clin) | isnan(prop);
+            P = polyfit(clin(~idx_nan),prop(~idx_nan),1);
             X = xmin:0.1*xmax:xmax+0.2*xmax;
             Y = P(1)*X + P(2);
             
