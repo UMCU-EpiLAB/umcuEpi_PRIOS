@@ -109,3 +109,6 @@ end
 
 close all
 
+%% Determine the Cohen's Kappa interobserver variability
+% Determine this with checked files of two raters/observers
+interobserverKappa(myDataPath);
