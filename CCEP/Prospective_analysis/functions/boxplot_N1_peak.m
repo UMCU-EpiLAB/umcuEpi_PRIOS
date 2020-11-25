@@ -120,26 +120,33 @@ fs = 1/(size(ccep_prop.tt,2)/4);                                        % Devide
    
 
     % Create boxplot with the amplitude of SPES clin and SPES prop
-    figure('Position',[205,424,1530,638])
+    figure('Position',[205,424,1530,638]);
     % columnMeans = mean(new_mat, 1, 'omitnan');
-    grouporder = {'clin 01','prop 01','clin 02**','prop 02**','clin 03**','prop 03**','clin 04**','prop 04**','clin 05**','prop 05**','clin 06**','prop 06**'};
+    grouporder = {'PRIOS01','1','PRIOS02**','2*','PRIOS03**','3','PRIOS04**','4','PRIOS05**','5','PRIOS06**','6'};
    
-    boxplot([new_mat],'Labels',{'clin 01','prop 01','clin 02**','prop 02**','clin 03**','prop 03**','clin 04**','prop 04**','clin 05**','prop 05**','clin 06**','prop 06**'})
+%     boxplot([new_mat],'Labels',{'clin 01','prop 01','clin 02**','prop 02**','clin 03**','prop 03**','clin 04**','prop 04**','clin 05**','prop 05**','clin 06**','prop 06**'})
     
     violins = violinplot([new_mat],grouporder) ;
     for i = 1:2:size(new_mat,2)
         violins([i]).ViolinColor(:) = [1 0 0];
         violins([i+1]).ViolinColor(:) = [0 0 1];
-      
     end
-    title(sprintf('N1 Latency'))
+       
+    ax = gca
+    ax.XAxis.FontSize = 15;
+    ax.YAxis.FontSize = 12;
+    ax.XAxis.FontWeight = 'bold';
+    ax.YAxis.FontWeight = 'bold';
+    
+
+    title(sprintf('N1 Latency'),'FontSize', 15, 'FontWeight', 'bold')
     %                 legend(findall(gca,'Tag','Box'), sprintf('mean Clin = %1.0f',columnMeans(:,1)), sprintf('mean Prop = %1.0f',columnMeans(:,2)),'Location','southoutside');
 
 %     if strcmp(mode{mode_N1},'Amplitude')
 %         ylabel('Amplitude (\muV)')
 %     elseif strcmp(mode{mode_N1},'Latency')
-        ylabel('Latency (milliseconds)')
-        legend([violins(1).ViolinPlot,violins(2).ViolinPlot], 'Clinical SPES','Propofol SPES')
+        ylabel('Latency (milliseconds)','FontSize', 15, 'FontWeight', 'bold')
+        legend([violins(1).ViolinPlot,violins(2).ViolinPlot], 'Clinical SPES','Propofol SPES','FontSize', 12, 'FontWeight', 'bold')
 %     end             
 
     % Save figure

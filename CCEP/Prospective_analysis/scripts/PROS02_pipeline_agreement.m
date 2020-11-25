@@ -103,7 +103,8 @@ for subj = 1:size(dataBase,2)
 end
 
 
-%% Make boxplots of the latency and amplitude of the N1 peaks. 
+%% Make boxplots of the latency and amplitude of the N1 peaks.
+% Folder Violinplot-Matlab has to be added to the path. 
     boxplot_N1_peak(dataBase, myDataPath)
 
 
