@@ -1,4 +1,5 @@
 clear; 
+clc;
 
 % Choose patient
 config_CCEP
@@ -47,7 +48,7 @@ for i = 1:size(dataBase,2)
     if ismember(dataBase(i).task_name,'task-SPESclin')
 %        avg_stim_clin = 5;
        cfg.minstim = 5;
-%        cfg.max_stim = 5;
+%        cfg.max_stim = 5; 
        dataBase_clin(i,:) = preprocess_ECoG_spes(dataBase(i),cfg);
       
     elseif ismember(dataBase(i).task_name,'task-SPESprop')
@@ -75,12 +76,19 @@ elseif size(dataBase_prop,1) >1
      
 end
 
+
+%% Check whether SPESclin and SPESprop contain the same stimulation pairs
+% Stimpairs and electrodes which are different in the clinical and propofol
+% SPES are removed.
+[dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop);
+
+
 tt = dataBase_clin.tt;
 
 % check whether similar stimuli are present in the same stimulus pair
 figure('Position',[515,333,1034,707]); 
 
-chan = 49; stim=41;
+chan = 3; stim=45;
 tt(:,tt>-0.001 & tt<0.01) = NaN; 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -103,21 +111,35 @@ xlim([-.2 0.5])
 
 
 figure()
-plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
+plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,1:6,:))','Color','r','LineWidth',1)
 hold on
-plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color','b','LineWidth',1)
-hold on
-plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
+plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,7:12,:))','Color','b','LineWidth',1)
+ hold on
+ plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
-title('SPES clin')
+title('SPES prop')
 xlabel('time (s)')
-xlim([-.1 0.1])
+xlim([-0.1 0.3])
+
+% figure()
+% 
+% for i=1:size(dataBase_prop.cc_epoch_sorted_select_avg,3)
+%     if i < 7          
+%         plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,i,:)) + 500*i,'LineWidth',1,'Color','r');
+%         hold on
+%     else 
+%         plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,i,:)) + 500*i,'LineWidth',1,'Color','b');
+%         hold on
+%     end
+%     
+% end
+% xlim([-0.1 0.3])
+% ylabel('Average per electrodes (mV)')
+% xlabel('time (s)')
+% title(sprintf('SPES prop, %s, %s, %s',dataBase(1).sub_label, dataBase_prop.stimpnames_avg{stim},  dataBase_prop.ch{chan}))    
+% set(gca,'YTick',3000,'YTickLabel',dataBase_prop.ch{chan}) ;
 
 
-%% Check whether SPESclin and SPESprop contain the same stimulation pairs
-% Stimpairs and electrodes which are different in the clinical and propofol
-% SPES are removed.
-[dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop);
 
 %% Use the automatic N1 detector to detect ccep 
 

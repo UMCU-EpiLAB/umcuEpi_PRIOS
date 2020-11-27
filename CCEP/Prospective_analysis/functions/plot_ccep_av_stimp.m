@@ -70,9 +70,9 @@ tt = ccep_clin.tt;
                  for j = 1:length(ER_in10st)
                     if ismember({Stimpnm}, ER_in10st{j,1}) && ismember(ccep_clin.ch{elec}, ER_in10st(j,2))   
                         counter_10 = counter_10+1;
-                        NameER(:,counter_10) =  [ER_in10st(j,2)];
                         str_main = sprintf('10 stims evoke ER in %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s',NameER{:});        
-                        sgtitle(str_main)
+                        sgtitle(str_main)                        NameER(:,counter_10) =  [ER_in10st(j,2)];
+
                     end
                  end
                 

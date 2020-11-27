@@ -194,7 +194,7 @@ ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
         sort_cc_stimsets = sort(cc_stimsets_all,2);
         [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
         
-         if 2*length(cc_stimsets_avg) ~= length(cc_stimsets_all)                % When not all stimulation pairs are stimulated in both directions
+         if 2*length(cc_stimsets_avg) ~= length(cc_stimsets_all)                 % When not all stimulation pairs are stimulated in both directions
              Ncount = find(histcounts(IC_avg,length(cc_stimsets_avg))~=2)';      % stimpairs which are stimulated in one direction            
              
              % Allocation
@@ -207,9 +207,7 @@ ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
               cc_stimsets_all(remove_rows,:) = [];   
               sort_cc_stimsets(remove_rows,:) = [];
               % recalculate IC_avg
-              [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
-
-              
+              [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');  
          end
          
     elseif strcmp(cfg.dir_avg,'no')         % dir_avg = 'no' to analyse all signals separately
@@ -240,8 +238,8 @@ ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
             cc_stimchans_avg{stimp,chan} = dataBase(subj).ch{cc_stimsets_avg(stimp,chan)};
         end
         cc_stimpnames_avg{stimp} = [cc_stimchans_avg{stimp,1} '-' cc_stimchans_avg{stimp,2}];
-    end
-    
+    end    
+  
     dataBase(subj).cc_stimsets_all = cc_stimsets_all;
     dataBase(subj).cc_stimsets_avg = cc_stimsets_avg;
     dataBase(subj).cc_stimchans_all = cc_stimchans_all;
@@ -250,8 +248,6 @@ ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
     dataBase(subj).stimpnames_avg = cc_stimpnames_avg;
     dataBase(subj).max_stim = max_stim;
     
-  
-   
     %% Select epochs
  t = round(epoch_length*dataBase(subj).ccep_header.Fs);
  tt = (1:epoch_length*dataBase(subj).ccep_header.Fs)/dataBase(subj).ccep_header.Fs - epoch_prestim;
@@ -302,6 +298,13 @@ ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
                 
                 %%% NaNs DUS OMITTEN!!!
                 
+                
+                
+                %%% REGEL 158 CHECK IK OF ALLE STIMULATIE PAREN IN BEIDE
+                %%% RICHTINGEN GESTIMULEERD WORDEN MAAR ALS ER HIER EEN
+                %%% STIMULATIEPAAR IS WAT ER DOOR ARTEFACT OF BS UITGEHAALD
+                %%% WORDT DAN KLOPT HET NIET MEER
+                
                 end
             end
         
@@ -319,7 +322,13 @@ ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
     cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1), size(cc_stimsets_avg,1), max_stim*2, size(cc_epoch_sorted_all,4));   % avg_stim*sum(IC_avg==2)   Wat nergens op slaat trouwens...
     
     for ll = 1:max(IC_avg)                     % Takes every value between 1 and max while some numbers are not used, therefore the next line
-        if sum(IC_avg==ll)>1                   % Check whether the stimpair is stimulated in both directions.
+
+        %%% DIT MAAKT GEBRUIK VAN EEN OUDE BEREKENING VAN IC_AVG, 
+        %%% HIERBOVEN KUNNEN STIMPAREN WEGGEHAALD ZIJN VANWEGE ARTEFACT OF BS,
+        %%% EN DUS NIET MEER IN BEIDE RICHTINGEN GESTIMULERED ZIJN
+            stimps = find(IC_avg == ll);
+            
+        if any(~isnan(cc_epoch_sorted_all(1,:,stimps(1),1))) && any(~isnan(cc_epoch_sorted_all(1,:,stimps(2),1))) % Check whether the stimpair is stimulated in both directions.      
             
             % Average ALL stimuli given to certain stimpair
             selection = cc_epoch_sorted_all(:,:,IC_avg==ll,:);         
@@ -335,14 +344,59 @@ ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
         end
     end
     
+
+    %% Find rows which are not stimulated in both directions anymore because
+% Either one of the stimulation pairs is removed due to burst suppression
+% or artefact
+if any(find(isnan(cc_epoch_sorted_avg(1,:,1)))>0)
+    
+    % Avg
+    remove_stimp_avg = find(isnan(cc_epoch_sorted_avg(1,:,1)));
+    cc_epoch_sorted_avg(:,remove_stimp_avg,:) = [];
+
+    % Select
+    cc_epoch_sorted_select(:,remove_stimp_avg,:,:) = [];
+
+    % All
+    for i = 1:size(remove_stimp_avg,2)
+        remove_stimp_all(i,1:2) = find(IC_avg == remove_stimp_avg(i))';  
+    end
+    remove_stimp_all = unique(reshape(remove_stimp_all,[],1));
+
+    cc_epoch_sorted_all(:,:,remove_stimp_all,:) = [];
+
+    % tt
+    tt_epoch_sorted_all(:,remove_stimp_all,:) = [];
+    
+    
+    cc_stimsets_all(remove_stimp_all,:) = [];
+    cc_stimsets_avg(remove_stimp_avg,:) = [];
+    cc_stimchans_all(remove_stimp_all,:) = [];
+    cc_stimchans_avg(remove_stimp_avg,:) = [];
+    cc_stimpnames_all(:,remove_stimp_all) = [];
+    cc_stimpnames_avg(:,remove_stimp_avg) = [];
+    
+    
+end
+
+
+
+
+    dataBase(subj).cc_stimsets_all = cc_stimsets_all;
+    dataBase(subj).cc_stimsets_avg = cc_stimsets_avg;
+    dataBase(subj).cc_stimchans_all = cc_stimchans_all;
+    dataBase(subj).cc_stimchans_avg = cc_stimchans_avg;
+    dataBase(subj).stimpnames_all = cc_stimpnames_all;
+    dataBase(subj).stimpnames_avg = cc_stimpnames_avg;
+    dataBase(subj).max_stim = max_stim;
+    
     dataBase(subj).cc_epoch_sorted = cc_epoch_sorted_all;
     dataBase(subj).tt_epoch_sorted = tt_epoch_sorted_all;
     dataBase(subj).tt = tt;
     dataBase(subj).cc_epoch_sorted_avg = cc_epoch_sorted_avg;
-    dataBase(subj).cc_epoch_sorted_select_avg = cc_epoch_sorted_select;
-   
+    dataBase(subj).cc_epoch_sorted_select_avg = cc_epoch_sorted_select;    
     dataBase(subj).stimpnames = cc_stimpnames_all;
-    
+
     
 end
 end
