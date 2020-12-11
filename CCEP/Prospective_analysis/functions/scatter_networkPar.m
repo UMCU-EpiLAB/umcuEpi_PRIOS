@@ -4,7 +4,7 @@ mode = {'ERs per stimulation pair','Indegree','Outdegree','Betweenness Centralit
 
 for J = 1:size(mode,2)
 
-    figure('Position',[302,17,938,1039])
+   figure('Position',[302,17,1110,1039])
 
 
     for i = 1:size(dataBase,2)
@@ -33,14 +33,17 @@ for J = 1:size(mode,2)
             rho = dataBase(i).statistics.rho_BC;
        end
         
-        subplot(size(dataBase,2),1,i)
-        scatter(clin  , prop  )
-        ylabel('SPES-prop')
-        xlabel("Clinical-SPES"+newline+"   ")
-        str_main = sprintf('%s', mode{J});
-        sgtitle(str_main)
+        subplot(size(dataBase,2),1,i);
+        scatter(clin  , prop ,'*' )
+        ylabel('value SPES-prop', 'FontSize',9)
+        xlabel("Value for SPES-Clin"+newline+"    ",'FontSize',9)
+%         str_main = sprintf('%s', mode{J});
+%         sgtitle(str_main)
         title(sprintf('%s, p =  %1.3f', dataBase(i).sub_label, pval))
-        legend(sprintf('%s',mode{J}),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)
+        legend(sprintf('%s',mode{J}),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',11)
+        ax = gca;
+        ax.YAxis.FontSize = 10;
+        ax.XAxis.FontSize = 10;     
         xmin = 0;
         xmax = round(max(clin)+0.1*max(clin),2);
         
@@ -51,11 +54,12 @@ for J = 1:size(mode,2)
             Y = P(1)*X + P(2);
             
             hold on
-            h=plot(X,Y);
+            h=plot(X,Y,'LineWidth',2);
             hold off
-            h.LineWidth = 2;
+            h.Color(4) = 0.7;
+            uistack(h,'bottom')         %you can also do uistack(h,'top')
             title(sprintf('%s, p = <0.05', dataBase(i).sub_label))
-            legend(sprintf('%s',mode{J}), sprintf('r_s = %1.3f',rho  ),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)
+            legend(sprintf('%s',mode{J}), sprintf('r_s = %1.3f',rho  ),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',11)
             if pval < 0.01
                 title(sprintf('%s, p = <0.01', dataBase(i).sub_label))
             end
@@ -73,6 +77,7 @@ for J = 1:size(mode,2)
     end
     saveas(gcf,[path,outlabel],'jpg')    
 
- end   
+end   
+
 end
          

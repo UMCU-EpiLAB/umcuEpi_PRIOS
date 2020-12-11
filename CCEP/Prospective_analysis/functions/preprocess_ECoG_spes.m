@@ -297,14 +297,7 @@ ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
                 %%% EVENT IS. 
                 
                 %%% NaNs DUS OMITTEN!!!
-                
-                
-                
-                %%% REGEL 158 CHECK IK OF ALLE STIMULATIE PAREN IN BEIDE
-                %%% RICHTINGEN GESTIMULEERD WORDEN MAAR ALS ER HIER EEN
-                %%% STIMULATIEPAAR IS WAT ER DOOR ARTEFACT OF BS UITGEHAALD
-                %%% WORDT DAN KLOPT HET NIET MEER
-                
+                            
                 end
             end
         
@@ -375,8 +368,8 @@ if any(find(isnan(cc_epoch_sorted_avg(1,:,1)))>0)
     cc_stimchans_avg(remove_stimp_avg,:) = [];
     cc_stimpnames_all(:,remove_stimp_all) = [];
     cc_stimpnames_avg(:,remove_stimp_avg) = [];
-    
-    
+    fprintf('...%d are removed because only one direction was stimulated... \n',remove_stimp_avg(1,:))
+   
 end
 
 

@@ -8,7 +8,7 @@ ER_stimpClin = agreement_parameter.ERs_stimpClin;
 ER_stimpProp = agreement_parameter.ERs_stimpProp;
  
 NorDisClin = lillietest(ER_stimpClin);                  % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected 
-NorDisClin = lillietest(ER_stimpProp);
+NorDisProp = lillietest(ER_stimpProp);
  
 % Check for monotonic relation
 figure(2)
@@ -22,7 +22,7 @@ normplot(ER_stimpClin)                                % normal distribution is d
 subplot(2,1,2)
 normplot(ER_stimpProp)
 
-if NorDisClin == 1 && NorDisClin ==1
+if NorDisClin == 1 && NorDisProp ==1
     p = ranksum(ER_stimpClin, ER_stimpProp) ;           % tests the null hypothesis that data in x and y are samples from continuous distributions with equal medians
     fprintf('The detected ERs per stimulation pair is NOT normally distributed, Wilcoxon Signed Rank test is used.\n')
 
@@ -31,6 +31,7 @@ else
     p = ranksum(ER_stimpClin, ER_stimpProp);          % alpha default = 0.05
      
 end
+
 
 if p<0.05
     fprintf('Test between the number of ERs evoked in SPES-clin and SPES-prop gives p-value = %1.4f. This means that there is a significant difference between the two protocols for %s \n', p, SubjectName{1});

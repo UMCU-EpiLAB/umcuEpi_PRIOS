@@ -17,6 +17,7 @@ uni_runlabel = unique({files.run_label});
 for run = 1: size(uni_runlabel,2)
     for i = 1:size(files)
    
+        % PRIOS study is rater2, REC2Stim is rater1.
         if contains(files(i).name, uni_runlabel{run}) && contains(files(i).name, 'PRIOS') 
            rater2(run,:) = load(fullfile(files(i).folder,files(i).name)) ;
         elseif contains(files(i).name, uni_runlabel{run}) && contains(files(i).name, 'REC2Stim')
@@ -25,11 +26,12 @@ for run = 1: size(uni_runlabel,2)
         end
     end
     
-    N1_peak_R1 = rater1(run).ccep.checked  ;
+    N1_peak_R1 = rater1(run).ccep.checked  ;                        % Rater 1 already transformed to 1/0
     N1_peak_R2 = rater2(run).ccep_clin.n1_peak_sample_check;
     
-    % Determine whether the same stimulation pairs are used.
-       
+    % Determine whether the same stimulation pairs are used. 
+    % Stimulation pairs that are 'extra' are not removed from the original
+    % detection matrix in the CCEP struct. 
     if size(N1_peak_R1,2) > size(N1_peak_R2,2)
        extra_rater1 = find(~ismember(rater1(run).ccep.cc_stimsets(:,1), rater2(run).ccep_clin.stimsets_avg(:,1))) ;
        N1_peak_R1(:,extra_rater1) = [];  
@@ -40,8 +42,8 @@ for run = 1: size(uni_runlabel,2)
         rater2(run).ccep_clin.stimsets_avg(extra_rater2,:) = [];
     end
     
-  if ~isequal(rater1(run).ccep.cc_stimsets(:,:) , rater2(run).ccep_clin.stimsets_avg(:,:))
-      %sum(sum(rater1(run).ccep.cc_stimsets(:,:) == rater2(run).ccep_clin.stimsets_avg(:,:))) ~= (2*size(rater1(run).ccep.cc_stimsets,1)) && sum(sum(rater1(run).ccep.cc_stimsets(:,:) == rater2(run).ccep_clin.stimsets_avg(:,:))) ~= (2*size(rater2(run).ccep_clin.stimsets_avg,1))
+    % Check whether the stimpairs are equal in both ratings. 
+    if ~isequal(rater1(run).ccep.cc_stimsets(:,:) , rater2(run).ccep_clin.stimsets_avg(:,:))
         diff_stimp = find(rater1(run).ccep.cc_stimsets ~= rater2(run).ccep_clin.stimsets_avg);
         rater1(run).ccep.cc_stimsets(diff_stimp(1,:),:) = [];
         N1_peak_R1(:,diff_stimp(1,:)) = [];  

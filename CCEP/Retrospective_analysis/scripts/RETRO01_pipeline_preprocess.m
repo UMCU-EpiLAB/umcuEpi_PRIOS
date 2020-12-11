@@ -25,7 +25,6 @@ files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg'
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
 
-% ---- Find run_labels ----
 % pre-allocation
 strings = cell(size(names));
 for n = 1:size(names,2)

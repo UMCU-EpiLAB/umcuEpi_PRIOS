@@ -23,23 +23,19 @@ for i = 1:size(ccep_allPat.sub_labels,2)
   
      % load all both the SPESclin and SPESprop of the patient
     for j=1:size(respLoc,2)                                                      % number of rows with the run_label of interest
-       if contains(files(respLoc(j)).name,'clin_filt_check.') 
+       if contains(files(respLoc(j)).name,'clin_filt_check_N2.') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep_clin = ccep_clin;
           dataBase(i).filenameClin = files(respLoc(j)).name;
           
-       elseif contains(files(respLoc(j)).name,'prop_filt_check.') 
+       elseif contains(files(respLoc(j)).name,'prop_filt_check_N2.') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep_prop = ccep_prop;   
           dataBase(i).filenameProp = files(respLoc(j)).name;
        end
     end
 end
-%file_clin = dir(fullfile(myDataPath.CCEP_allpat,['sub-',ccep_allPat.name{1} '*_CCEP_clin.mat']));
-%file_prop = dir(fullfile(myDataPath.CCEP_allpat,['sub-',ccep_allPat.name{1} '*_CCEP_prop.mat']));
 
-%load(fullfile(file_clin.folder, file_clin.name));
-%load(fullfile(file_prop.folder, file_prop.name));
 
 %% determine the agreement between 2 and 10 stims per run
 % The determine_agreement function is not only determining the agreement
@@ -102,13 +98,79 @@ for subj = 1:size(dataBase,2)
     visualise_gridstructure(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).ccep_prop, dataBase(subj).agreement_parameter);
 end
 
+%% Make bar graph of number of ERs per SPES session per patient
+figure('Position',[407,689,939,373])
+ax1 = axes('Position',[0.074,0.11,0.9,0.82]);
+
+for subj = 1:size(dataBase,2)
+   
+    % prealloction of the column number   
+    clin_colm = 2*subj-1;                      
+    prop_colm = 2*subj; 
+
+    ERs_tot(subj,clin_colm) = sum(sum(~isnan(dataBase(subj).ccep_clin.n1_peak_amplitude_check)));
+    ERs_tot(subj,prop_colm) = sum(sum(~isnan(dataBase(subj).ccep_prop.n1_peak_amplitude_check)));
+        
+    priosLab = extractAfter(dataBase(subj).sub_label,'sub-');
+
+    if dataBase(subj).statistics.p_ERsperStimp <0.05
+        categorie{:,subj} = sprintf('%s, p<0.05',priosLab);
+    elseif dataBase(subj).statistics.p_ERsperStimp <0.01
+        categorie{:,subj} = sprintf('%s, p<0.01',priosLab);
+    else
+        categorie{:,subj} = sprintf('%s, p=%1.3f',priosLab,dataBase(subj).statistics.p_ERsperStimp);
+    end
+        
+end
+
+
+X = categorical(categorie);
+b =  bar(ax1,X,ERs_tot,1);
+
+for i = 1:2:size(ERs_tot,2)
+        b([i]).FaceColor(:) =  [0.5843 0.8157 0.9882];          %[0 0 1]
+        b([i+1]).FaceColor(:) = [0.9882 0.6157 0.5843];                        %[1 0 0]
+end
+ 
+
+% Misschien 1:2:12 met alignment left 
+% en 2:2:12 met alignment right
+for i = 1:2:12
+    xtips1 = b(i).XEndPoints;
+    ytips1 = b(i).YEndPoints;
+    labels1 = string(b(i).YData);
+    Zero = find(labels1 == '0');
+    labels1(Zero) = NaN;
+    text(xtips1,ytips1,labels1,'HorizontalAlignment','right',...
+    'VerticalAlignment','bottom','FontSize',11,'fontweight','Bold') 
+end
+
+for i = 2:2:12
+    xtips1 = b(i).XEndPoints;
+    ytips1 = b(i).YEndPoints;
+    labels1 = string(b(i).YData);
+    Zero = find(labels1 == '0');
+    labels1(Zero) = NaN;
+    text(xtips1,ytips1,labels1,'HorizontalAlignment','left',...
+    'VerticalAlignment','bottom','FontSize',11,'fontweight','Bold') 
+end
+legend('SPES-clin','SPES-Prop')
+ylabel('Number of ERs');
+title('Total number of ERs evoked per SPES session')
+
+% Save figure
+outlabel='ERs_per_stimp.jpg';
+path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
+if ~exist(path, 'dir')
+    mkdir(path);
+end
+saveas(gcf,[path,outlabel],'jpg')
+
 
 %% Make boxplots of the latency and amplitude of the N1 peaks.
 % Folder Violinplot-Matlab has to be added to the path. 
     boxplot_N1_peak(dataBase, myDataPath)
 
-
-close all
 
 %% Determine the Cohen's Kappa interobserver variability
 % Determine this with checked files of two raters/observers
