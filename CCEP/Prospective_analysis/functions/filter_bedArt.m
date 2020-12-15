@@ -30,8 +30,8 @@ for i = 1:size(dataBase,2)
              % nr_samples = 0.02/0.0005 = 40 samples
              
             stimart_start = dataBase(i).tb_events.sample_start(event) - 3;       % Stim_start is almost correctly the start time of the stimulation artefact
-            stimart_stop =  dataBase(i).tb_events.sample_start(event) +19;         % the true stimulation artefact is ~40 samples instead of the 3 suggested by the sample_end
- 
+            stimart_stop =  dataBase(i).tb_events.sample_start(event) +19;       % D. van Blooijs studied in her thesis that 19 samples are sufficient to mark the stimulation artefact 
+            
             % Remove the stimulation artefact in every channel
             for channel = 1:size(data,1)                                   
                  data(channel,(stimart_start:stimart_stop)) = NaN;            % Make the period of the stimulation artefact as NaN.
@@ -45,11 +45,12 @@ for i = 1:size(dataBase,2)
              
                  data(channel, ((stimart_start - 40) : (stimart_stop + 40))) = Interpol_period;
                   
-%                  figure()
-%                  plot(dataBase(i).raw_data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
-%                  hold on
-%                  plot(data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
-%                  hold off
+                 figure()
+                 plot(dataBase(i).raw_data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
+                 hold on
+                 plot(data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
+                 hold off
+                 title(sprintf('%s, %s', dataBase(i).ch{channel}, dataBase(i).tb_events.electrical_stimulation_site{event}))
             end
          end        
     end

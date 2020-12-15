@@ -1,4 +1,5 @@
 function interobserverKappa(myDataPath)
+
 clc;
 files = dir(fullfile(myDataPath.CCEP_interObVar));
 
@@ -15,6 +16,7 @@ files = files(all(~cellfun(@isempty,struct2cell(files))));          % Remove all
 % Find unique run_labels
 uni_runlabel = unique({files.run_label});
 for run = 1: size(uni_runlabel,2)
+       
     for i = 1:size(files)
    
         % PRIOS study is rater2, REC2Stim is rater1.
@@ -28,6 +30,8 @@ for run = 1: size(uni_runlabel,2)
     
     N1_peak_R1 = rater1(run).ccep.checked  ;                        % Rater 1 already transformed to 1/0
     N1_peak_R2 = rater2(run).ccep_clin.n1_peak_sample_check;
+    R1_ori = rater1(run).ccep.n1_peak_sample;
+    R2_ori = rater2(run).ccep_clin.n1_peak_sample;
     
     % Determine whether the same stimulation pairs are used. 
     % Stimulation pairs that are 'extra' are not removed from the original
@@ -35,10 +39,19 @@ for run = 1: size(uni_runlabel,2)
     if size(N1_peak_R1,2) > size(N1_peak_R2,2)
        extra_rater1 = find(~ismember(rater1(run).ccep.cc_stimsets(:,1), rater2(run).ccep_clin.stimsets_avg(:,1))) ;
        N1_peak_R1(:,extra_rater1) = [];  
+       
+       % Also remove them in the original, because only the responses which
+       % were automatically detected were checked
+       R1_ori(:,extra_rater1) = [];                 
        rater1(run).ccep.cc_stimsets(extra_rater1,:) = [];
+       
     elseif size(N1_peak_R2,2) > size(N1_peak_R1,2)
         extra_rater2 =  find(~ismember(rater2(run).ccep_clin.stimsets_avg(:,1), rater1(run).ccep.cc_stimsets(:,1))) ;
         N1_peak_R2(:,extra_rater2) = []; 
+        
+        % Also remove them in the original, because only the responses which
+        % were automatically detected were checked
+        R2_ori(:,extra_rater2) = [];
         rater2(run).ccep_clin.stimsets_avg(extra_rater2,:) = [];
     end
     
@@ -46,18 +59,36 @@ for run = 1: size(uni_runlabel,2)
     if ~isequal(rater1(run).ccep.cc_stimsets(:,:) , rater2(run).ccep_clin.stimsets_avg(:,:))
         diff_stimp = find(rater1(run).ccep.cc_stimsets ~= rater2(run).ccep_clin.stimsets_avg);
         rater1(run).ccep.cc_stimsets(diff_stimp(1,:),:) = [];
-        N1_peak_R1(:,diff_stimp(1,:)) = [];  
+        N1_peak_R1(:,diff_stimp(1,:)) = []; 
+        R1_ori(:,diff_stimp(1,:)) = [];                 
 
+        % Also remove them for rater 2
         rater2(run).ccep_clin.stimsets_avg(diff_stimp(1,:),:) = [];
         N1_peak_R2(:,diff_stimp(1,:)) = []; 
+        R2_ori(:,diff_stimp(1,:)) = [];
 
-        
         % Check again
         if ~isequal(rater1(run).ccep.cc_stimsets(:,:) , rater2(run).ccep_clin.stimsets_avg(:,:))
             warning('Check the stimulation pairs since they are still not equal')
         end
-  end
-
+    end
+      
+    % Convert to zero and one to be able to check equality
+    R1_ori(~isnan(R1_ori)) = 1;                         % all non-NaNs are amplitudes, so N1s --> 1
+    R1_ori(isnan(R1_ori)) = 0; 
+    R2_ori(~isnan(R2_ori)) = 1;
+    R2_ori(isnan(R2_ori)) = 0;
+    
+    % Only the automatically detected ERs are checked
+    % Find the automatically detected ERs
+    if isequal(R1_ori, R2_ori)
+        auto_ERs = find(R1_ori == 1);                               
+        
+    else
+        warning('Matrix with automatically detected ERs is not equal')
+        diff_autodet = find(R2_ori~=R1_ori)
+    end
+    
     % Convert matrix with sample numbers to binary matrix
     N1_peak_R2(~isnan(N1_peak_R2)) = 1;     % all non-NaNs are amplitudes, so N1s --> 1
     N1_peak_R2(isnan(N1_peak_R2)) = 0;      % all NaNs are no N1s --> 0
@@ -66,10 +97,13 @@ for run = 1: size(uni_runlabel,2)
     N1_peak_R1 = N1_peak_R1(:);
     N1_peak_R2 = N1_peak_R2(:);
     
+    R1_auto_ER = N1_peak_R1(auto_ERs);
+    R2_auto_ER = N1_peak_R2(auto_ERs);
+    
     
     % Cohens kappa unweighted is used to determine the interobserver
     % variablity
-    C = confusionmat(N1_peak_R1, N1_peak_R2)                        % Convert to confusion matrix
+    C = confusionmat(R1_auto_ER, R2_auto_ER)                        % Convert to confusion matrix
     n = sum(C(:));                                                  % get total N
     C = C./n;                                                       % Convert confusion matrix counts to proportion of n
     r = sum(C,2);                                                   % row sum
@@ -87,7 +121,7 @@ for run = 1: size(uni_runlabel,2)
     % Find where dorien had 0 and i have 1, determine column nummer en row
     % nummer. Vind zo de elektrode en stimpair en die dan plotten in
     % pipeline01. 
-    diff_rating = num2cell(find(N1_peak_R1 ~= N1_peak_R2)) ;             % find where R1 and R2 are diffferent
+    diff_rating = num2cell(find(R1_auto_ER ~= R2_auto_ER)) ;             % find where R1 and R2 are diffferent
     num_elec = size(rater1(run).ccep.ch  ,1);                       % New stimpair after the number of electrodes
     
     stimp = 1;                                          % Stimpair_label
@@ -111,5 +145,6 @@ for run = 1: size(uni_runlabel,2)
     fileName = ['Different_ratings_',PRIOS_label,'_',REC2Stim_label,'.xlsx'];
     writetable(T  ,[targetFolder, fileName])
 
+    clearvars -except files myDataPath uni_runlabel
 end
 end

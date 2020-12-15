@@ -39,8 +39,6 @@ dataBase = filter_bedArt(dataBase);
 fprintf('Both runs of subject %s are filtered. \n',cfg.sub_labels{1})
 %% CCEP for SPES-clin stimulations
 % save all stimuli of clinical SPES
-%  dataBase_clin = struct;
-%  dataBase_prop = struct;
 
 for i = 1:size(dataBase,2)
     dataBase(i).task_name = dataBase(i).dataName(strfind(dataBase(i).dataName,'task-'):strfind(dataBase(i).dataName,'_run')-1); 
@@ -88,7 +86,7 @@ tt = dataBase_clin.tt;
 % check whether similar stimuli are present in the same stimulus pair
 figure('Position',[515,333,1034,707]); 
 
-chan = 3; stim=12;
+chan = 51; stim=4;
 tt(:,tt>-0.001 & tt<0.01) = NaN; 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -208,7 +206,7 @@ end
 % [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save propofol SPES
-fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_V2.mat'];
+fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop.mat'];
 ccep_prop = dataBase_prop.ccep;
 ccep_prop.stimchans_all = dataBase_prop.cc_stimchans_all;
 ccep_prop.stimchans_avg = dataBase_prop.cc_stimchans_avg;
@@ -234,7 +232,7 @@ if ~exist(targetFolder_clin, 'dir')
 end
 
 % save all stims
-fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_filt_V2.mat'];
+fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_check.mat'];
 ccep_clin = dataBase_clin.ccep;
 ccep_clin.stimchans_all = dataBase_clin.cc_stimchans_all;
 ccep_clin.stimchans_avg = dataBase_clin.cc_stimchans_avg;

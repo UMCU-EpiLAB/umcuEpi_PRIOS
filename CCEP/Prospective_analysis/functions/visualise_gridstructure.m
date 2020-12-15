@@ -101,13 +101,13 @@ figure1 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
     colormap(c);
     colorbar();
     
-     % Create the same colormap limits based on the highest protocol with the highest indegree
-    if max(agreement_parameter.indegreeN_Clin)>max(agreement_parameter.indegreeN_Prop)
-        caxis([0 max(agreement_parameter.indegreeN_Clin)]);
-    else
-        caxis([0 max(agreement_parameter.indegreeN_Prop)]);
-    end
-    
+%      % Create the same colormap limits based on the highest protocol with the highest indegree
+%     if max(agreement_parameter.indegreeN_Clin)>max(agreement_parameter.indegreeN_Prop)
+%         caxis([0 max(agreement_parameter.indegreeN_Clin)]);
+%     else
+%         caxis([0 max(agreement_parameter.indegreeN_Prop)]);
+%     end
+%     
     hold(axes1,'on')
     str_main = sprintf('sub-%s', subj{1});
     sgtitle(str_main)
@@ -118,7 +118,7 @@ figure1 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
  % Save figure
 outlabel=sprintf('sub-%s_indegree_ERstimp.jpg',...
     subj{1});
-path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
+path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Visualise Gridstructure/');
 if ~exist(path, 'dir')
     mkdir(path);
 end
@@ -127,7 +127,7 @@ saveas(gcf,[path,outlabel],'jpg')
 
 %% Plot the outdegree and the BC
 
-mode = {'Outdegree','BC'};
+mode = {'Outdegree','BC','Indegree'};
 
 for J = 1:size(mode,2)
     
@@ -141,6 +141,10 @@ for J = 1:size(mode,2)
     elseif strcmp(mode{J},'BC')
         par10 = (agreement_parameter.BCN_Clin)';
         par2 = (agreement_parameter.BCN_Prop)';
+        
+    elseif strcmp(mode{J},'Indegree')
+        par10 = (agreement_parameter.indegreeN_Clin)';
+        par2 = (agreement_parameter.indegreeN_Prop)';
     end
     
     
@@ -164,13 +168,13 @@ for J = 1:size(mode,2)
     colorbar();
     text(((topo.x)+0.2),topo.y,ccep_clin.ch, 'FontSize',8,'FontWeight','bold')
     
-    % Create the same colormap limits based on the highest protocol with
-    % the highest parameter value
-    if max(par10)>max(par2)
-        caxis([0 max(par10)]);
-    else
-        caxis([0 max(par2)]);
-    end
+%     % Create the same colormap limits based on the highest protocol with
+%     % the highest parameter value
+%     if max(par10)>max(par2)
+%         caxis([0 max(par10)]);
+%     else
+%         caxis([0 max(par2)]);
+%     end
     
     % 2 stims
     axes4 = axes('Parent',figure2,'Position',[0.04,0.07,0.9,0.4]);
@@ -198,16 +202,16 @@ for J = 1:size(mode,2)
     
     % Create the same colormap limits based on the highest protocol with
     % the highest parameter value
-    if max(par10)>max(par2)
-        caxis([0 max(par10)]);
-    else
-        caxis([0 max(par2)]);
-    end
+%     if max(par10)>max(par2)
+%         caxis([0 max(par10)]);
+%     else
+%         caxis([0 max(par2)]);
+%     end
     
     % Save figure
     outlabel=sprintf('sub-%s_%s.jpg',...
         subj{1},mode{J});
-    path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
+    path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Visualise Gridstructure/');
     
     if ~exist(path, 'dir')
         mkdir(path);
@@ -216,7 +220,10 @@ for J = 1:size(mode,2)
     
 end
 
-    
+  close all;
+  
+ 
+  
 
 
 %% ER's responses to specific stimulus

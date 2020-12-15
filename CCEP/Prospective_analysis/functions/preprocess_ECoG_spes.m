@@ -20,15 +20,15 @@ for subj = 1:size(dataBase,2)
 %% define artefact period - stimuli during an artefact become NaNs
 % This must be defined for all electrodes or for specified electrodes.
 
-elec_art = find(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));                % Find rows with artefact in them
-elec_art_all = find(strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all'));  % Find the artefacts which concern all electrodes
-elec_art_in_all = find(ismember(elec_art, elec_art_all));                               % done because notes like STIM_on also concern 'all'.
+    elec_art = find(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));                % Find rows with artefact in them
+    elec_art_all = find(strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all'));  % Find the artefacts which concern all electrodes
+    elec_art_in_all = find(ismember(elec_art, elec_art_all));                               % done because notes like STIM_on also concern 'all'.
 
-% Determine the start- and stop-moment of the artefact concerning all
-% electrodes
-ev_artefact_start = dataBase(subj).tb_events.sample_start(elec_art_in_all,:);
-ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
-   
+    % Determine the start- and stop-moment of the artefact concerning all
+    % electrodes
+    ev_artefact_start = dataBase(subj).tb_events.sample_start(elec_art_in_all,:);
+    ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
+
     if iscell(ev_artefact_start)
         ev_artefact_start = str2double(ev_artefact_start);
     end
@@ -249,14 +249,14 @@ ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
     dataBase(subj).max_stim = max_stim;
     
     %% Select epochs
- t = round(epoch_length*dataBase(subj).ccep_header.Fs);
- tt = (1:epoch_length*dataBase(subj).ccep_header.Fs)/dataBase(subj).ccep_header.Fs - epoch_prestim;
+    t = round(epoch_length*dataBase(subj).ccep_header.Fs);
+    tt = (1:epoch_length*dataBase(subj).ccep_header.Fs)/dataBase(subj).ccep_header.Fs - epoch_prestim;
 
-  % allocation
-   cc_epoch_sorted_all = NaN(size(dataBase(subj).data,1),dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t);
-   tt_epoch_sorted_all = NaN(dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t); 
+    % allocation
+    cc_epoch_sorted_all = NaN(size(dataBase(subj).data,1),dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t);
+    tt_epoch_sorted_all = NaN(dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t); 
 
-   for elec = 1:size(dataBase(subj).data,1)                    % for all channels 
+    for elec = 1:size(dataBase(subj).data,1)                    % for all channels 
        for ll = 1:size(dataBase(subj).cc_stimsets_all,1)       % for all epochs with > minimum number of stimuli (minstim)
 
            eventnum = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans_all{ll,1}, '-',dataBase(subj).cc_stimchans_all{ll,2}]));
