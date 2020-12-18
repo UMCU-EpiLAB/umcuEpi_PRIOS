@@ -83,7 +83,26 @@ for i=1:size(mode,2)
     newgroups = reshape(horzcat(groups,n)',size(groups,1)*2,1);
     rank.(['fig_sort_names_' mode{i}]) = vertcat({' '}, newgroups{:});
 end
-    
+ 
+% Sorted matrix based on stimpair number, so ranking isunsorted 
+for i=1:size(mode,2)
+    [~,order] = sortrows(rank.(['sort_' mode{i}])(:,1:2));
+    rank.(['unsort_' mode{i}]) = rank.(['sort_' mode{i}])(order,:);         
+end
+
+% If the order of the stimulation pairs is not equal, than the ranking
+% cannot be compared
+if ~isequal(rank.unsort_SPES_clin(:,1:2),rank.unsort_SPES_prop(:,1:2))
+    error('Sorting stimulus pairs is incorrect and led to unequal matrices in SPES-clin and SPES-prop')
+end
+
+
+% Test the hypothesis of NO correlation
+% When p <0.05, an rho is close to (-)1, rejection of the hypothesis that no correlation exists between the two columns
+[RHO_stmp,PVAL_stmp] = corr(rank.unsort_SPES_clin(:,4) , rank.unsort_SPES_prop(:,4) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
+fprintf('Spearman Corr between stimpair ranking of SPES-clin and SPES-prop gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
+
+
 figure('Position',[1074,4,519,1052]);
 cm = colormap(parula(max(rank.sort_SPES_clin(:,4))));
 colororder({'k','k'})
@@ -102,7 +121,13 @@ ylabel('order SPES-prop')
 
 xlim([1, 2])
 set(gca,'xtick',[])
-str_main = sprintf('sub-%s', SubjectName{1});
+    if PVAL_stmp <0.05
+       str_main = sprintf('%s, p < 0.05',SubjectName{1});
+    elseif PVAL_stmp <0.01
+        str_main = sprintf('%s, p < 0.01',SubjectName{1});
+    else
+        str_main = sprintf('sub-%s, p = %1.2f', SubjectName{1},PVAL_stmp);
+    end
 sgtitle(str_main)
 
 
@@ -123,24 +148,6 @@ if ~exist(path, 'dir')
     mkdir(path);
 end
 saveas(gcf,[path,outlabel],'jpg')
-
-
-% Sorted matrix based on stimpair number, so ranking isunsorted 
-for i=1:size(mode,2)
-    [~,order] = sortrows(rank.(['sort_' mode{i}])(:,1:2));
-    rank.(['unsort_' mode{i}]) = rank.(['sort_' mode{i}])(order,:);         
-end
-
-% If the order of the stimulation pairs is not equal, than the ranking
-% cannot be compared
-if ~isequal(rank.unsort_SPES_clin(:,1:2),rank.unsort_SPES_prop(:,1:2))
-    error('Sorting stimulus pairs is incorrect and led to unequal matrices in SPES-clin and SPES-prop')
-end
-
-% Test the hypothesis of NO correlation
-% When p <0.05, an rho is close to (-)1, rejection of the hypothesis that no correlation exists between the two columns
-[RHO_stmp,PVAL_stmp] = corr(rank.unsort_SPES_clin(:,4) , rank.unsort_SPES_prop(:,4) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
-fprintf('Spearman Corr between stimpair ranking of SPES-clin and SPES-prop gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
 
 
 %% Spearman correlation
@@ -198,6 +205,7 @@ statistics.p_stimp = PVAL_stmp;
 statistics.rho_stimp = RHO_stmp;
 statistics.p_ERsperStimp = p;        
 
+clear PVAL_stmp
         
 end       
 

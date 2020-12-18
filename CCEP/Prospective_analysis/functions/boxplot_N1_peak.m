@@ -88,11 +88,12 @@ fs = 1/(size(ccep_prop.tt,2)/4);                                        % Devide
     zero_mat = find(new_mat == 0);                                          % replace zero with NaN to avoid influence on the mean
     new_mat(zero_mat) = NaN;
     means =  median(new_mat,'omitnan');
+    Ns = sum(~isnan(new_mat(:,:)) ) ;                                       % Number of ERs
 
     % Create boxplot with the amplitude of SPES clin and SPES prop
     figure('Position',[205,424,1530,638]);
     % columnMeans = mean(new_mat, 1, 'omitnan');
-    grouporder = {'PRIOS01','','  PRIOS02**','','  PRIOS03**','','  PRIOS04','','  PRIOS05*','','  PRIOS06**',''};
+    grouporder = {'PRIOS01','','  PRIOS02**','','  PRIOS03**','','  PRIOS04','','  PRIOS05*','','  PRIOS06',''};
      
     violins = violinplot([new_mat],grouporder) ;
     for i = 1:2:size(new_mat,2)
@@ -101,19 +102,18 @@ fs = 1/(size(ccep_prop.tt,2)/4);                                        % Devide
     end
        
     ax = gca;
-    ax.XAxis.FontSize = 15;
+    ax.XAxis.FontSize = 12;
     ax.YAxis.FontSize = 12;
     ax.XAxis.FontWeight = 'bold';
     ax.YAxis.FontWeight = 'bold';
-    ax.XLabel.Position = [6.5, -7.4, -1];
+    ax.XLabel.Position = [6.5, -28.4, -1];
     
-
     title(sprintf('N1 Latency'),'FontSize', 15, 'FontWeight', 'bold')
     ylabel('Latency (milliseconds)','FontSize', 15, 'FontWeight', 'bold')
     
     % Plot the mean on the xaxis  
-    stringsz = [repmat('%2.1f,    ',1,size(means,2)-1),'%2.1f'];
-    xlabel(sprintf([stringsz],means))
+    stringsz = [repmat('n = %2.0f,    ',1,size(means,2)-1),'n = %2.0f'];
+    xlabel(sprintf([stringsz],Ns))
 
     legend([violins(1).ViolinPlot,violins(2).ViolinPlot], 'Clinical SPES','Propofol SPES','FontSize', 12, 'FontWeight', 'bold')
 
@@ -172,17 +172,17 @@ for subj = 1:size(dataBase,2)
         ymax = round(max(prop, [], 'all'),2);
         
         % PLot reference line when data is NOT significant
-        if p > 0.05
-            P = polyfit(clin, prop,1);
-            X = xmin : 0.1*xmax : xmax+(0.2*xmax);
-            Y = P(1)*X + P(2);
-
-            hold on
-            h=plot(X,Y);
-            hold off
-            h.LineWidth = 2;
-%                     legend(sprintf('%s',mode{mode_N1}),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)      
-        end
+%         if p > 0.05
+%             P = polyfit(clin, prop,1);
+%             X = xmin : 0.1*xmax : xmax+(0.2*xmax);
+%             Y = P(1)*X + P(2);
+% 
+%             hold on
+%             h=plot(X,Y);
+%             hold off
+%             h.LineWidth = 2;
+% %                     legend(sprintf('%s',mode{mode_N1}),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)      
+%         end
         
         xlim([xmin, xmax+2])
         ylim([ymin, ymax+5])
@@ -198,6 +198,33 @@ for subj = 1:size(dataBase,2)
             mkdir(path);
         end
         saveas(gcf,[path,outlabel],'jpg')
+        
+%% Determine the multiplication factor
+
+for subj = 1:size(dataBase,2)
+  M_Clin = means(1:2:end);
+  M_Prop = means(2:2:end);
+end
+
+
+Mult_factor(subj,1) = sum(M_Clin)/sum(M_Prop);
+T_N1(:,1) = means(1:2:end);
+T_N1(:,2) = means(2:2:end);
+
+for i = 1:size(T_N1,1)
+    T_N1(i,3) = T_N1(i,1)/T_N1(i,2);
+end
+
+% Make a table to facilitate reading the data
+Size_mat = (size(T_N1,1)+1);
+T_N1(Size_mat,1) = median(M_Clin);
+T_N1(Size_mat,2) = median(M_Prop);
+T_N1(Size_mat,3) = median(T_N1(:,3));
+
+variables = {'N1 clinical','N1 propofol','Mult-factor'};
+
+T_N1 = table(T_N1(:,1),T_N1(:,2),T_N1(:,3), 'VariableNames',variables,'RowNames',{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06','Medians'})
+
 
 end
     

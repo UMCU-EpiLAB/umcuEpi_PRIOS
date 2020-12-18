@@ -55,52 +55,58 @@ for run = 1: size(uni_runlabel,2)
         rater2(run).ccep_clin.stimsets_avg(extra_rater2,:) = [];
     end
     
-    % Check whether the stimpairs are equal in both ratings. 
-    if ~isequal(rater1(run).ccep.cc_stimsets(:,:) , rater2(run).ccep_clin.stimsets_avg(:,:))
-        diff_stimp = find(rater1(run).ccep.cc_stimsets ~= rater2(run).ccep_clin.stimsets_avg);
-        rater1(run).ccep.cc_stimsets(diff_stimp(1,:),:) = [];
-        N1_peak_R1(:,diff_stimp(1,:)) = []; 
-        R1_ori(:,diff_stimp(1,:)) = [];                 
-
-        % Also remove them for rater 2
-        rater2(run).ccep_clin.stimsets_avg(diff_stimp(1,:),:) = [];
-        N1_peak_R2(:,diff_stimp(1,:)) = []; 
-        R2_ori(:,diff_stimp(1,:)) = [];
-
-        % Check again
-        if ~isequal(rater1(run).ccep.cc_stimsets(:,:) , rater2(run).ccep_clin.stimsets_avg(:,:))
-            warning('Check the stimulation pairs since they are still not equal')
-        end
-    end
+%     % Check whether the stimpairs are equal in both ratings. 
+%     if ~isequal(rater1(run).ccep.cc_stimsets(:,:) , rater2(run).ccep_clin.stimsets_avg(:,:))
+%         diff_stimp = find(rater1(run).ccep.cc_stimsets ~= rater2(run).ccep_clin.stimsets_avg);
+%         rater1(run).ccep.cc_stimsets(diff_stimp(1,:),:) = [];
+%         N1_peak_R1(:,diff_stimp(1,:)) = []; 
+%         R1_ori(:,diff_stimp(1,:)) = [];                 
+% 
+%         % Also remove them for rater 2
+%         rater2(run).ccep_clin.stimsets_avg(diff_stimp(1,:),:) = [];
+%         N1_peak_R2(:,diff_stimp(1,:)) = []; 
+%         R2_ori(:,diff_stimp(1,:)) = [];
+% 
+%         % Check again
+%         if ~isequal(rater1(run).ccep.cc_stimsets(:,:) , rater2(run).ccep_clin.stimsets_avg(:,:))
+%             warning('Check the stimulation pairs since they are still not equal')
+%         end
+%     end
       
+    % Convert matrix with sample numbers to binary matrix
+    N1_peak_R2(~isnan(N1_peak_R2)) = 1;     % all non-NaNs are amplitudes, so N1s --> 1
+    N1_peak_R2(isnan(N1_peak_R2)) = 0;      % all NaNs are no N1s --> 0
+   
     % Convert to zero and one to be able to check equality
     R1_ori(~isnan(R1_ori)) = 1;                         % all non-NaNs are amplitudes, so N1s --> 1
     R1_ori(isnan(R1_ori)) = 0; 
     R2_ori(~isnan(R2_ori)) = 1;
     R2_ori(isnan(R2_ori)) = 0;
-    
+   
     % Only the automatically detected ERs are checked
     % Find the automatically detected ERs
-    if isequal(R1_ori, R2_ori)
+    if isequaln(R1_ori, R2_ori)
         auto_ERs = find(R1_ori == 1);                               
         
     else
-        warning('Matrix with automatically detected ERs is not equal')
-        diff_autodet = find(R2_ori~=R1_ori)
+        diff_autodet = find(R2_ori~=R1_ori);
+        R1_ori(diff_autodet) = NaN;
+        R2_ori(diff_autodet) = NaN;
+        % Test equallity again
+        if isequaln(R1_ori, R2_ori)
+            auto_ERs = find(R1_ori == 1); 
+        else
+             warning('Matrix with automatically detected ERs is not equal')
+        end
     end
-    
-    % Convert matrix with sample numbers to binary matrix
-    N1_peak_R2(~isnan(N1_peak_R2)) = 1;     % all non-NaNs are amplitudes, so N1s --> 1
-    N1_peak_R2(isnan(N1_peak_R2)) = 0;      % all NaNs are no N1s --> 0
-    
+         
     % Convert matrix to array
     N1_peak_R1 = N1_peak_R1(:);
     N1_peak_R2 = N1_peak_R2(:);
     
     R1_auto_ER = N1_peak_R1(auto_ERs);
     R2_auto_ER = N1_peak_R2(auto_ERs);
-    
-    
+       
     % Cohens kappa unweighted is used to determine the interobserver
     % variablity
     C = confusionmat(R1_auto_ER, R2_auto_ER)                        % Convert to confusion matrix
@@ -111,35 +117,48 @@ for run = 1: size(uni_runlabel,2)
     expected = r*s;                                                 % expected proportion for random agree
     po = sum(diag(C));                                              % Observed proportion correct
     pe = sum(diag(expected));                                       % Proportion correct expected
-    kappa = (po-pe)/(1-pe);                                  % Cohen's kappa
+    kappa = (po-pe)/(1-pe);                                         % Cohen's kappa
   
     REC2Stim_label = rater1(run).ccep.dataName(strfind(rater1(run).ccep.dataName,'sub-')+4 : strfind(rater1(run).ccep.dataName,'ses-')-2);
     PRIOS_label = rater2(run).ccep_clin.dataName(strfind(rater2(run).ccep_clin.dataName,'sub-') +4 :strfind(rater2(run).ccep_clin.dataName,'ses-')-2);
     
     fprintf('Cohens kappa between Rater1 and Rater2 for %s/%s is k=%1.4f \n ', REC2Stim_label, PRIOS_label, kappa)
     
-    % Find where dorien had 0 and i have 1, determine column nummer en row
-    % nummer. Vind zo de elektrode en stimpair en die dan plotten in
-    % pipeline01. 
-    diff_rating = num2cell(find(R1_auto_ER ~= R2_auto_ER)) ;             % find where R1 and R2 are diffferent
-    num_elec = size(rater1(run).ccep.ch  ,1);                       % New stimpair after the number of electrodes
+    %% Find where R1 and R2 have differences  
+     
+    % Find where R1 has an one/zero
+    elec_one_R1 = auto_ERs ;
+    elec_one_R1(find(R1_auto_ER == 0)) = [];              % Remain with the electrodes with a one
+        
+    % Find where R2 has an one/zero
+    elec_one_R2 = auto_ERs ;
+    elec_one_R2(find(R2_auto_ER == 0)) = [];              % Remain with the electrodes with a one
     
-    stimp = 1;                                          % Stimpair_label
+        
+    diff_rating = find(~ismember(elec_one_R1 , elec_one_R2)) ;             % find where R1 and R2 are diffferent
+    R1_only = elec_one_R1(diff_rating);                                    % Determine the electrode location of ERs only present in R1 check
+    
+    
+    num_elec = size(rater1(run).ccep.ch  ,1);                              % New stimpair after the number of electrodes
+    
+    stimp = 1;                                                             % Stimpair_label
     for i = 1:size(diff_rating,1)
-       if  (diff_rating{i}/num_elec)>1                            % For stimpairs >1
-           stimp = ceil(diff_rating{i}/num_elec);
+       if  (R1_only(i)/num_elec)>1                                     % For stimpairs >1
+           stimp = ceil(R1_only(i)/num_elec);
           
-           diff_rating(i,2) = rater1(run).ccep.ch(diff_rating{i}-((stimp-1)*num_elec));
-           diff_rating(i,3:4) = num2cell(rater2(run).ccep_clin.stimsets_avg(stimp,1:2));
+           diff_rat{i,1} = R1_only(i)-((stimp-1)*num_elec);                          % Electrode number
+           diff_rat(i,2) = rater1(run).ccep.ch(R1_only(i)-((stimp-1)*num_elec));     % Electrode name
+           diff_rat(i,3:4) = num2cell(rater2(run).ccep_clin.stimsets_avg(stimp,1:2));    % Stimpair name
 
        else % for stimpair 1
-           diff_rating(i,2) = rater1(run).ccep.ch(diff_rating{i});
-           diff_rating(i,3:4) = num2cell(rater2(run).ccep_clin.stimsets_avg(stimp,1:2));
+           diff_rat{i,1} = R1_only(i);                          % Electrode number
+           diff_rat(i,2) = rater1(run).ccep.ch(R1_only(i));
+           diff_rat(i,3:4) = num2cell(rater2(run).ccep_clin.stimsets_avg(stimp,1:2));
        end
     end
     
     varNames = {'nummer','Channel','StimElec1','StimpElec2'};
-    T = table(diff_rating(:,1),diff_rating(:,2),diff_rating(:,3),diff_rating(:,4), 'VariableNames',varNames);
+    T = table(diff_rat(:,1),diff_rat(:,2),diff_rat(:,3),diff_rat(:,4), 'VariableNames',varNames);
      
     targetFolder = [myDataPath.CCEP_interObVar];
     fileName = ['Different_ratings_',PRIOS_label,'_',REC2Stim_label,'.xlsx'];

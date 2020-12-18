@@ -45,12 +45,12 @@ for i = 1:size(dataBase,2)
              
                  data(channel, ((stimart_start - 40) : (stimart_stop + 40))) = Interpol_period;
                   
-                 figure()
-                 plot(dataBase(i).raw_data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
-                 hold on
-                 plot(data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
-                 hold off
-                 title(sprintf('%s, %s', dataBase(i).ch{channel}, dataBase(i).tb_events.electrical_stimulation_site{event}))
+%                  figure()
+%                  plot(dataBase(i).raw_data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
+%                  hold on
+%                  plot(data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
+%                  hold off
+%                  title(sprintf('%s, %s', dataBase(i).ch{channel}, dataBase(i).tb_events.electrical_stimulation_site{event}))
             end
          end        
     end

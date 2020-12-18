@@ -21,7 +21,6 @@ for n = 1:size(names,2)
 end
 
 % Load data (also possible for multiple runs)
-
 % dataBase = struct;
 for R = 1:size(strings,2)
     cfg.run_label = strings(R);
@@ -86,7 +85,7 @@ tt = dataBase_clin.tt;
 % check whether similar stimuli are present in the same stimulus pair
 figure('Position',[515,333,1034,707]); 
 
-chan = 51; stim=4;
+chan = 27; stim=12;
 tt(:,tt>-0.001 & tt<0.01) = NaN; 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -108,35 +107,34 @@ xlabel('time (s)')
 xlim([-.2 0.5])
 
 
-figure()
-plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,1:6,:))','Color','r','LineWidth',1)
+figure('Position',[391,61,1076,712])
+chan = 34; stim=8;
+plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[1,0,0,0.4],'LineWidth',1)
 hold on
-plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,7:12,:))','Color','b','LineWidth',1)
- hold on
- plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
-hold off
-title('SPES prop')
+plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2.5)
+hold on
+title(sprintf('SPES clin, %s, %s, %s',dataBase(1).sub_label, dataBase_clin.stimpnames_avg{stim},  dataBase_clin.ch{chan}))
 xlabel('time (s)')
-xlim([-0.1 0.3])
-
-% figure()
+xlim([-0.02 0.11])
+plot(0.06055,-207.1,'o','MarkerEdgeColor','b','MarkerFaceColor','b')
+hold on 
+% plot(0.005848,-274.8,'o','MarkerEdgeColor','g','MarkerFaceColor','g')
+hold off
+% ylim([-400 350])
+% ylabel('Potential \muV')
+% h1 = line([0 0],[-400 350]);
+% h2 = line([0.009 0.009],[-400 350]);
+% patch([0 0.009 0.009 0],[-400 -400 350 350],[0.6,0.2,0.2])
+% alpha(0.1)                % set patches transparency to 0.3
 % 
-% for i=1:size(dataBase_prop.cc_epoch_sorted_select_avg,3)
-%     if i < 7          
-%         plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,i,:)) + 500*i,'LineWidth',1,'Color','r');
-%         hold on
-%     else 
-%         plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,i,:)) + 500*i,'LineWidth',1,'Color','b');
-%         hold on
-%     end
-%     
+% 
+% % Save figure
+% outlabel=('N1_latency_interObs(6).jpg');
+% path = fullfile(myDataPath.CCEP_interObVar,'N1_latency_interOb/');
+% if ~exist(path, 'dir')
+%     mkdir(path);
 % end
-% xlim([-0.1 0.3])
-% ylabel('Average per electrodes (mV)')
-% xlabel('time (s)')
-% title(sprintf('SPES prop, %s, %s, %s',dataBase(1).sub_label, dataBase_prop.stimpnames_avg{stim},  dataBase_prop.ch{chan}))    
-% set(gca,'YTick',3000,'YTickLabel',dataBase_prop.ch{chan}) ;
-
+% saveas(gcf,[path,outlabel],'jpg')
 
 
 %% Use the automatic N1 detector to detect ccep 
@@ -145,6 +143,38 @@ dataBase_clin = detect_n1peak_ECoG_ccep(dataBase_clin,cfg);
 dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);
 
 disp('Detection of ERs is completed')
+
+%% Interobserver differnence check
+% script to determine the latency of the N1's which are incorrectly
+% rejected
+dataBase = check_interobs(dataBase_clin, myDataPath);
+
+% Find the number of samples after the stimulation artefact
+% 9 ms is 19 samples
+% Fs = 2048 
+Latency_interOb = dataBase.ccep.n1_peak_sample_check_check-(2*2048);            % To samples after stimulation artefact
+Num_interOb = find(~isnan(Latency_interOb));
+Latency_interOb(isnan(Latency_interOb)) = [];
+numel(find(Latency_interOb<19))
+
+% Latencies of detector detected ERs
+Latency_detector = dataBase.ccep.n1_peak_sample-(2*2048);
+Latency_detector = Latency_detector(Num_interOb)';
+
+figure()
+boxplot([Latency_interOb' Latency_detector'],'Notch','on', ...
+        'Labels',{'Checked Latencies N1','Detector latencies N1'})
+ylabel('Number of samples after stimulation artefact')
+ 
+% Save
+outlabel=('N1_latency_interObs.jpg');
+path = fullfile(myDataPath.CCEP_interObVar,'N1_latency_interOb/');
+if ~exist(path, 'dir')
+    mkdir(path);
+end
+saveas(gcf,[path,outlabel],'jpg')
+
+
 
 %% Visually check detected cceps
 % Check the average signal in which an ER was detected
@@ -206,7 +236,7 @@ end
 % [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save propofol SPES
-fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop.mat'];
+fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_check2.mat'];
 ccep_prop = dataBase_prop.ccep;
 ccep_prop.stimchans_all = dataBase_prop.cc_stimchans_all;
 ccep_prop.stimchans_avg = dataBase_prop.cc_stimchans_avg;

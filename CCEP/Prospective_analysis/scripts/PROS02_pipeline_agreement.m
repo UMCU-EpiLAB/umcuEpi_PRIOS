@@ -88,8 +88,49 @@ for subj = 1:size(dataBase,2)
 end
 
 %% Visualise the agreement in a scatter plot
+
     scatter_networkPar(dataBase,myDataPath)
 
+%% Determine multiplication factor of the network parameters    
+% Data is not normally distributed therefore the median is calculated
+
+for subj = 1:size(dataBase,2)
+   measure = {'ERs per stimp','Indegree','Outdegree','BC'};
+
+    for n=1:size(measure,2)
+        
+        if strcmp(measure{n},'ERs per stimp')
+             M_Clin = median(dataBase(subj).agreement_parameter.ERs_stimpClin,'omitnan');
+             M_Prop = median(dataBase(subj).agreement_parameter.ERs_stimpProp,'omitnan');       
+        elseif strcmp(measure{n},'Indegree')
+             M_Clin = median(dataBase(subj).agreement_parameter.indegreeN_Clin,'omitnan');
+             M_Prop = median(dataBase(subj).agreement_parameter.indegreeN_Prop,'omitnan');
+        elseif strcmp(measure{n},'Outdegree')
+             M_Clin = median(dataBase(subj).agreement_parameter.outdegreeN_Clin,'omitnan');
+             M_Prop = median(dataBase(subj).agreement_parameter.outdegreeN_Prop,'omitnan');
+        elseif strcmp(measure{n},'BC')
+             M_Clin = median(dataBase(subj).agreement_parameter.BCN_Clin,'omitnan');
+             M_Prop = median(dataBase(subj).agreement_parameter.BCN_Prop,'omitnan');
+        end
+    
+        
+        Mult_factor(subj,n) = M_Clin/M_Prop;
+
+        
+    end
+end
+
+T = table(Mult_factor(:,1),Mult_factor(:,2),Mult_factor(:,3),Mult_factor(:,4), 'VariableNames',measure,'RowNames',{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06'});
+        
+        
+    for n=1:size(measure,2)
+
+        Mult = sum(Mult_factor(:,n)) / 6;
+        
+        fprintf('Multiplication factor of the %s of the SPES-clin and SPES-prop = %1.1f \n', measure{n}, Mult);
+
+    end
+    
 %% load electrodes positions (xlsx/electrodes.tsv)
 % database (ccep10) is only used for channels and stimpairs and these are
 % equal for 2 and 10, so does not matter which database is used.
@@ -112,20 +153,13 @@ for subj = 1:size(dataBase,2)
     ERs_tot(subj,prop_colm) = sum(sum(~isnan(dataBase(subj).ccep_prop.n1_peak_amplitude_check)));
         
     priosLab = extractAfter(dataBase(subj).sub_label,'sub-');
-
-    if dataBase(subj).statistics.p_ERsperStimp <0.05
-        categorie{:,subj} = sprintf('%s, p<0.05',priosLab);
-    elseif dataBase(subj).statistics.p_ERsperStimp <0.01
-        categorie{:,subj} = sprintf('%s, p<0.01',priosLab);
-    else
-        categorie{:,subj} = sprintf('%s, p=%1.3f',priosLab,dataBase(subj).statistics.p_ERsperStimp);
-    end
         
 end
 
-
-X = categorical(categorie);
-b =  bar(ax1,X,ERs_tot,1);
+x = {'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06'};
+ 
+X = categorical(x);
+b =   bar(ax1,X,ERs_tot,1);         % bar(ax1,X,ERs_tot,1);
 
 for i = 1:2:size(ERs_tot,2)
         b([i]).FaceColor(:) =  [0.5843 0.8157 0.9882];          %[0 0 1]
@@ -133,8 +167,7 @@ for i = 1:2:size(ERs_tot,2)
 end
  
 
-% Misschien 1:2:12 met alignment left 
-% en 2:2:12 met alignment right
+% Place the Number of ERs next to the column
 for i = 1:2:12
     xtips1 = b(i).XEndPoints;
     ytips1 = b(i).YEndPoints;
