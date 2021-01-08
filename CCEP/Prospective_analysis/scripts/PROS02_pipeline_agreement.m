@@ -84,12 +84,22 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).agreement_parameter = agreement_parameters(dataBase(subj).agreement, ...
         dataBase(subj).ccep_prop, dataBase(subj).ccep_clin, myDataPath);
     
-    dataBase(subj).statistics = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep_clin);
+    [dataBase(subj).statistics, dataBase(subj).rank] = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep_clin);
 end
 
-%% Visualise the agreement in a scatter plot
+%% Create Violinplot of the ranking of the number of ERs per stimulation pair. 
+
+    ERs_perStimp_violin(dataBase,myDataPath)   
+
+
+%% Visualise the agreement in a scatter plot of the absolute values
 
     scatter_networkPar(dataBase,myDataPath)
+
+%% Scatter rankings
+
+    scatter_ranking(dataBase, myDataPath)
+
 
 %% Determine multiplication factor of the network parameters    
 % Data is not normally distributed therefore the median is calculated
@@ -121,12 +131,10 @@ for subj = 1:size(dataBase,2)
 end
 
 T = table(Mult_factor(:,1),Mult_factor(:,2),Mult_factor(:,3),Mult_factor(:,4), 'VariableNames',measure,'RowNames',{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06'});
-        
-        
+                
     for n=1:size(measure,2)
 
         Mult = sum(Mult_factor(:,n)) / 6;
-        
         fprintf('Multiplication factor of the %s of the SPES-clin and SPES-prop = %1.1f \n', measure{n}, Mult);
 
     end

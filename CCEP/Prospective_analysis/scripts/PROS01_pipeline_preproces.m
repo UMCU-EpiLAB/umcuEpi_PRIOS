@@ -108,10 +108,10 @@ xlim([-.2 0.5])
 
 
 figure('Position',[391,61,1076,712])
-chan = 34; stim=8;
-plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[1,0,0,0.4],'LineWidth',1)
-hold on
-plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2.5)
+chan = 5; stim=1;
+% plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[1,0,0,0.4],'LineWidth',1)
+% hold on
+plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2.5)
 hold on
 title(sprintf('SPES clin, %s, %s, %s',dataBase(1).sub_label, dataBase_clin.stimpnames_avg{stim},  dataBase_clin.ch{chan}))
 xlabel('time (s)')
@@ -120,12 +120,12 @@ plot(0.06055,-207.1,'o','MarkerEdgeColor','b','MarkerFaceColor','b')
 hold on 
 % plot(0.005848,-274.8,'o','MarkerEdgeColor','g','MarkerFaceColor','g')
 hold off
-% ylim([-400 350])
-% ylabel('Potential \muV')
-% h1 = line([0 0],[-400 350]);
-% h2 = line([0.009 0.009],[-400 350]);
-% patch([0 0.009 0.009 0],[-400 -400 350 350],[0.6,0.2,0.2])
-% alpha(0.1)                % set patches transparency to 0.3
+ylim([-400 350])
+ylabel('Potential \muV')
+h1 = line([0 0],[-400 350]);
+h2 = line([0.009 0.009],[-400 350]);
+patch([0 0.009 0.009 0],[-400 -400 350 350],[0.6,0.2,0.2])
+alpha(0.1)                % set patches transparency to 0.3
 % 
 % 
 % % Save figure
@@ -144,7 +144,7 @@ dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);
 
 disp('Detection of ERs is completed')
 
-%% Interobserver differnence check
+%% Interobserver difference check
 % script to determine the latency of the N1's which are incorrectly
 % rejected
 dataBase = check_interobs(dataBase_clin, myDataPath);

@@ -87,15 +87,20 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).agreement_parameter = agreement_parameters(dataBase(subj).agreement, ...
         dataBase(subj).ccep2, dataBase(subj).ccep10);
     
-    dataBase(subj).statistics = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep10);
+    [dataBase(subj).statistics,dataBase(subj).rank] = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep10);
 end
 
 
-%% Scatter plot of the network parameters
-% function corrplot cannot be used because I don't have the Econometrics
-% Toolbox, though refline also works perfectly.
+%% Scatter plot of absolute values per network parameters
+
 close all
 scatter_networkPar(dataBase, myDataPath)
+
+
+%% Scatter plot of the rankings of the network parameters
+
+scatter_ranking(dataBase, myDataPath)
+
 
 %% Load electrodes positions (xlsx/electrodes.tsv)
 plot_fig = 'n';                 % 'n' when you don't want all ER responses per stim, and the SOZ to be plot
