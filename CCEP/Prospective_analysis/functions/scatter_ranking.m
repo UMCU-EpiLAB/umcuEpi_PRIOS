@@ -4,8 +4,7 @@ mode = {'ERs evoked per stimulation pair','Indegree','Outdegree','Betweenness Ce
 
 for J = 1:size(mode,2)
 
-   figure('Position',[302,17,1110,1039])
-
+   fig = figure('Position',[302,17,1110,1039]);
 
     for i = 1:size(dataBase,2)
        if strcmp(mode{J},'ERs evoked per stimulation pair')
@@ -40,17 +39,13 @@ for J = 1:size(mode,2)
        
         subplot(size(dataBase,2),1,i);
         scatter(clin(~idx_nan)  , prop(~idx_nan) ,'*' )
-        ylabel({'Place on ranking';'SPES-prop'}, 'FontSize',11)
-        xlabel("Place on ranking for SPES-Clin",'FontSize',11)
+        % Change fontsize
+        ax = gca;
+        ax.XAxis.FontSize = 14;    ax.YAxis.FontSize = 14;
         title(sprintf('%s, p =  %1.3f', dataBase(i).sub_label, pval))
-%         legend(sprintf('%s',mode{J}),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',11)
-%         ax = gca;
-%         ax.YAxis.FontSize = 10;
-%         ax.XAxis.FontSize = 10;     
+    
         xmin = min(clin(~idx_nan));
-        xmax = max(clin(~idx_nan));
-        
-         
+        xmax = max(clin(~idx_nan)); 
            
         if pval < 0.05
             [P,S] = polyfit(clin(~idx_nan),prop(~idx_nan),1);
@@ -63,8 +58,10 @@ for J = 1:size(mode,2)
             % Plot polyfit throught data points
             plot(clin(~idx_nan),y_fit,'Color',[0.8,0.2,0.2],'LineWidth',2)
             hold on
-            ylabel({'Place on ranking';'SPES-prop'}, 'FontSize',11)
-            xlabel("Place on ranking for SPES-Clin",'FontSize',11)
+            % Change fontsize
+            ax = gca;
+            ax.XAxis.FontSize = 14;    ax.YAxis.FontSize = 14;                      
+
             % Plot conficence interval as a line
 %             plot(clin, y_fit-2*delta, 'm--', clin, y_fit+2*delta,'--','color',[0.6,0.1,0.2,0.8])
 
@@ -78,14 +75,23 @@ for J = 1:size(mode,2)
             Filled_CI = patch([min(clin),max(clin),max(clin),min(clin)], [min(y_fit-2*delta),max(y_fit-2*delta),max(y_fit+2*delta), min(y_fit+2*delta)],[0.1,0.2,0.2]);
             alpha(0.06)                % set patches transparency to 0.
             Filled_CI.EdgeAlpha = 0;
-%             title(sprintf('%s, p = %1.3f', dataBase(i).sub_label,pval));
            
         end
         xlim([xmin xmax])
        
-       % Create main title without decreasing the subplots sizes
-        annotation(gcf,'textbox',[0.32 0.95 0.35 0.043],'VerticalAlignment','middle','String',sprintf('%s',mode{J}),'HorizontalAlignment','center','FontWeight','bold','FontSize',15,'FitBoxToText','off','EdgeColor','none');
-        
+   % Create main title without decreasing the subplots sizes
+    annotation(gcf,'textbox',[0.32 0.95 0.35 0.043],'VerticalAlignment','middle','String',sprintf('%s',mode{J}),'HorizontalAlignment','center','FontWeight','bold','FontSize',15,'FitBoxToText','off','EdgeColor','none');
+
+   %Create one main x- and y-label
+    han=axes(fig,'visible','off'); 
+    han.YLabel.Visible='on';
+    han.YLabel.Position = [-0.0464    0.5000         0];
+    ylabel(han,{'Rank SPES-prop'}, 'FontSize',17,'fontweight','bold')
+    
+    han.XLabel.Visible='on';
+    xlabel(han,{'Rank SPES-clin'}, 'FontSize',17,'fontweight','bold')
+
+
     end
     
     % Save figure

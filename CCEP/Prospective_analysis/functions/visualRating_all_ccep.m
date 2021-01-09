@@ -22,16 +22,11 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
         
     for chan =1 :size(dataBase.cc_epoch_sorted_avg,1)
         
-%         if ~isnan(dataBase.ccep.n1_peak_sample(chan,stimp))
-            % figure with left the epoch, and right zoomed in
             H=figure(1);
             H.Units = 'normalized';
             H.Position = [0.13 0.31 0.77 0.7];
-            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));                                
-            this_plot(:,tt>-0.001 & tt<0.01) = NaN;            
-            
+            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));                                          
             this_plot_avg = squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:));
-            this_plot_avg(tt>-0.001 & tt<0.01) = NaN;                      
                
             subplot(1,2,1)
             plot(tt,this_plot,':r','linewidth',1);
@@ -67,8 +62,13 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             ylim([-750 750])
             title('Zoomed average signal')
             xlabel('Time (s)')
-            ylabel('Voltage (uV)')
-            
+            ylabel('Potential (\muV)')
+                        
+            % Create a patch for the -1/5:9 ms interval in which no
+            % physiological activity can be measured.
+            patch([0 0.009 0.009 0],[-750 -750 750 750],[0.6,0.2,0.2],'EdgeAlpha',0)
+            alpha(0.2) 
+                        
             currkey = 0;
             fprintf('When a blue dot is already shown, press y/n. No ER, press n, When ER, select the correct N1 and press enter. \n')
             

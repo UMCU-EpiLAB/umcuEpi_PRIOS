@@ -7,31 +7,34 @@ SubjectName = extractBetween(ccep_clin.dataName,'ieeg/sub-','_ses-1_');
 ER_stimpClin = agreement_parameter.ERs_stimpClin;
 ER_stimpProp = agreement_parameter.ERs_stimpProp;
  
-%NorDisClin = lillietest(ER_stimpClin);                  % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected 
-%NorDisProp = lillietest(ER_stimpProp);
- 
-% Check for monotonic relation
+% % Test the distribution
+% % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected 
+% NorDisClin = lillietest(ER_stimpClin);                  
+% NorDisProp = lillietest(ER_stimpProp);
+
+% % Check for normal distribution
+% % Normal distributed data contains data along the reference line
+% figure(1)
+% subplot(2,1,1)
+% normplot(ER_stimpClin)                                
+% subplot(2,1,2)
+% normplot(ER_stimpProp) 
+
+% % Check for monotonic relation
 % figure(2)
 % scatter(ER_stimpClin,ER_stimpProp)
 % refline
-%  
-% Check for normal distribution
-% figure(1)
-% subplot(2,1,1)
-% normplot(ER_stimpClin)                                % normal distribution is datapoints along the reference line
-% subplot(2,1,2)
-% normplot(ER_stimpProp)
 
-% Use the Wilcoxon Signed rank test for all patients since the larger part
+% Use the Wilcoxon Signed rank test for all patients when the larger part
 % of the population is not normally distributed.
 % Wilcoxon tests the null hypothesis that data in x and y are samples from continuous distributions with equal medians
 % So significant value indicates a significant difference between 2 parameters
 p = signrank(ER_stimpClin, ER_stimpProp) ;           
 
 if p<0.05
-    fprintf('Wilcoxon signed rank test between the number of ERs evoked in SPES-clin and SPES-prop gives p-value = %1.4f. This means that there is a significant difference between the two protocols for %s \n', p, SubjectName{1});
+    fprintf('Wilcoxon signed rank test for the number of ERs evoked gives p-value = %1.4f. There is a significant difference for %s \n', p, SubjectName{1});
 else
-    fprintf('Wilcoxon signed rank test between the number of ERs evoked in SPES-clin and SPES-prop gives p-value = %1.4f. This means that there is NO significant difference between the two protocols for %s \n', p, SubjectName{1});
+    fprintf('Wilcoxon signed rank test between the number of ERs evoked gives p-value = %1.4f. There is NO significant difference for %s \n', p, SubjectName{1});
 end
      
 %% Spearman test for ranking of stimpairs
@@ -196,7 +199,7 @@ end
 
 fprintf('------------ NEXT PATIENT ------------\n')
 
- % Write to variable
+% Write to struct
 statistics.p_BC = PVAL.BC;
 statistics.rho_BC = RHO.BC;
 statistics.p_indegree= PVAL.indegree;

@@ -1,11 +1,12 @@
 function dataBase = filter_bedArt(dataBase)
+% Filter the data to remove noise
+% Filtering is preceded by removal of the stimulation artefact. This is
+% done with interpolation with the points around the stimulation artefact.
+% The stimulation artefact interval is [-1.5 ms : 9 ms] interval which is
+% caused by the saturation effect induced by the amplifier.
 
-% Filter
 Fs = dataBase(1).ccep_header.Fs;
 Fn = Fs/2;
-% epoch_length = cfg.epoch_length;         
-% epoch_prestim = cfg.epoch_prestim;
-% tt = (1:epoch_length*Fs) / Fs - epoch_prestim;
 
 % Filters: Butterworth, 4th order
 [b50,a50] =butter(4,[49/Fn 51/Fn],'stop');
@@ -13,7 +14,7 @@ Fn = Fs/2;
 [b110,a110] = butter(4,[108/Fn 112/Fn], 'stop');
 [bP,aP] = butter(4,120/Fn,'low');
  
-% fvtool(b36,a36)
+% fvtool(b36,a36)               % Check the effect of the filter
 % fvtool(bP,aP)
 
 % Remove all stimulation artefacts. 
@@ -23,14 +24,13 @@ for i = 1:size(dataBase,2)
     
     for event = 1:size(dataBase(i).tb_events,1)
          if strcmp(dataBase(i).tb_events.trial_type(event), 'electrical_stimulation')
-             % To remove the stimulation artefact = nr_samples = t_stimart/Ts
-      %%%% Verslag Dorien zegt 19 samples!!!!
-             % Ts = 1/Fs = 0.0005 sec
-             % t_stimart = 0.02 sec
-             % nr_samples = 0.02/0.0005 = 40 samples
              
-            stimart_start = dataBase(i).tb_events.sample_start(event) - 3;       % Stim_start is almost correctly the start time of the stimulation artefact
-            stimart_stop =  dataBase(i).tb_events.sample_start(event) +19;       % D. van Blooijs studied in her thesis that 19 samples are sufficient to mark the stimulation artefact 
+            % The [-1.5 ms : 9 ms] interval surrounding the stimulus was removed using interpolation
+            % to avoid incorrect filtering becuase of the saturation effect induced by the amplifier 
+            % (the stimulation artefact) @VanBlooijs2015, @VantKlooster2011
+            
+            stimart_start = dataBase(i).tb_events.sample_start(event) - 3;       
+            stimart_stop =  dataBase(i).tb_events.sample_start(event) +19;       
             
             % Remove the stimulation artefact in every channel
             for channel = 1:size(data,1)                                   
@@ -45,26 +45,13 @@ for i = 1:size(dataBase,2)
              
                  data(channel, ((stimart_start - 40) : (stimart_stop + 40))) = Interpol_period;
                   
-%                  figure()
-%                  plot(dataBase(i).raw_data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
-%                  hold on
-%                  plot(data(channel, ((stimart_start - 40) : (stimart_stop + 40))));
-%                  hold off
-%                  title(sprintf('%s, %s', dataBase(i).ch{channel}, dataBase(i).tb_events.electrical_stimulation_site{event}))
             end
          end        
     end
-    
-    % plot the whole signal without stimulation artefacts
+          
+%   % plot the whole signal without stimulation artefacts
 %     figure()
-%     plot(dataBase(i).raw_data(ch, ((stimart_start - 2040) : (stimart_start +2040))))
-%     title('Whole signal with and without the stimulation artefacts')
-%     xlabel('time (samples')
-%     ylabel('Voltage (uV)')
-%     title(sprintf('%s, %s, channel: %s',dataBase(i).sub_label, dataBase(i).run_label,dataBase(i).ch{ch}))
-% %     
-%       % plot the whole signal without stimulation artefacts
-%     figure()
+%     ch = 5;
 %     subplot(2,1,1)
 %     plot(dataBase(i).raw_data(ch,:))
 %     legend('original')
@@ -73,8 +60,8 @@ for i = 1:size(dataBase,2)
 %     legend('without artefact')
 %     title('Whole signal with and without the stimulation artefacts')
 %     xlabel('time (samples')
-%     
-%     
+     
+     
     
     % Filter every signal
     % Preallocation
@@ -94,9 +81,9 @@ for i = 1:size(dataBase,2)
     end
 
     
-%     % Periodograms to determine the frequencies in the whole signal
-%     t_start = 1704324
-%     t_stop = 2553463
+% % Periodograms to determine the frequencies in the whole signal
+%     t_start = 1704324;
+%     t_stop = 2553463;
 % 
 %     [pww,f] = periodogram(signal(ch,((t_start) : (t_stop))),[],[],Fs);                     % original with bed art
 %     [pww_filt,f_filt] = periodogram(signal_filt_pass(ch,((t_start) : (t_stop))), [], [], Fs);      % Filtered signal    

@@ -1,4 +1,6 @@
-function dataBase = visualRating_N2(dataBase, ccep)
+function dataBase = visualRating_N2(dataBase)
+% Visual detection of the N2 peaks is relevant to study the effect on the 
+%latency and amplitude of propofol.
 
 % INSTRUCTIONS
 % select new point: select new point > enter or y
@@ -9,8 +11,8 @@ close all
 
 tt = dataBase.tt;
 
-N1_amplitude = ccep.n1_peak_amplitude_check;
-N1_sample = ccep.n1_peak_sample_check;
+N1_amplitude = dataBase.ccep.n1_peak_amplitude_check;
+N1_sample = dataBase.ccep.n1_peak_sample_check;
 
 % Preallocation
 n2_amplitude = NaN(size(N1_amplitude));
@@ -42,7 +44,6 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             ylabel('amplitude(uV)')
             title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},dataBase.stimpnames_avg{stimp}))
             
-           
             currkey = 0;
             fprintf('Select N2 and press enter, no N2 press n \n')
             

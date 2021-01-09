@@ -19,16 +19,16 @@ for i = 1:size(ccep_allPat.sub_labels,2)
     dataBase(i).sub_label = ccep_allPat.sub_labels{i}; 
     
      % Find rows with the sub_label of interest 
-    respLoc = find(contains({files(:).name},ccep_allPat.sub_labels{i}));        %find(contains({files(:).name},'merged'));
+    respLoc = find(contains({files(:).name},ccep_allPat.sub_labels{i}));        
   
      % load all both the SPESclin and SPESprop of the patient
-    for j=1:size(respLoc,2)                                                      % number of rows with the run_label of interest
-       if contains(files(respLoc(j)).name,'clin_filt_check.') 
+    for j=1:size(respLoc,2)                                                      
+       if contains(files(respLoc(j)).name,'clin_filt_check.')               % Change to load the files of interest 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep_clin = ccep_clin;
           dataBase(i).filenameClin = files(respLoc(j)).name;
-          
-       elseif contains(files(respLoc(j)).name,'prop_filt_check.') 
+            
+       elseif contains(files(respLoc(j)).name,'prop_filt_check.')           % Change to load the files of interest
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep_prop = ccep_prop;   
           dataBase(i).filenameProp = files(respLoc(j)).name;
@@ -40,7 +40,7 @@ end
 %% determine the agreement between 2 and 10 stims per run
 % The determine_agreement function is not only determining the agreement
 % when 2 sessions are compared. It could be possible to compare more, but
-% then the values for W, Z and XandY should be changed. 
+% then the values for truetrue, truefalse and falsefalse should be changed. 
 
 % load file of continue with variables if they are already in workspace
 for subj = 1:size(dataBase,2)
@@ -68,7 +68,12 @@ for subj = 1:size(dataBase,2)
 end
 
 
-%% Rewrite the adjacency matrices to calculate agreement parameters
+%% Rewrite the adjacency matrices to calculate agreement parameters per electrode instead of per stimulation pair.
+% Rewrite the adjacency matrices with stimluation pairs in the columns and the electrodes in the rows
+% to an adjacency matrix with electrodes in the columns and rows. 
+% This way the network characteristics can be determined per electrode
+% instead of per stimulation pair.
+
 close all;
 
 for subj = 1:size(dataBase,2)
@@ -82,7 +87,7 @@ close all;
 
 for subj = 1:size(dataBase,2)
     dataBase(subj).agreement_parameter = agreement_parameters(dataBase(subj).agreement, ...
-        dataBase(subj).ccep_prop, dataBase(subj).ccep_clin, myDataPath);
+        dataBase(subj).ccep_prop, dataBase(subj).ccep_clin);
     
     [dataBase(subj).statistics, dataBase(subj).rank] = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep_clin);
 end
@@ -100,12 +105,13 @@ end
 
     scatter_ranking(dataBase, myDataPath)
 
-
 %% Determine multiplication factor of the network parameters    
 % Data is not normally distributed therefore the median is calculated
+measure = {'ERs per stimp','Indegree','Outdegree','BC'};
 
+Mult_factor = zeros(size(dataBase,2), size(measure,2));
+        
 for subj = 1:size(dataBase,2)
-   measure = {'ERs per stimp','Indegree','Outdegree','BC'};
 
     for n=1:size(measure,2)
         
@@ -124,9 +130,7 @@ for subj = 1:size(dataBase,2)
         end
     
         
-        Mult_factor(subj,n) = M_Clin/M_Prop;
-
-        
+        Mult_factor(subj,n) = M_Clin/M_Prop;       
     end
 end
 
@@ -143,75 +147,26 @@ T = table(Mult_factor(:,1),Mult_factor(:,2),Mult_factor(:,3),Mult_factor(:,4), '
 % database (ccep10) is only used for channels and stimpairs and these are
 % equal for 2 and 10, so does not matter which database is used.
 
+% Color scale can be specific for the measurement or the same color
+% scale can be used for prop and clin. 
+% When using the same: the absolute values can easier be compared
+% When using specific colorscale, the ranking is easier comparable.
+
+
 for subj = 1:size(dataBase,2)
-    visualise_gridstructure(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).ccep_prop, dataBase(subj).agreement_parameter);
+    visualise_gridstructure(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).agreement_parameter);
 end
 
 %% Make bar graph of number of ERs per SPES session per patient
-figure('Position',[407,689,939,373])
-ax1 = axes('Position',[0.074,0.11,0.9,0.82]);
+% Function used to group/sort all scripts only used for visualisation of
+% results for the report
 
-for subj = 1:size(dataBase,2)
-   
-    % prealloction of the column number   
-    clin_colm = 2*subj-1;                      
-    prop_colm = 2*subj; 
-
-    ERs_tot(subj,clin_colm) = sum(sum(~isnan(dataBase(subj).ccep_clin.n1_peak_amplitude_check)));
-    ERs_tot(subj,prop_colm) = sum(sum(~isnan(dataBase(subj).ccep_prop.n1_peak_amplitude_check)));
-        
-    priosLab = extractAfter(dataBase(subj).sub_label,'sub-');
-        
-end
-
-x = {'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06'};
- 
-X = categorical(x);
-b =   bar(ax1,X,ERs_tot,1);         % bar(ax1,X,ERs_tot,1);
-
-for i = 1:2:size(ERs_tot,2)
-        b([i]).FaceColor(:) =  [0.5843 0.8157 0.9882];          %[0 0 1]
-        b([i+1]).FaceColor(:) = [0.9882 0.6157 0.5843];                        %[1 0 0]
-end
- 
-
-% Place the Number of ERs next to the column
-for i = 1:2:12
-    xtips1 = b(i).XEndPoints;
-    ytips1 = b(i).YEndPoints;
-    labels1 = string(b(i).YData);
-    Zero = find(labels1 == '0');
-    labels1(Zero) = NaN;
-    text(xtips1,ytips1,labels1,'HorizontalAlignment','right',...
-    'VerticalAlignment','bottom','FontSize',11,'fontweight','Bold') 
-end
-
-for i = 2:2:12
-    xtips1 = b(i).XEndPoints;
-    ytips1 = b(i).YEndPoints;
-    labels1 = string(b(i).YData);
-    Zero = find(labels1 == '0');
-    labels1(Zero) = NaN;
-    text(xtips1,ytips1,labels1,'HorizontalAlignment','left',...
-    'VerticalAlignment','bottom','FontSize',11,'fontweight','Bold') 
-end
-legend('SPES-clin','SPES-Prop')
-ylabel('Number of ERs');
-title('Total number of ERs evoked per SPES session')
-
-% Save figure
-outlabel='ERs_per_stimp.jpg';
-path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
-if ~exist(path, 'dir')
-    mkdir(path);
-end
-saveas(gcf,[path,outlabel],'jpg')
+vis_report(dataBase, myDataPath)
 
 
 %% Make boxplots of the latency and amplitude of the N1 peaks.
 % Folder Violinplot-Matlab has to be added to the path. 
     boxplot_N1_peak(dataBase, myDataPath)
-
 
 %% Determine the Cohen's Kappa interobserver variability
 % Determine this with checked files of two raters/observers

@@ -1,7 +1,8 @@
-function visualise_gridstructure(myDataPath, ccep_clin, ccep_prop, agreement_parameter)
+function visualise_gridstructure(myDataPath, ccep_clin, agreement_parameter)
+% Display the values of the network parameters/characterisitcs on the
+% patients grid-structure
 
-subj = [extractBetween(ccep_clin.dataName,'sub-','/ses')];
-
+subj = extractBetween(ccep_clin.dataName,'sub-','/ses');
 
 if exist(fullfile(myDataPath.elec_input,[subj{1},'_ses-1_elektroden.xlsx']),'file')
     elec = readcell(fullfile(myDataPath.elec_input,[subj{1},'_ses-1_elektroden.xlsx']),'Sheet','matlabsjabloon');
@@ -10,7 +11,6 @@ elseif exist(fullfile(myDataPath.elec_input,[subj{1},'_ses-1_elektroden.xls']),'
 end
 
 % localize electrodes in grid
-% Same for 10 and 2 stims
 x = NaN(size(ccep_clin.ch)); 
 y = NaN(size(ccep_clin.ch));
 elecmat = NaN(size(elec));
@@ -43,7 +43,7 @@ topo.y = y;
 
 
 %% Indegree of electrodes and ERs per stimulation pair, for all stims
-    close all;
+close all;
 mode = {'Indegree & ERs per stimpair, Clinical SPES','Indegree & ERs per stimpair, Propofol SPES'};
 figure1 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
     
@@ -124,13 +124,11 @@ if ~exist(path, 'dir')
 end
 saveas(gcf,[path,outlabel],'jpg')
 
-
 %% Plot the outdegree and the BC
 
 mode = {'Outdegree','BC','Indegree'};
 
-for J = 1:size(mode,2)
-    
+for J = 1:size(mode,2) 
     
     figure2 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
     
@@ -221,10 +219,6 @@ for J = 1:size(mode,2)
 end
 
   close all;
-  
- 
-  
-
 
 %% ER's responses to specific stimulus
 plot_fig = input('Do you want plot figures with all ERs per stimulation pair? [y/n] ','s');
@@ -248,11 +242,8 @@ if strcmp(plot_fig,'y')
         axes1.YColor = 'none';
         axes1.Units = 'normalized';
         text(((topo.x)+0.2),topo.y,ccep_clin.ch,'bold')
-%         str_main = sprintf('sub-%s', subj{1});
-%         sgtitle(str_main)
-%         title('\rm ERs responses to specific stimulus, Clinical SPES')   
 
-         % for 10 stims
+        % for CLinicalA SPES stims
         % plot stimulation pair in black
         for chan=1:2
             indicator(1,:) = plot(topo.x(stimnum(chan)),topo.y(stimnum(chan)),'o','MarkerSize',15,...
@@ -270,7 +261,7 @@ if strcmp(plot_fig,'y')
             
         end
         
-        % In blue the ERs in 2 and not in 10
+        % In blue the ERs in Prop and not in clin
         for elek = 1:length(ccep.ch)
             if isnan(ccep.n1_peak_sample(elek,stimp)) && ~isnan(ccep2.n1_peak_sample(elek,stimp))
                 indicator(3,:) = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
@@ -278,7 +269,7 @@ if strcmp(plot_fig,'y')
             end
         end
         
-        % In magenta the ER in 10 and not in 2
+        % In magenta the ER in CLin and not in prop
         for elek = 1:length(ccep.ch)
             if isnan(ccep2.n1_peak_sample(elek,stimp)) && ~isnan(ccep.n1_peak_sample(elek,stimp))
                 indicator(4,:) = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...

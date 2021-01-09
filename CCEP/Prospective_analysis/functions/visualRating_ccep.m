@@ -18,9 +18,6 @@ n1_peak_sample = dataBase.ccep.n1_peak_sample;
 n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
 n1_peak_sample_check = NaN(size(n1_peak_sample));
 
-% n2_latency = NaN(size(n1_peak_amplitude));
-% n2_amplitude = NaN(size(n1_peak_sample));
-
 for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
         
     for chan =1 :size(dataBase.cc_epoch_sorted_avg,1)
@@ -30,14 +27,9 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             H=figure(1);
             H.Units = 'normalized';
             H.Position = [0.13 0.31 0.77 0.7];
-            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));           
-                        
-% %             this_plot= reshape(this_plot, size(this_plot,1)*size(this_plot,2), size(this_plot,3));
-%              this_plot(:,tt>-0.001 & tt<0.01) = NaN;            
-%             
+            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));                                       
             this_plot_avg = squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:));
-%              this_plot_avg(tt>-0.001 & tt<0.01) = NaN;                      
-               
+              
             subplot(1,2,1)
             plot(tt,this_plot,':r','linewidth',1);
             hold on
@@ -45,23 +37,26 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',3)
             hold off
             xlim([-1 1])
-%             ylim([-3000 2000])
-            xlabel('time(s)')
-            ylabel('amplitude(uV)')
+            xlabel('Time(s)')
+            ylabel('Potential (\muV)')
             title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},dataBase.stimpnames_avg{stimp}))
             
             subplot(1,2,2)
             plot(tt,this_plot,':r','linewidth',1);
             hold on
             plot(tt,this_plot_avg,'k','linewidth',2);
-            h = line([0 0],[-750 750]);
             plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b')
             hold off
             xlim([-0.2 0.5])
             ylim([-750 750])
             title('Zoomed average signal')
             xlabel('Time (s)')
-            ylabel('Voltage (uV)')
+            ylabel('Potential \muV')
+            
+            % Create a patch for the -1/5:9 ms interval in which no
+            % physiological activity can be measured.
+            patch([0 0.009 0.009 0],[-750 -750 750 750],[0.6,0.2,0.2],'EdgeAlpha',0)
+            alpha(0.2)
             
             currkey = 0;
             fprintf('N1 [y/n], if incorrect N1, select correct N1 and press enter \n')

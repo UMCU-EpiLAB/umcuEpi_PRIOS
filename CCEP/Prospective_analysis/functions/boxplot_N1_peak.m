@@ -1,12 +1,10 @@
 function boxplot_N1_peak(dataBase, myDataPath)
 close all
 clc
-%% Statistics
+% Statistics
 for subj = 1:size(dataBase,2)
-    new_mat = [];
     ccep_clin = dataBase(subj).ccep_clin;
     ccep_prop = dataBase(subj).ccep_prop;
-    sub_label = dataBase(subj).sub_label;
 
     fs = 1/(size(ccep_prop.tt,2)/4);                                        % Devide tt by four because ccep_prop.tt includes 4 seconds.
     clin = ccep_clin.n1_peak_sample_check;
@@ -54,76 +52,74 @@ end
 %% Make boxPlots    
 new_mat = [];  
 fs = 1/(size(ccep_prop.tt,2)/4);                                        % Devide tt by four because ccep_prop.tt includes 4 seconds.
-    
-% for mode_N1 = 1:size(mode,2)
-        
-    for subj = 1:size(dataBase,2)
-        ccep_clin = dataBase(subj).ccep_clin;
-        ccep_prop = dataBase(subj).ccep_prop;
-        sub_label = dataBase(subj).sub_label;
+              
+for subj = 1:size(dataBase,2)
+    ccep_clin = dataBase(subj).ccep_clin;
+    ccep_prop = dataBase(subj).ccep_prop;
 
-        clin = ccep_clin.n1_peak_sample_check;
-        clin = ((clin*fs)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
-        prop = ccep_prop.n1_peak_sample_check;
-        prop = ((prop*fs)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
-        
-         i = 1;
-         clin_colm = 2*subj-1;                      % prealloction of the column number
-         prop_colm = 2*subj;                        % prealloction of the column number
+    clin = ccep_clin.n1_peak_sample_check;
+    clin = ((clin*fs)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
+    prop = ccep_prop.n1_peak_sample_check;
+    prop = ((prop*fs)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
 
-                for stimp = 1:size(ccep_prop.stimpnames_avg,2)                          % For each stimpair
-                    for elec = 1:size(ccep_prop.ch,1)                                   % For each electrode
+     i = 1;
+     clin_colm = 2*subj-1;                      % prealloction of the column number
+     prop_colm = 2*subj;                        % prealloction of the column number
 
-                    % When both clinical SPES and propofol SPES show an ER
-                      if ~isnan(clin(elec, stimp)) &&  ~isnan(prop(elec, stimp)) 
-                            new_mat(i,clin_colm) = clin(elec, stimp);            % plot the SPES-clin amp in column 1
-                            new_mat(i,prop_colm) = prop(elec, stimp);          % plot the SPES-prop amp in column 2
-                            i = i+1;
-        %                 
-                      end
-                    end      
-                end
-                
-    end
-    zero_mat = find(new_mat == 0);                                          % replace zero with NaN to avoid influence on the mean
-    new_mat(zero_mat) = NaN;
-    means =  median(new_mat,'omitnan');
-    Ns = sum(~isnan(new_mat(:,:)) ) ;                                       % Number of ERs
 
-    % Create boxplot with the amplitude of SPES clin and SPES prop
-    figure('Position',[205,424,1530,638]);
-    % columnMeans = mean(new_mat, 1, 'omitnan');
-    grouporder = {'PRIOS01','','  PRIOS02**','','  PRIOS03**','','  PRIOS04','','  PRIOS05*','','  PRIOS06',''};
-     
-    violins = violinplot([new_mat],grouporder) ;
-    for i = 1:2:size(new_mat,2)
-        violins([i]).ViolinColor(:) = [1 0 0];
-        violins([i+1]).ViolinColor(:) = [0 0 1];
-    end
-       
-    ax = gca;
-    ax.XAxis.FontSize = 12;
-    ax.YAxis.FontSize = 12;
-    ax.XAxis.FontWeight = 'bold';
-    ax.YAxis.FontWeight = 'bold';
-    ax.XLabel.Position = [6.5, -28.4, -1];
-    
-    title(sprintf('N1 Latency'),'FontSize', 15, 'FontWeight', 'bold')
-    ylabel('Latency (milliseconds)','FontSize', 15, 'FontWeight', 'bold')
-    
-    % Plot the mean on the xaxis  
-    stringsz = [repmat('n = %2.0f,    ',1,size(means,2)-1),'n = %2.0f'];
-    xlabel(sprintf([stringsz],Ns))
 
-    legend([violins(1).ViolinPlot,violins(2).ViolinPlot], 'Clinical SPES','Propofol SPES','FontSize', 12, 'FontWeight', 'bold')
+            for stimp = 1:size(ccep_prop.stimpnames_avg,2)                          % For each stimpair
+                for elec = 1:size(ccep_prop.ch,1)                                   % For each electrode
 
-    % Save figure
-    outlabel=sprintf('Latency_violin.jpg');
-    path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/N1_compare/');
-    if ~exist(path, 'dir')
-        mkdir(path);
-    end
-    saveas(gcf,[path,outlabel],'jpg')
+                % When both clinical SPES and propofol SPES show an ER
+                  if ~isnan(clin(elec, stimp)) &&  ~isnan(prop(elec, stimp)) 
+                        new_mat(i,clin_colm) = clin(elec, stimp);            % plot the SPES-clin amp in column 1
+                        new_mat(i,prop_colm) = prop(elec, stimp);          % plot the SPES-prop amp in column 2
+                        i = i+1;
+
+                  end
+                end      
+            end             
+end
+
+new_mat((new_mat == 0)) = NaN;                                      % replace zero with NaN to avoid influence on the mean
+means =  median(new_mat,'omitnan');
+Ns = sum(~isnan(new_mat(:,:)) ) ;                                       % Number of ERs
+
+% Create boxplot with the amplitude of SPES clin and SPES prop
+figure('Position',[205,424,1530,638]);
+% columnMeans = mean(new_mat, 1, 'omitnan');
+grouporder = {'PRIOS01','','  PRIOS02**','','  PRIOS03**','','  PRIOS04','','  PRIOS05*','','  PRIOS06',''};
+
+violins = violinplot(new_mat,grouporder) ;
+for i = 1:2:size(new_mat,2)
+    violins(1,i).ViolinColor = [1 0 0];
+    violins(1,i+1).ViolinColor = [0 0 1];
+end
+
+ax = gca;
+ax.XAxis.FontSize = 12;
+ax.YAxis.FontSize = 12;
+ax.XAxis.FontWeight = 'bold';
+ax.YAxis.FontWeight = 'bold';
+ax.XLabel.Position = [6.5, -28.4, -1];
+
+title(sprintf('N1 Latency'),'FontSize', 15, 'FontWeight', 'bold')
+ylabel('Latency (milliseconds)','FontSize', 15, 'FontWeight', 'bold')
+
+% Plot the mean on the xaxis  
+stringsz = [repmat('n = %2.0f,    ',1,size(means,2)-1),'n = %2.0f'];
+xlabel(sprintf(stringsz,Ns))
+
+legend([violins(1).ViolinPlot,violins(2).ViolinPlot], 'Clinical SPES','Propofol SPES','FontSize', 12, 'FontWeight', 'bold')
+
+% Save figure
+outlabel=sprintf('Latency_violin.jpg');
+path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/N1_compare/');
+if ~exist(path, 'dir')
+    mkdir(path);
+end
+saveas(gcf,[path,outlabel],'jpg')
 
         
 %% Make scatter of the amplitude and latency
@@ -138,7 +134,8 @@ for subj = 1:size(dataBase,2)
        prop = new_mat(:,colm_prop);
        p = round(str2double(dataBase(subj).ccep_clin.p_n1{:}),3);
        
-       if any(isnan(clin)) == 1
+       % do not plot values with NaN
+       if size(clin(isnan(clin)),1) > 1
           clin = clin(~isnan(clin));
           prop = prop(~isnan(prop));              
        end
@@ -186,11 +183,7 @@ for subj = 1:size(dataBase,2)
         
         xlim([xmin, xmax+2])
         ylim([ymin, ymax+5])
-
-         end 
-            
-
-
+end 
           % Save figure
         outlabel=sprintf('n1_scatter_Latency.jpg');
         path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/N1_compare/Scatter/');
@@ -206,8 +199,7 @@ for subj = 1:size(dataBase,2)
   M_Prop = means(2:2:end);
 end
 
-
-Mult_factor(subj,1) = sum(M_Clin)/sum(M_Prop);
+% Pre-allocation
 T_N1(:,1) = means(1:2:end);
 T_N1(:,2) = means(2:2:end);
 
@@ -223,8 +215,7 @@ T_N1(Size_mat,3) = median(T_N1(:,3));
 
 variables = {'N1 clinical','N1 propofol','Mult-factor'};
 
-T_N1 = table(T_N1(:,1),T_N1(:,2),T_N1(:,3), 'VariableNames',variables,'RowNames',{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06','Medians'})
-
-
+T_N1 = table(T_N1(:,1),T_N1(:,2),T_N1(:,3), 'VariableNames',variables,'RowNames',{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06','Medians'});
+disp(T_N1)
 end
     

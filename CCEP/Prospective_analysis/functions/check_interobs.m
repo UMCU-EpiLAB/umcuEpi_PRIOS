@@ -36,11 +36,9 @@ for Event = 1:size(T,1)                           % For each stimulation pair
             plot(tt,this_plot_avg,'k','linewidth',2);
             plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',3)
             hold off
-            xlim([-0.2 0.5])
-            ylim([-1000 1000])
-            xlabel('time(s)')
-            ylabel('amplitude(uV)')
+            xlim([-0.2 0.5]); ylim([-1000 1000]); xlabel('time(s)'); ylabel('potential (\muV)');
             title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},dataBase.stimpnames_avg{stimp}))
+            
             
             subplot(1,2,2)
             plot(tt,this_plot,':r','linewidth',1);
@@ -48,12 +46,12 @@ for Event = 1:size(T,1)                           % For each stimulation pair
             plot(tt,this_plot_avg,'k','linewidth',2);
             plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b')
             hold off
-            xlim([-0.02 0.09])
-            ylim([-400 400])
-            title('Zoomed average signal')
-            xlabel('Time (s)')
-            ylabel('Voltage (uV)')
+            xlim([-0.02 0.09]); ylim([-400 400]); title('Zoomed average signal'); xlabel('Time (s)'); ylabel('Potential (\muV)')
             
+            % Create patch to indicate the 9 ms interval
+            patch([0 0.009 0.009 0],[-400 -400 1000 1000],[0.6,0.2,0.2], 'EdgeAlpha',0)
+            alpha(0.1)
+
             currkey = 0;
             fprintf('N1 [y/n], if incorrect N1, select correct N1 and press enter \n')
             

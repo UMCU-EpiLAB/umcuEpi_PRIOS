@@ -4,7 +4,7 @@ mode = {'ERs per stimulation pair','Indegree','Outdegree','Betweenness Centralit
 
 for J = 1:size(mode,2)
     
-    figure('Position',[302,17,1224,1039])
+    fig = figure('Position',[302,17,1224,1039]);
     
     for i = 1:size(dataBase,2)
         
@@ -38,8 +38,13 @@ for J = 1:size(mode,2)
         
         subplot(size(dataBase,2),1,i)
         scatter(par10  , par2 ,'*' )
-        ylabel({'Value';'2 stims setting'}, 'FontSize',11)
-        xlabel("Value 10 stimuli setting",'FontSize',11)
+        
+        % Change fontsize
+        ax = gca;
+        ax.XAxis.FontSize = 14;    ax.YAxis.FontSize = 14;
+       
+%         ylabel({'Value';'2 stims setting'}, 'FontSize',11)
+%         xlabel("Value 10 stimuli setting",'FontSize',11)
 
         title(sprintf('%s, p =  %1.3f', dataBase(i).sub_label, pval))
 %         legend(sprintf('%s',mode{J}),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)
@@ -65,9 +70,14 @@ for J = 1:size(mode,2)
             
             % Plot polyfit throught data points
             plot(par10(~idx_nan),y_fit,'Color',[0.8,0.2,0.2],'LineWidth',2)
+            
+            % Change fontsize
+            ax = gca;
+            ax.XAxis.FontSize = 14;    ax.YAxis.FontSize = 14;
+       
             hold on
-            ylabel({'Value';'2 stims setting'}, 'FontSize',11)
-            xlabel("Value 10 stims setting",'FontSize',11)
+%             ylabel({'Value';'2 stims setting'}, 'FontSize',11)
+%             xlabel("Value 10 stims setting",'FontSize',11)
             % Plot conficence interval as a line
 %             plot(par10, y_fit-2*delta, 'm--', par10, y_fit+2*delta,'--','color',[0.6,0.1,0.2,0.8])
             
@@ -97,6 +107,15 @@ for J = 1:size(mode,2)
         % Create main title without decreasing the subplots sizes
         annotation(gcf,'textbox',[0.32 0.95 0.35 0.043],'VerticalAlignment','middle','String',sprintf('%s',mode{J}),'HorizontalAlignment','center','FontWeight','bold','FontSize',15,'FitBoxToText','off','EdgeColor','none');
        
+        %Create one main x- and y-label
+        han=axes(fig,'visible','off'); 
+        han.YLabel.Visible='on';
+        han.YLabel.Position = [-0.0864    0.5000         0];
+        ylabel(han,{'Value 2 stimuli setting'}, 'FontSize',17,'fontweight','bold')
+    
+        han.XLabel.Visible='on';
+        xlabel(han,{'Value 10 stimuli setting'}, 'FontSize',17,'fontweight','bold')
+
     end
     
     % Save figure

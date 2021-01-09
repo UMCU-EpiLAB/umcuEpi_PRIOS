@@ -21,13 +21,12 @@ for n = 1:size(names,2)
 end
 
 % Load data (also possible for multiple runs)
-% dataBase = struct;
 for R = 1:size(strings,2)
     cfg.run_label = strings(R);
     dataBase(R) = load_ECoGdata(cfg,myDataPath);
 end
 
-fprintf('Both runs of subject %s have run. \n',cfg.sub_labels{1})
+fprintf('Data of subject %s is laoded. \n',cfg.sub_labels{1})
     
     
 %% Filter
@@ -86,25 +85,28 @@ tt = dataBase_clin.tt;
 figure('Position',[515,333,1034,707]); 
 
 chan = 27; stim=12;
-tt(:,tt>-0.001 & tt<0.01) = NaN; 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
 title(sprintf('SPES prop, %s, %s, %s',dataBase(1).sub_label, dataBase_prop.stimpnames_avg{stim},  dataBase_prop.ch{chan}))
-xlabel('time (s)')
-xlim([-.2 0.5])
-           
-            
+xlabel('time (s)'); xlim([-.2 0.5]); ylabel('Potential \muV');            
+% Create patch to indicate the 9 ms interval
+patch([0 0.009 0.009 0],[-400 -400 1000 1000],[0.6,0.2,0.2], 'EdgeAlpha',0)
+alpha(0.1)                % set patches transparency
+
+
 subplot(2,1,2),
 plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
 plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
 title(sprintf('SPES clin, %s, %s, %s',dataBase(1).sub_label, dataBase_clin.stimpnames_avg{stim},  dataBase_clin.ch{chan}))
-xlabel('time (s)')
-xlim([-.2 0.5])
+xlabel('time (s)'); xlim([-.2 0.5]); ylabel('Potential \muV');
+% Create patch to indicate the 9 ms interval
+patch([0 0.009 0.009 0],[-400 -400 1000 1000],[0.6,0.2,0.2], 'EdgeAlpha',0)
+alpha(0.1)                % set patches transparency
 
 
 figure('Position',[391,61,1076,712])
@@ -114,27 +116,16 @@ chan = 5; stim=1;
 plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2.5)
 hold on
 title(sprintf('SPES clin, %s, %s, %s',dataBase(1).sub_label, dataBase_clin.stimpnames_avg{stim},  dataBase_clin.ch{chan}))
-xlabel('time (s)')
-xlim([-0.02 0.11])
+xlabel('time (s)'); xlim([-0.02 0.11]);
 plot(0.06055,-207.1,'o','MarkerEdgeColor','b','MarkerFaceColor','b')
 hold on 
 % plot(0.005848,-274.8,'o','MarkerEdgeColor','g','MarkerFaceColor','g')
 hold off
-ylim([-400 350])
-ylabel('Potential \muV')
-h1 = line([0 0],[-400 350]);
-h2 = line([0.009 0.009],[-400 350]);
-patch([0 0.009 0.009 0],[-400 -400 350 350],[0.6,0.2,0.2])
-alpha(0.1)                % set patches transparency to 0.3
-% 
-% 
-% % Save figure
-% outlabel=('N1_latency_interObs(6).jpg');
-% path = fullfile(myDataPath.CCEP_interObVar,'N1_latency_interOb/');
-% if ~exist(path, 'dir')
-%     mkdir(path);
-% end
-% saveas(gcf,[path,outlabel],'jpg')
+ylim([-400 350]); ylabel('Potential \muV');
+
+% Create patch to indicate the 9 ms interval
+patch([0 0.009 0.009 0],[-400 -400 350 350],[0.6,0.2,0.2], 'EdgeAlpha',0)
+alpha(0.1)                % set patches transparency
 
 
 %% Use the automatic N1 detector to detect ccep 
@@ -143,37 +134,6 @@ dataBase_clin = detect_n1peak_ECoG_ccep(dataBase_clin,cfg);
 dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);
 
 disp('Detection of ERs is completed')
-
-%% Interobserver difference check
-% script to determine the latency of the N1's which are incorrectly
-% rejected
-dataBase = check_interobs(dataBase_clin, myDataPath);
-
-% Find the number of samples after the stimulation artefact
-% 9 ms is 19 samples
-% Fs = 2048 
-Latency_interOb = dataBase.ccep.n1_peak_sample_check_check-(2*2048);            % To samples after stimulation artefact
-Num_interOb = find(~isnan(Latency_interOb));
-Latency_interOb(isnan(Latency_interOb)) = [];
-numel(find(Latency_interOb<19))
-
-% Latencies of detector detected ERs
-Latency_detector = dataBase.ccep.n1_peak_sample-(2*2048);
-Latency_detector = Latency_detector(Num_interOb)';
-
-figure()
-boxplot([Latency_interOb' Latency_detector'],'Notch','on', ...
-        'Labels',{'Checked Latencies N1','Detector latencies N1'})
-ylabel('Number of samples after stimulation artefact')
- 
-% Save
-outlabel=('N1_latency_interObs.jpg');
-path = fullfile(myDataPath.CCEP_interObVar,'N1_latency_interOb/');
-if ~exist(path, 'dir')
-    mkdir(path);
-end
-saveas(gcf,[path,outlabel],'jpg')
-
 
 
 %% Visually check detected cceps
@@ -188,41 +148,41 @@ end
 disp('CCEPs are checked')      
 
 %% Visually detect N2's
-% % Check the signals with a checked N1 if they have an N2.
-% VisCheck_n2 = input('Do you want to visually detect N2s? [y/n] ','s');
-% 
-% % load saved files because otherwise i have to do the whole check again.
-% load('sub-PRIOS03_ses-1_task-SPESclin_run-021318_CCEP_clin_filt_check.mat')
-% load('sub-PRIOS03_ses-1_task-SPESprop_run-050816_CCEP_prop_filt_check.mat')
-% 
-% if strcmp(VisCheck_n2,'y')
-%     dataBase_clin = visualRating_N2(dataBase_clin,ccep_clin);
-%     dataBase_prop = visualRating_N2(dataBase_prop,ccep_prop);
-% end
-% 
-% disp('CCEPs are checked')      
+% Check the signals with a checked N1 if they have an N2.
+% Can only be performed when ERs are already visually checked and the
+% n1_peak_amplitude_check and n1_peak_sample_check files are saved.
+
+VisCheck_n2 = input('Do you want to visually detect N2s? [y/n] ','s');
+
+
+if strcmp(VisCheck_n2,'y')
+    dataBase_clin = visualRating_N2(dataBase_clin);
+    dataBase_prop = visualRating_N2(dataBase_prop);
+end
+
+disp('N2 peaks are checked')      
 
 %% Visually check all stimuli of a SPES
 % The ERs detected with the detector are shown with a blue dot.
 % This is very time consuming! only perform when the ER-detector results
 % are not as expected.
-% VisCheck_all = input('Do you want to visually check ALL signals? [y/n] ','s');
+VisCheck_all = input('Do you want to visually check ALL signals? [y/n] ','s');
 
-% if strcmp(VisCheck_all,'y')
-% %     dataBase_clin = visualRating_all_ccep(dataBase_clin);
-%     dataBase_prop = visualRating_all_ccep(dataBase_prop);
-% end
-% 
-% disp('CCEPs are checked') 
+if strcmp(VisCheck_all,'y')
+    dataBase_clin = visualRating_all_ccep(dataBase_clin);
+    dataBase_prop = visualRating_all_ccep(dataBase_prop);
+end
+
+disp('All responses are checked') 
 
 %% save ccep
 savefiles = input('Do you want to save the ccep-structures? [y/n] ','s');
 
 for i = 1:size(dataBase,2)
-    if dataBase(i).task_name == 'task-SPESclin'
+    if isequal(dataBase(i).task_name, 'task-SPESclin')
         targetFolder_clin = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_name),'/'];
         [~,filename_clin,~] = fileparts(dataBase(i).dataName);
-    elseif dataBase(i).task_name == 'task-SPESprop'
+    elseif isequal(dataBase(i).task_name, 'task-SPESprop')
         targetFolder_prop = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_name),'/'];
         [~,filename_prop,~] = fileparts(dataBase(i).dataName);
     end
@@ -236,7 +196,7 @@ end
 % [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save propofol SPES
-fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_check2.mat'];
+fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_check.mat'];       % Make sure to identify with _filt_ or _check_ or _check_N2 when necessary
 ccep_prop = dataBase_prop.ccep;
 ccep_prop.stimchans_all = dataBase_prop.cc_stimchans_all;
 ccep_prop.stimchans_avg = dataBase_prop.cc_stimchans_avg;
@@ -262,7 +222,7 @@ if ~exist(targetFolder_clin, 'dir')
 end
 
 % save all stims
-fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_check.mat'];
+fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_filt_check.mat'];           % Make sure to identify with _filt_ or _check_ or _check_N2 when necessary
 ccep_clin = dataBase_clin.ccep;
 ccep_clin.stimchans_all = dataBase_clin.cc_stimchans_all;
 ccep_clin.stimchans_avg = dataBase_clin.cc_stimchans_avg;
@@ -284,11 +244,11 @@ if strcmp(savefiles,'y')
 end
 
 
-
 %% Plot the average signal of all electrodes per stimulation pair
+% Create figures with a plot per stimulation pair with the averaged response per electrode 
+% Easy compare between clinical-SPES and propofol-SPES
+
 dataBase_clin.save_fig = input('Do you want plot all average signals to the stimulus per stimpair? [y/n] ','s');
 if strcmp(dataBase_clin.save_fig, 'y')
     plot_all_ccep(dataBase_clin, dataBase_prop, myDataPath)
 end
-% plot_all_ccep( dataBase_prop, myDataPath)
-

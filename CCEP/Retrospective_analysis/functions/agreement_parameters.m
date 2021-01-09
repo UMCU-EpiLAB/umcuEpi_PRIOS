@@ -50,7 +50,7 @@ function agreement_parameter = agreement_parameters(agreement, dataBase10, dataB
         n_intot(el) = 2*(stimptot - trialelek(el)); % both stimulated electrodes x (total number of stimuli - number of stimulated)
     end
     
-    % NETWERKMATEN   
+    % Network characteristics, pre-allocation      
     outdegreenorm10 = zeros(1,elektot);
     indegreenorm10 = zeros(1,elektot);
     BCnorm10 = zeros(1,elektot); 
