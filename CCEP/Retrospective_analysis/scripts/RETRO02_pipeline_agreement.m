@@ -97,11 +97,6 @@ close all
 scatter_networkPar(dataBase, myDataPath)
 
 
-%% Scatter plot of the rankings of the network parameters
-
-scatter_ranking(dataBase, myDataPath)
-
-
 %% Load electrodes positions (xlsx/electrodes.tsv)
 plot_fig = 'n';                 % 'n' when you don't want all ER responses per stim, and the SOZ to be plot
 close all;

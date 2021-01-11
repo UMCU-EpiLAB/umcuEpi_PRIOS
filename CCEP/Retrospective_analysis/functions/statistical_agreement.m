@@ -7,20 +7,20 @@ SubjectName = extractBetween(ccep10.dataName,'ieeg/sub-','_ses-1_');
 ER_stimp10 = agreement_parameter.ERs_stimp10;
 ER_stimp2 = agreement_parameter.ERs_stimp2;
 
-NorDis10 = lillietest(ER_stimp10);                  % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected
-NorDis2 = lillietest(ER_stimp2);
+% NorDis10 = lillietest(ER_stimp10);                  % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected
+% NorDis2 = lillietest(ER_stimp2);
 
-% Check for monotonic relation
-figure(2)
-scatter(ER_stimp10,ER_stimp2)
-refline
-
-% Check for normal distribution
-figure(1)
-subplot(2,1,1)
-normplot(ER_stimp10)                                % normal distribution is datapoints along the reference line
-subplot(2,1,2)
-normplot(ER_stimp2)
+% % Check for monotonic relation
+% figure(2)
+% scatter(ER_stimp10,ER_stimp2)
+% refline
+% 
+% % Check for normal distribution
+% figure(1)
+% subplot(2,1,1)
+% normplot(ER_stimp10)                                % normal distribution is datapoints along the reference line
+% subplot(2,1,2)
+% normplot(ER_stimp2)
 
 p = signrank(ER_stimp10, ER_stimp2) ;           % tests the null hypothesis that data in x and y are samples from continuous distributions with equal medians
 
@@ -91,7 +91,7 @@ end
 % When p <0.05, an rho is close to (-)1, rejection of the hypothesis that
 % no correlation exists between the two columns i.e. there is a
 % correlation
-[RHO_stmp,PVAL_stmp] = corr(rank.unsort_stims10(:,4) , rank.unsort_stims2(:,4) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
+[RHO_stmp,PVAL_stmp] = corr(rank.unsort_stims10(:,3) , rank.unsort_stims2(:,3) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
 fprintf('Spearman Corr between stimpair ranking of 10 stims and 2 stims gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
 
 figure('Position',[1074,4,519,1052]);
@@ -176,13 +176,9 @@ for n=1:size(measure,2)
     end
     
     % To determine the significance for the ranking
-    [RHO.(measure{n}), PVAL.(measure{n})] = corr(rank.(['unsort_' measure{n} mode{1}])(:,3), rank.(['unsort_', measure{n} mode{2}])(:,3),'Type','Spearman','rows','pairwise');
+    [RHO.(measure{n}), PVAL.(measure{n})] = corr(rank.(['unsort_' measure{n} mode{1}])(:,2), rank.(['unsort_', measure{n} mode{2}])(:,2),'Type','Spearman','rows','pairwise');
     
-    % To determine the significance for the absolute value.
-    pval.(measure{n}) = signrank(rank.(['unsort_' measure{n} mode{1}])(:,2), rank.(['unsort_', measure{n} mode{2}])(:,2));
-
     fprintf('Spearman Corr (ranking) between %s per electrode of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', measure{n}, PVAL.(measure{n}), RHO.(measure{n}), SubjectName{1});
-    fprintf('Wilcoxon (abs values) between %s per electrode of SPES-clin and SPES-prop gives, p-value = %1.4f, for %s \n', measure{n}, pval.(measure{n}), SubjectName{1});
 
 end
 
@@ -201,9 +197,6 @@ statistics.p_ERsperStimp = p;
 % statistics.ranking2stimp = sort_rank2;
 % statistics.ranking10stimp = sort_rank10;
 
-statistics.p_indegree_abs = pval.indegree;
-statistics.p_outdegree_abs = pval.outdegree;
-statistics.p_BC_abs = pval.BC;
 
 end
 
