@@ -101,10 +101,6 @@ end
 
     scatter_networkPar(dataBase,myDataPath)
 
-%% Scatter rankings
-
-    scatter_ranking(dataBase, myDataPath)
-
 %% Determine multiplication factor of the network parameters    
 % Data is not normally distributed therefore the median is calculated
 measure = {'ERs per stimp','Indegree','Outdegree','BC'};

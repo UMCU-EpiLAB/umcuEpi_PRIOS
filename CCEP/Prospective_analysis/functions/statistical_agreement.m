@@ -99,7 +99,7 @@ end
 % When p <0.05, an rho is close to (-)1, rejection of the hypothesis that
 % no correlation exists between the two columns i.e. there is a
 % correlation
-[RHO_stmp,PVAL_stmp] = corr(rank.unsort_SPES_clin(:,4) , rank.unsort_SPES_prop(:,4) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
+[RHO_stmp,PVAL_stmp] = corr(rank.unsort_SPES_clin(:,3) , rank.unsort_SPES_prop(:,3) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
 fprintf('Spearman Corr between stimpair ranking of SPES-clin and SPES-prop gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
 
 figure('Position',[1074,4,519,1052]);
@@ -187,13 +187,8 @@ for n=1:size(measure,2)
     
     % To determine the significance for the ranking
     % Use Spearman 'rows','pairwise' to ensure that row's with NaN's in both columns are not considered in the analysis.
-    [RHO.(measure{n}), PVAL.(measure{n})] = corr(rank.(['unsort_' measure{n} mode{1}])(:,3), rank.(['unsort_', measure{n} mode{2}])(:,3),'Type','Spearman','rows','pairwise');
-    
-    % To determine the significance for the absolute value.
-    pval.(measure{n}) = signrank(rank.(['unsort_' measure{n} mode{1}])(:,2), rank.(['unsort_', measure{n} mode{2}])(:,2));
-    
+    [RHO.(measure{n}), PVAL.(measure{n})] = corr(rank.(['unsort_' measure{n} mode{1}])(:,2), rank.(['unsort_', measure{n} mode{2}])(:,2),'Type','Spearman','rows','pairwise');
     fprintf('Spearman Corr (ranking) between %s per electrode of SPES-clin and SPES-prop gives, p-value = %1.4f, rho = %1.3f, for %s \n', measure{n}, PVAL.(measure{n}), RHO.(measure{n}), SubjectName{1});
-    fprintf('Wilcoxon (abs value) between %s per electrode of SPES-clin and SPES-prop gives, p-value = %1.4f, for %s \n', measure{n}, pval.(measure{n}), SubjectName{1});
 
 end
 
@@ -209,10 +204,6 @@ statistics.rho_outdegree = RHO.outdegree;
 statistics.p_stimp = PVAL_stmp;
 statistics.rho_stimp = RHO_stmp;
 statistics.p_ERsperStimp = p;  
-
-statistics.p_indegree_abs = pval.indegree;
-statistics.p_outdegree_abs = pval.outdegree;
-statistics.p_BC_abs = pval.BC;
 
 clear PVAL_stmp
         

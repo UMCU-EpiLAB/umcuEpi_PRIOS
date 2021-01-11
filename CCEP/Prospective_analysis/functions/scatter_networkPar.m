@@ -15,22 +15,26 @@ for J = 1:size(mode,2)
        if strcmp(mode{J},'ERs evoked per stimulation pair')
             clin = dataBase(i).agreement_parameter.ERs_stimpClin;
             prop = dataBase(i).agreement_parameter.ERs_stimpProp;
-            pval = dataBase(i).statistics.p_ERsperStimp  ;
+            pval = dataBase(i).statistics.p_stimp  ;
+            rho = dataBase(i).statistics.rho_stimp;
 
         elseif strcmp(mode{J},'Indegree')
             clin = dataBase(i).agreement_parameter.indegreeN_Clin;
             prop = dataBase(i).agreement_parameter.indegreeN_Prop;
-            pval = dataBase(i).statistics.p_indegree_abs;
-
+            pval = dataBase(i).statistics.p_indegree;
+            rho = dataBase(i).statistics.rho_indegree;
+            
         elseif strcmp(mode{J},'Outdegree')
             clin = dataBase(i).agreement_parameter.outdegreeN_Clin;
             prop = dataBase(i).agreement_parameter.outdegreeN_Prop;
-            pval = dataBase(i).statistics.p_outdegree_abs;
+            pval = dataBase(i).statistics.p_outdegree;
+            rho = dataBase(i).statistics.rho_outdegree;
 
         elseif strcmp(mode{J},'Betweenness Centrality')
             clin = dataBase(i).agreement_parameter.BCN_Clin;
             prop = dataBase(i).agreement_parameter.BCN_Prop;
-            pval = dataBase(i).statistics.p_BC_abs;
+            pval = dataBase(i).statistics.p_BC;
+            rho = dataBase(i).statistics.rho_BC;
        end
        
         % Find NaN values to avoid plotting these
@@ -38,24 +42,19 @@ for J = 1:size(mode,2)
  
         subplot(size(dataBase,2),1,i);
         scatter(clin(~idx_nan)  , prop(~idx_nan) ,'*' )
+       
         % Change fontsize
-            ax = gca;
-            ax.XAxis.FontSize = 14;    ax.YAxis.FontSize = 14;
+        ax = gca;
+        ax.XAxis.FontSize = 14;    ax.YAxis.FontSize = 14;
            
-        title(sprintf('%s, p =  %1.3f', dataBase(i).sub_label, pval))
+        title(sprintf('%s, p =  %1.3f', dataBase(i).sub_label, pval),'FontSize',12)
         xmin = min(clin(~idx_nan));
         xmax = max(clin(~idx_nan));
              
-        
-         if pval < 0.01
-                title(sprintf('%s, p = <0.01', dataBase(i).sub_label))
-         elseif pval<0.05
-                 title(sprintf('%s, p = <0.05', dataBase(i).sub_label))
-         end
-            
-        if pval > 0.05
+                   
+        if pval < 0.05
             [P,S] = polyfit(clin(~idx_nan),prop(~idx_nan),1);
-            [y_fit, delta] = polyval(P,clin(~idx_nan),S);
+            [y_fit, ~] = polyval(P,clin(~idx_nan),S);
             
             plot(clin(~idx_nan),prop(~idx_nan),'*')                        % This is equal to scatter
             hold on
@@ -71,11 +70,16 @@ for J = 1:size(mode,2)
 %             plot(clin, y_fit-2*delta, 'm--', clin, y_fit+2*delta,'--','color',[0.6,0.1,0.2,0.8])
             
             % Plot confidence interval as a patch
-            Filled_CI = patch([min(clin),max(clin),max(clin),min(clin)], [min(y_fit-2*delta),max(y_fit-2*delta),max(y_fit+2*delta), min(y_fit+2*delta)],[0.1,0.2,0.2]);
-            alpha(0.06)                % set patches transparency to 0.
-            Filled_CI.EdgeAlpha = 0;
-            title(sprintf('%s, p = %1.3f', dataBase(i).sub_label,pval));
-           
+%             Filled_CI = patch([min(clin),max(clin),max(clin),min(clin)], [min(y_fit-2*delta),max(y_fit-2*delta),max(y_fit+2*delta), min(y_fit+2*delta)],[0.1,0.2,0.2]);
+%             alpha(0.06)                % set patches transparency to 0.
+%             Filled_CI.EdgeAlpha = 0;
+            
+            if pval < 0.01
+                title(sprintf('%s, p = <0.01, r_s = %1.3f', dataBase(i).sub_label, rho),'FontSize',12)
+            elseif pval<0.05
+                 title(sprintf('%s, p = <0.05, r_s = %1.3f', dataBase(i).sub_label, rho),'FontSize',12)
+            end   
+            
 %             legend(sprintf('%s',mode{J}), sprintf('r_s = %1.3f',rho  ),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',11)
 %            X = xmin:0.1*xmax:xmax+0.2*xmax;
 %             Y = P(1)*X + P(2);
@@ -106,7 +110,7 @@ for J = 1:size(mode,2)
         
     % Save figure
     outlabel=sprintf('All_pat_scatter_%s.jpg',mode{J});
-    path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Scatter/Scatter of abs values/');
+    path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Scatter/');
     if ~exist(path, 'dir')
         mkdir(path);
     end
