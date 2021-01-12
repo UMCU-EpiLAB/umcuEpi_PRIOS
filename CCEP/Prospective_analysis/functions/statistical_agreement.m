@@ -118,16 +118,26 @@ set(gca, 'YDir', 'reverse');
 ylim([1, max([size(rank.fig_sort_names_SPES_clin,1) size(rank.fig_sort_names_SPES_prop,1)])])
 ylabel('order SPES-prop')
 
+
+% Median number of places shifted on the ranking
+shift_rank = median(rank.unsort_SPES_clin(:,4) - rank.unsort_SPES_prop(:,4));
+
 xlim([1, 2])
 set(gca,'xtick',[])
-    if PVAL_stmp(:) <0.01
-       str_main = sprintf('%s, p < 0.01',SubjectName{1});
-    elseif PVAL_stmp(:) <0.05
-        str_main = sprintf('%s, p < 0.05',SubjectName{1});
-    else
-        str_main = sprintf('sub-%s, p = %1.2f', SubjectName{1},PVAL_stmp);
-    end
+str_main = sprintf('%s, \\Delta = %1.1f',SubjectName{1},shift_rank);  
 sgtitle(str_main)
+
+    
+% xlim([1, 2])
+% set(gca,'xtick',[])
+%     if PVAL_stmp(:) <0.01
+%        str_main = sprintf('%s, p < 0.01',SubjectName{1});
+%     elseif PVAL_stmp(:) <0.05
+%         str_main = sprintf('%s, p < 0.05',SubjectName{1});
+%     else
+%         str_main = sprintf('sub-%s, p = %1.2f', SubjectName{1},PVAL_stmp);
+%     end
+% sgtitle(str_main)
 
 
 n=1;
@@ -139,6 +149,7 @@ for k = 1:length(rank.fig_sort_names_SPES_clin)
         n=n+1;
     end
 end
+
 
 % Save figure
 outlabel=sprintf('sub-%s_ranking.jpg',SubjectName{1});
