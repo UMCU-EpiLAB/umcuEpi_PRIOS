@@ -133,16 +133,16 @@ for J = 1:size(mode,2)
     figure2 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
     
     if strcmp(mode{J},'Outdegree')
-        par10 = (agreement_parameter.outdegreeN_Clin)';
-        par2 = (agreement_parameter.outdegreeN_Prop)';
+        parclin = (agreement_parameter.outdegreeN_Clin)';
+        parprop = (agreement_parameter.outdegreeN_Prop)';
         
     elseif strcmp(mode{J},'BC')
-        par10 = (agreement_parameter.BCN_Clin)';
-        par2 = (agreement_parameter.BCN_Prop)';
+        parclin = (agreement_parameter.BCN_Clin)';
+        parprop = (agreement_parameter.BCN_Prop)';
         
     elseif strcmp(mode{J},'Indegree')
-        par10 = (agreement_parameter.indegreeN_Clin)';
-        par2 = (agreement_parameter.indegreeN_Prop)';
+        parclin = (agreement_parameter.indegreeN_Clin)';
+        parprop = (agreement_parameter.indegreeN_Prop)';
     end
     
     
@@ -159,7 +159,7 @@ for J = 1:size(mode,2)
     title(sprintf('%s, Clinical SPES',mode{J}))
     
     % Plot the parameter as a colorscale
-    scatter(topo.x, topo.y, 260, par10,'filled','MarkerEdgeColor','k')
+    scatter(topo.x, topo.y, 260, parclin,'filled','MarkerEdgeColor','k')
     c = hot;
     c = flipud(c);
     colormap(c);
@@ -174,7 +174,7 @@ for J = 1:size(mode,2)
 %         caxis([0 max(par2)]);
 %     end
     
-    % 2 stims
+    % Prop stims
     axes4 = axes('Parent',figure2,'Position',[0.04,0.07,0.9,0.4]);
     hold(axes4,'on');
     plot(topo.x,topo.y,'ok','Parent',axes4,'MarkerSize',15);
@@ -191,7 +191,7 @@ for J = 1:size(mode,2)
     
     % Plot the outdegree as a colorscale, combine this with the number of
     % ERS evoked per stimulation pair.
-    scatter(topo.x, topo.y, 260, par2,'filled','MarkerEdgeColor','k')
+    scatter(topo.x, topo.y, 260, parprop,'filled','MarkerEdgeColor','k')
     c = hot;
     c = flipud(c);
     colormap(c);

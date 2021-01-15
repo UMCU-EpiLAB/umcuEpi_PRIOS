@@ -139,10 +139,7 @@ T = table(Mult_factor(:,1),Mult_factor(:,2),Mult_factor(:,3),Mult_factor(:,4), '
 
     end
     
-%% load electrodes positions (xlsx/electrodes.tsv)
-% database (ccep10) is only used for channels and stimpairs and these are
-% equal for 2 and 10, so does not matter which database is used.
-
+%% Visualise the network characteristics in the gridstructure of the electrodes positions (xlsx/electrodes.tsv)
 % Color scale can be specific for the measurement or the same color
 % scale can be used for prop and clin. 
 % When using the same: the absolute values can easier be compared
@@ -153,6 +150,15 @@ for subj = 1:size(dataBase,2)
     visualise_gridstructure(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).agreement_parameter);
 end
 
+%% Visualise the network characteristics in a heatmap to later plot on the MRI
+% Create a heatmap of the network characteristics with the outlay of the
+% electrodes from the matlabSjabloon in Excel.
+
+for subj = 1:size(dataBase,2)
+    
+    heat_map_grid(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).agreement_parameter)
+
+end
 %% Make bar graph of number of ERs per SPES session per patient
 % Function used to group/sort all scripts only used for visualisation of
 % results for the report

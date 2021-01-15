@@ -123,10 +123,7 @@ for i = 1:size(dataBase,2)
 
       
 dataBase(i).data = signal_filt_pass;    
-end
-
-
-    
+end 
 
 % subtract the median .
 end

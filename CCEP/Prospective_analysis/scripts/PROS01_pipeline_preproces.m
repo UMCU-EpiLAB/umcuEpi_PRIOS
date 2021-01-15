@@ -23,10 +23,10 @@ end
 % Load data (also possible for multiple runs)
 for R = 1:size(strings,2)
     cfg.run_label = strings(R);
-    dataBase(R) = load_ECoGdata(cfg,myDataPath);
+    dataBase(R) = load_ECoGdata(cfg,myDataPath); %#ok<SAGROW>
 end
 
-fprintf('Data of subject %s is laoded. \n',cfg.sub_labels{1})
+fprintf('Data of subject %s is loaded. \n',cfg.sub_labels{1})
     
     
 %% Filter
@@ -42,16 +42,12 @@ for i = 1:size(dataBase,2)
     dataBase(i).task_name = dataBase(i).dataName(strfind(dataBase(i).dataName,'task-'):strfind(dataBase(i).dataName,'_run')-1); 
 
     if ismember(dataBase(i).task_name,'task-SPESclin')
-%        avg_stim_clin = 5;
        cfg.minstim = 5;
-%        cfg.max_stim = 5; 
-       dataBase_clin(i,:) = preprocess_ECoG_spes(dataBase(i),cfg);
+       dataBase_clin(i,:) = preprocess_ECoG_spes(dataBase(i),cfg); %#ok<SAGROW>
       
     elseif ismember(dataBase(i).task_name,'task-SPESprop')
-%         avg_stim = 1;                                                         %%% This was necessary for Retro, NOT for prospective
         cfg.minstim = 1;
-%         cfg.max_stim = 1;
-        dataBase_prop(i,:) = preprocess_ECoG_spes(dataBase(i),cfg);     
+        dataBase_prop(i,:) = preprocess_ECoG_spes(dataBase(i),cfg);      %#ok<SAGROW>
 
     end
 end
@@ -84,7 +80,7 @@ tt = dataBase_clin.tt;
 % check whether similar stimuli are present in the same stimulus pair
 figure('Position',[515,333,1034,707]); 
 
-chan = 27; stim=12;
+chan = 4; stim=1;
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
@@ -109,32 +105,12 @@ patch([0 0.009 0.009 0],[-400 -400 1000 1000],[0.6,0.2,0.2], 'EdgeAlpha',0)
 alpha(0.1)                % set patches transparency
 
 
-figure('Position',[391,61,1076,712])
-chan = 5; stim=1;
-% plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[1,0,0,0.4],'LineWidth',1)
-% hold on
-plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2.5)
-hold on
-title(sprintf('SPES clin, %s, %s, %s',dataBase(1).sub_label, dataBase_clin.stimpnames_avg{stim},  dataBase_clin.ch{chan}))
-xlabel('time (s)'); xlim([-0.02 0.11]);
-plot(0.06055,-207.1,'o','MarkerEdgeColor','b','MarkerFaceColor','b')
-hold on 
-% plot(0.005848,-274.8,'o','MarkerEdgeColor','g','MarkerFaceColor','g')
-hold off
-ylim([-400 350]); ylabel('Potential \muV');
-
-% Create patch to indicate the 9 ms interval
-patch([0 0.009 0.009 0],[-400 -400 350 350],[0.6,0.2,0.2], 'EdgeAlpha',0)
-alpha(0.1)                % set patches transparency
-
-
 %% Use the automatic N1 detector to detect ccep 
 
 dataBase_clin = detect_n1peak_ECoG_ccep(dataBase_clin,cfg);
 dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);
 
 disp('Detection of ERs is completed')
-
 
 %% Visually check detected cceps
 % Check the average signal in which an ER was detected
@@ -146,6 +122,7 @@ if strcmp(VisCheck,'y')
 end
 
 disp('CCEPs are checked')      
+
 
 %% Visually detect N2's
 % Check the signals with a checked N1 if they have an N2.
@@ -252,3 +229,12 @@ dataBase_clin.save_fig = input('Do you want plot all average signals to the stim
 if strcmp(dataBase_clin.save_fig, 'y')
     plot_all_ccep(dataBase_clin, dataBase_prop, myDataPath)
 end
+
+%% Determine the amplitude and latency of the P1 and the highest point before N1
+% Necessary to determine the rise and fall times of the N1.
+
+N1_rise_fall(dataBase_clin, dataBase_prop, myDataPath);
+
+disp('N1_rise and N1_fall are saved, to be later used in PROS02_pipeline_agreement.') 
+
+

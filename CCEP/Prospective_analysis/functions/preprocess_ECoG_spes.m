@@ -12,15 +12,14 @@ end
 % if cfg.dir_avg is not defined in config_CCEP.m, default is 'no'
 if sum(contains(fieldnames(cfg),'dir_avg'))<1
     cfg.dir_avg = 'no';
-    avg_stim = [];
 end
 
 for subj = 1:size(dataBase,2)
     
-%% define artefact period - stimuli during an artefact become NaNs
+% Define artefact period - stimuli during an artefact become NaNs
 % This must be defined for all electrodes or for specified electrodes.
 
-    elec_art = find(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));                % Find rows with artefact in them
+     elec_art = find(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));                % Find rows with artefact in them
     elec_art_all = find(strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all'));  % Find the artefacts which concern all electrodes
     elec_art_in_all = find(ismember(elec_art, elec_art_all));                               % done because notes like STIM_on also concern 'all'.
 
@@ -37,7 +36,7 @@ for subj = 1:size(dataBase,2)
         ev_artefact_stop = str2double(ev_artefact_stop);
     end
 
-    ev_artefact_all = zeros(1,max(dataBase(subj).tb_events.sample_end));                % This type of preallocation is necessary because in pipeline_preprocess, structs with empty cells are removed.
+    ev_artefact_all = zeros(1,100);                                                         % Preallocation with a guess of the size, structs with empty cells are removed.
     % When there are multiple artefacts, then the times samples are concatenaded
     % in the same array. So ev_artefact is not overwritten
     for i=1:size(ev_artefact_start,1)
@@ -46,14 +45,16 @@ for subj = 1:size(dataBase,2)
 
     dataBase(subj).ev_artefact_all = ev_artefact_all;
     
+%%%% WHEN ARTEFACTS ARE SPECIFIED PER ELECTRODE THEY ARE CURRENTLY NOT
+%%%% REMOVED. ONLY APPLICABLE FOR PATIENT PRIOS01
 
-% % When artefact is specified per electrode
-% % Electrode contains label artefact, though does not contain label all
+% When artefact is specified per electrode
+% Electrode contains label artefact, though does not contain label all
 % row_spec_elek = find(ismember(elec_art, (find(~strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all')))));
 % art_spec_elek = dataBase(subj).tb_events.electrodes_involved_onset(row_spec_elek);
 % art_elek_start = dataBase(subj).tb_events.sample_start(row_spec_elek);
 % art_elek_stop = dataBase(subj).tb_events.sample_end(row_spec_elek);
-% 
+
 % newStr = extractBetween(art_spec_elek(1,:),',')   
 % 
 %     if iscell(art_elek_start)
@@ -292,12 +293,7 @@ for subj = 1:size(dataBase,2)
                 else
                     cc_epoch_sorted_all(elec,n,ll,:) = dataBase(subj).data(elec,dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1:dataBase(subj).tb_events.sample_start(eventnum(n))+round((epoch_length-epoch_prestim)*dataBase(subj).ccep_header.Fs));
                     tt_epoch_sorted_all(n,ll,:) = dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1:dataBase(subj).tb_events.sample_start(eventnum(n))+round((epoch_length-epoch_prestim)*dataBase(subj).ccep_header.Fs);
-                %%% WAARSCHIJNLIJK ZIJN ER NU TE VEEL N's KLAARGEZET IN DE ALLOCATION, 
-                %%% DUS DIE RIJEN BLIJVEN WAARSCHIJNLIJK NU NaN ALS ER GEEN
-                %%% EVENT IS. 
-                
-                %%% NaNs DUS OMITTEN!!!
-                            
+                                         
                 end
             end
         
@@ -316,9 +312,6 @@ for subj = 1:size(dataBase,2)
     
     for ll = 1:max(IC_avg)                     % Takes every value between 1 and max while some numbers are not used, therefore the next line
 
-        %%% DIT MAAKT GEBRUIK VAN EEN OUDE BEREKENING VAN IC_AVG, 
-        %%% HIERBOVEN KUNNEN STIMPAREN WEGGEHAALD ZIJN VANWEGE ARTEFACT OF BS,
-        %%% EN DUS NIET MEER IN BEIDE RICHTINGEN GESTIMULERED ZIJN
             stimps = find(IC_avg == ll);
             
         if any(~isnan(cc_epoch_sorted_all(1,:,stimps(1),1))) && any(~isnan(cc_epoch_sorted_all(1,:,stimps(2),1))) % Check whether the stimpair is stimulated in both directions.      
@@ -351,6 +344,7 @@ if any(find(isnan(cc_epoch_sorted_avg(1,:,1)))>0)
     cc_epoch_sorted_select(:,remove_stimp_avg,:,:) = [];
 
     % All
+    remove_stimp_all = zeros(size(remove_stimp_avg,2),2);
     for i = 1:size(remove_stimp_avg,2)
         remove_stimp_all(i,1:2) = find(IC_avg == remove_stimp_avg(i))';  
     end
