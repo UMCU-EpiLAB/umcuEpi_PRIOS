@@ -50,31 +50,6 @@ disp('Detection of ERs is completed')
 % Only run this script for PRIOS04 or PRIOS05
 dataBase = check_interobs(dataBase_clin, myDataPath);
 
-% Find the number of samples after the stimulation artefact
-% 9 ms is 19 samples
-% Fs = 2048 
-Latency_interOb = dataBase.ccep.n1_peak_sample_check_check-(2*2048);            % To samples after stimulation artefact
-Num_interOb = find(~isnan(Latency_interOb));
-Latency_interOb(isnan(Latency_interOb)) = [];
-numel(find(Latency_interOb<19))
-
-% Latencies of detector detected ERs
-Latency_detector = dataBase.ccep.n1_peak_sample-(2*2048);
-Latency_detector = Latency_detector(Num_interOb)';
-
-figure()
-boxplot([Latency_interOb' Latency_detector'],'Notch','on', ...
-        'Labels',{'Checked Latencies N1','Detector latencies N1'})
-ylabel('Number of samples after stimulation artefact')
-
-% Save
-outlabel=('N1_latency_interObs.jpg');
-path = fullfile(myDataPath.CCEP_interObVar,'N1_latency_interOb/');
-if ~exist(path, 'dir')
-    mkdir(path);
-end
-saveas(gcf,[path,outlabel],'jpg')
-
 
 %% Determine the Cohen's Kappa interobserver variability
 % Determine this with checked files of two raters/observers

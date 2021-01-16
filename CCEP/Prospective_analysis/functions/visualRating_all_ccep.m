@@ -1,5 +1,7 @@
-
 function dataBase = visualRating_all_ccep(dataBase)
+% This function could be used when all signals are to be checked. % Can be
+% performed to check the detector since the detected N1 can be plot in the
+% signal
 
 
 % INSTRUCTIONS

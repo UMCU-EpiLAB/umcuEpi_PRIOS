@@ -37,11 +37,11 @@ for i = 1:size(dataBase,2)
                  data(channel,(stimart_start:stimart_stop)) = NaN;            % Make the period of the stimulation artefact as NaN.
                 
                  % interpolate between the points of the stimulation artefact.
-                 % Use 40 samples before and after the artefact. 
+                 % Use 40 samples before and after the artefact to calculate the value in the [-1.5 ms : 9 ms] interval. 
                  Interpol_period = data(channel,((stimart_start - 40) : (stimart_stop + 40))) ;              % find the signal 40 samples before and after stimulation artefact,
                  IX = 1:numel(Interpol_period);
-                 tf = isnan(Interpol_period);                                                        % Find the NaN's 
-                 Interpol_period(tf) = interp1(IX(~tf),Interpol_period(~tf),IX(tf));                 % Interpolate between the -40 and +40 samples around the stimulation artefact
+                 tf = isnan(Interpol_period);                                                        % Find the NaN's (interval that has to be interpolated)
+                 Interpol_period(tf) = interp1(IX(~tf),Interpol_period(~tf),IX(tf));                 % Interpolate between the value -40 and +40 samples around the stimulation artefact
              
                  data(channel, ((stimart_start - 40) : (stimart_stop + 40))) = Interpol_period;
                   
@@ -60,7 +60,6 @@ for i = 1:size(dataBase,2)
 %     legend('without artefact')
 %     title('Whole signal with and without the stimulation artefacts')
 %     xlabel('time (samples')
-     
      
     
     % Filter every signal
@@ -113,13 +112,7 @@ for i = 1:size(dataBase,2)
 % %     ylim([-1000 2000])
 %     legend('Filtered','Original')
 %     title(sprintf('%s, %s, channel: %s',dataBase(i).sub_label, dataBase(i).run_label,dataBase(i).ch{ch}))
-%     
-%     % Save figure
-%     Frequencies = fullfile(myDataPath.CCEPpath,dataBase(i).sub_label,'/',...
-%     [dataBase(i).sub_label '_' dataBase(i).run_label '_frequencies_withoutBedArt' ])
-%     set(gcf,'PaperPositionMode','auto');
-%     print('-dpng','-r300',Frequencies);
-%     savefig(Frequencies);
+
 
       
 dataBase(i).data = signal_filt_pass;    

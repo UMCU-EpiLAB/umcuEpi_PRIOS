@@ -1,7 +1,4 @@
-
 function dataBase = visualRating_ccep(dataBase)
-
-
 % INSTRUCTIONS
 % select new point: select new point > enter or y
 % correct: y
@@ -11,6 +8,7 @@ close all
 
 tt = dataBase.tt;
 
+% Load the N1 amplitude and sample number of automatic detection
 n1_peak_amplitude = dataBase.ccep.n1_peak_amplitude;
 n1_peak_sample = dataBase.ccep.n1_peak_sample;
 
@@ -18,6 +16,8 @@ n1_peak_sample = dataBase.ccep.n1_peak_sample;
 n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
 n1_peak_sample_check = NaN(size(n1_peak_sample));
 
+% Check the automatically detected ER for every stimulation-electrode
+% combination in which an N1 is detected.
 for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
         
     for chan =1 :size(dataBase.cc_epoch_sorted_avg,1)

@@ -19,7 +19,7 @@ for subj = 1:size(dataBase,2)
 % Define artefact period - stimuli during an artefact become NaNs
 % This must be defined for all electrodes or for specified electrodes.
 
-     elec_art = find(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));                % Find rows with artefact in them
+    elec_art = find(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));                % Find rows with artefact in them
     elec_art_all = find(strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all'));  % Find the artefacts which concern all electrodes
     elec_art_in_all = find(ismember(elec_art, elec_art_all));                               % done because notes like STIM_on also concern 'all'.
 
@@ -40,41 +40,54 @@ for subj = 1:size(dataBase,2)
     % When there are multiple artefacts, then the times samples are concatenaded
     % in the same array. So ev_artefact is not overwritten
     for i=1:size(ev_artefact_start,1)
-        ev_artefact_all = [ev_artefact_all, ev_artefact_start(i):ev_artefact_stop(i)];   
+        ev_artefact_all = [ev_artefact_all, ev_artefact_start(i):ev_artefact_stop(i)];    %#ok<AGROW>
     end
 
     dataBase(subj).ev_artefact_all = ev_artefact_all;
     
-%%%% WHEN ARTEFACTS ARE SPECIFIED PER ELECTRODE THEY ARE CURRENTLY NOT
-%%%% REMOVED. ONLY APPLICABLE FOR PATIENT PRIOS01
 
-% When artefact is specified per electrode
-% Electrode contains label artefact, though does not contain label all
-% row_spec_elek = find(ismember(elec_art, (find(~strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all')))));
-% art_spec_elek = dataBase(subj).tb_events.electrodes_involved_onset(row_spec_elek);
-% art_elek_start = dataBase(subj).tb_events.sample_start(row_spec_elek);
-% art_elek_stop = dataBase(subj).tb_events.sample_end(row_spec_elek);
 
-% newStr = extractBetween(art_spec_elek(1,:),',')   
-% 
-%     if iscell(art_elek_start)
-%         art_elek_start = str2double(art_elek_start);
-%     end
-% 
-%     if iscell(art_elek_stop)
-%         art_elek_stop = str2double(art_elek_stop);
-%     end
-% 
-%     ev_artefact_elek = zeros(1,max(dataBase(subj).tb_events.sample_end));        % This type of preallocation is necessary because in pipeline_preprocess, structs with empty cells are removed.
-%     % When there are multiple artefacts, then the times samples are concatenaded
-%     % in the same array. So ev_artefact is not overwritten
-%     for i=1:size(art_elek_start,1)
-%         ev_artefact_elek = [ev_artefact_elek, art_elek_start(i):art_elek_stop(i)];   
-%     end
-% 
-%     dataBase(subj).ev_artefact_elek = ev_artefact_elek;
-% 
-%     clear i
+%% When artefact is specified per electrode
+row_spec_elek = find(ismember(elec_art, (find(~strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all')))));     % Electrode contains label artefact, though does not contain label all  
+art_spec_elek = dataBase(subj).tb_events.electrodes_involved_onset(row_spec_elek);                                       % Find name of electrode involved
+art_elek_start = dataBase(subj).tb_events.sample_start(row_spec_elek);
+art_elek_stop = dataBase(subj).tb_events.sample_end(row_spec_elek);
+
+% Find sample start stimulation, because artefacts before stimart are
+% ignored
+stim_start = find(strcmp(dataBase(subj).tb_events.trial_type,'electrical_stimulation'));
+start_stim = dataBase(subj).tb_events.sample_start(stim_start(1));
+
+% For PRIOS02 there are many artefacts before stimulation start these are
+% ignored.
+for i = 1:size(art_spec_elek,1)
+    if art_elek_stop(i) > start_stim
+
+        if iscell(art_elek_start)
+            art_elek_start = str2double(art_elek_start);
+        end
+
+        if iscell(art_elek_stop)
+            art_elek_stop = str2double(art_elek_stop);
+        end
+
+        ev_artefact_elek = zeros(1,100);        % Preallocation with a guess of the size, structs with empty cells are removed.
+        % When there are multiple artefacts, then the times samples are concatenaded
+        % in the same array. So ev_artefact is not overwritten
+        ev_artefact_elek = [ev_artefact_elek, art_elek_start(i):art_elek_stop(i)];    %#ok<AGROW>
+
+        dataBase(subj).ev_artefact_elek = ev_artefact_elek;
+
+        clear i
+
+    else
+        % Do nothing because the artefact is already over before stimulation
+        % started
+    end
+end
+%     newStr = extractBetween(art_spec_elek(1,:),',')   ;                 % Split when multiple electrodes are named in one annotaion
+
+   
      
     %% Remove Burst suppression periods 
     BS_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
@@ -87,15 +100,16 @@ for subj = 1:size(dataBase,2)
         BS_stop = str2double(BS_stop);
     end
 
-    BS_sig = zeros(1,max(dataBase(subj).tb_events.sample_end));
+    BS_sig = zeros(1,100);          % Preallocation with a guess of the size, structs with empty cells are removed.
     for i=1:size(BS_start,1)
-        BS_sig = [BS_sig, BS_start(i):BS_stop(i)]; 
+        BS_sig = [BS_sig, BS_start(i):BS_stop(i)];  %#ok<AGROW>
     end
 
     dataBase(subj).Burstsup = BS_sig;
 
     
      %% Remove seizure periods 
+     % This is yet no electrode specific
     SZ_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'seizure'));
     SZ_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'seizure'));
 
@@ -106,9 +120,9 @@ for subj = 1:size(dataBase,2)
         SZ_stop = str2double(SZ_stop);
     end
 
-    SZ_sig = zeros(1,max(dataBase(subj).tb_events.sample_end));
+    SZ_sig = zeros(1,100);                  % Preallocation with a guess of the size, structs with empty cells are removed.
     for i=1:size(SZ_start,1)
-       SZ_sig  = [SZ_sig, SZ_start(i):SZ_stop(i)];              % When there are multiple SZ, then the times samples are concatenaded in the same array
+       SZ_sig  = [SZ_sig, SZ_start(i):SZ_stop(i)];              %#ok<AGROW> % When there are multiple SZ, then the times samples are concatenaded in the same array
     end
 
     dataBase(subj).Seizure = SZ_sig;
@@ -276,11 +290,14 @@ for subj = 1:size(dataBase,2)
                        % do nothing, because part of artefact, therefore
                        % this event is not used
                        
-%                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact_elek)
-%                     if ismember(dataBase.ch{elec}, art_spec_elek{:})                                       % When the concerning electrode is part of a specified artefact
-%                        % do nothing, because part of an electrode specified artefact, therefore
-%                        % this event is not used
-%                     end
+                       % When the concerning electrode is part of a electrode-specified artefact, that is not applicable to the whole electrode-dataset
+                elseif ismember(dataBase.ch{elec}, art_spec_elek) && ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact_elek)
+                    % When eventnum is part of ev_artefact_elek AND the
+                    % specified electrode
+                                                                              
+                    % do nothing, because part of an electrode specified artefact, therefore
+                    % this event is not used
+
                         
                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),BS_sig)
                     % do nothing because stimulation is part of burst

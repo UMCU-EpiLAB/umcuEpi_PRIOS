@@ -54,25 +54,7 @@ for run = 1: size(uni_runlabel,2)
         R2_ori(:,extra_rater2) = [];
         rater2(run).ccep_clin.stimsets_avg(extra_rater2,:) = [];
     end
-    
-%     % Check whether the stimpairs are equal in both ratings. 
-%     if ~isequal(rater1(run).ccep.cc_stimsets(:,:) , rater2(run).ccep_clin.stimsets_avg(:,:))
-%         diff_stimp = find(rater1(run).ccep.cc_stimsets ~= rater2(run).ccep_clin.stimsets_avg);
-%         rater1(run).ccep.cc_stimsets(diff_stimp(1,:),:) = [];
-%         N1_peak_R1(:,diff_stimp(1,:)) = []; 
-%         R1_ori(:,diff_stimp(1,:)) = [];                 
-% 
-%         % Also remove them for rater 2
-%         rater2(run).ccep_clin.stimsets_avg(diff_stimp(1,:),:) = [];
-%         N1_peak_R2(:,diff_stimp(1,:)) = []; 
-%         R2_ori(:,diff_stimp(1,:)) = [];
-% 
-%         % Check again
-%         if ~isequal(rater1(run).ccep.cc_stimsets(:,:) , rater2(run).ccep_clin.stimsets_avg(:,:))
-%             warning('Check the stimulation pairs since they are still not equal')
-%         end
-%     end
-      
+         
     % Convert matrix with sample numbers to binary matrix
     N1_peak_R2(~isnan(N1_peak_R2)) = 1;     % all non-NaNs are amplitudes, so N1s --> 1
     N1_peak_R2(isnan(N1_peak_R2)) = 0;      % all NaNs are no N1s --> 0

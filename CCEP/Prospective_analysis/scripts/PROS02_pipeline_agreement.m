@@ -173,3 +173,6 @@ vis_report(dataBase, myDataPath)
 %% Determine the Cohen's Kappa interobserver variability
 % Determine this with checked files of two raters/observers
 interobserverKappa(myDataPath);
+
+% Function check_interobs.m can be used to visualise the inter-observer
+% agreement. An excel is saved which is loaded in check_interobs.m

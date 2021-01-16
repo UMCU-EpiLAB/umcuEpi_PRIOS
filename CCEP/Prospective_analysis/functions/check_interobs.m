@@ -67,14 +67,8 @@ for Event = 1:size(T,1)                           % For each stimulation pair
                     cp = get(gca,'CurrentPoint');
                                                               
                     % find sample number closest to the selected point
+                    % Try to select the N1-peak as correctly as possible!
                     [~,sampnum] = min(abs(tt-cp(1,1)));
-                    
-                    % find nearby peak
-%                     [~,locs] = findpeaks(-1*this_plot_avg(sampnum-50:sampnum+50),...
-%                         'NPeaks',1,'SortStr','descend');
-%                     
-%                     % find x-position of nearby peak
-%                     locsamp = sampnum-50+locs-1;
                     
                     locsamp = sampnum;
                     
@@ -102,4 +96,33 @@ end
 
 dataBase.ccep.n1_peak_amplitude_check_check = n1_peak_amplitude_check_check;
 dataBase.ccep.n1_peak_sample_check_check = n1_peak_sample_check_check;
+
+%% Visualise the interobserver agreement
+% Find the number of samples after the stimulation artefact
+% 9 ms is 19 samples
+% Fs = 2048 
+Latency_interOb = dataBase.ccep.n1_peak_sample_check_check-(2*2048);            % To samples after stimulation artefact
+Num_interOb = find(~isnan(Latency_interOb));
+Latency_interOb(isnan(Latency_interOb)) = [];
+numel(find(Latency_interOb<19))
+
+% Latencies of detector detected ERs
+Latency_detector = dataBase.ccep.n1_peak_sample-(2*2048);
+Latency_detector = Latency_detector(Num_interOb)';
+
+figure()
+boxplot([Latency_interOb' Latency_detector'],'Notch','on', ...
+        'Labels',{'Checked Latencies N1','Detector latencies N1'})
+ylabel('Number of samples after stimulation artefact')
+
+% Save
+outlabel=('N1_latency_interObs.jpg');
+path = fullfile(myDataPath.CCEP_interObVar,'N1_latency_interOb/');
+if ~exist(path, 'dir')
+    mkdir(path);
+end
+saveas(gcf,[path,outlabel],'jpg')
+
+end
+
 

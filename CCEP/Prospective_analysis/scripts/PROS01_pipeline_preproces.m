@@ -43,7 +43,7 @@ for i = 1:size(dataBase,2)
 
     if ismember(dataBase(i).task_name,'task-SPESclin')
        cfg.minstim = 5;
-       dataBase_clin(i,:) = preprocess_ECoG_spes(dataBase(i),cfg); %#ok<SAGROW>
+       dataBase_clin(i,:) = preprocess_ECoG_spes(dataBase(i),cfg);       %#ok<SAGROW>
       
     elseif ismember(dataBase(i).task_name,'task-SPESprop')
         cfg.minstim = 1;
@@ -75,12 +75,11 @@ end
 [dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop);
 
 
-tt = dataBase_clin.tt;
-
-% check whether similar stimuli are present in the same stimulus pair
-figure('Position',[515,333,1034,707]); 
-
+% Visualise the signal of specified stimpair and channel
 chan = 4; stim=1;
+
+tt = dataBase_clin.tt;
+figure('Position',[515,333,1034,707]); 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
