@@ -14,7 +14,6 @@ files = dir(fullfile(myDataPath.CCEP_allpat));
 
 dataBase = struct;                      
 
-
 for i = 1:size(ccep_allPat.sub_labels,2)
     dataBase(i).sub_label = ccep_allPat.sub_labels{i}; 
     
@@ -92,14 +91,10 @@ for subj = 1:size(dataBase,2)
     [dataBase(subj).statistics, dataBase(subj).rank] = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep_clin);
 end
 
-%% Create Violinplot of the ranking of the number of ERs per stimulation pair. 
-
-    ERs_perStimp_violin(dataBase,myDataPath)   
-
 
 %% Visualise the agreement in a scatter plot of the absolute values
 
-    scatter_networkPar(dataBase,myDataPath)
+scatter_networkPar(dataBase,myDataPath)
 
 %% Determine multiplication factor of the network parameters    
 % Data is not normally distributed therefore the median is calculated
@@ -145,30 +140,21 @@ T = table(Mult_factor(:,1),Mult_factor(:,2),Mult_factor(:,3),Mult_factor(:,4), '
 % When using the same: the absolute values can easier be compared
 % When using specific colorscale, the ranking is easier comparable.
 
-
 for subj = 1:size(dataBase,2)
     visualise_gridstructure(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).agreement_parameter);
 end
 
-%% Visualise the network characteristics in a heatmap to later plot on the MRI
-% Create a heatmap of the network characteristics with the outlay of the
-% electrodes from the matlabSjabloon in Excel.
-
-for subj = 1:size(dataBase,2)
-    
-    heat_map_grid(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).agreement_parameter)
-
-end
 %% Make bar graph of number of ERs per SPES session per patient
 % Function used to group/sort all scripts only used for visualisation of
 % results for the report
 
-vis_report(dataBase, myDataPath)
+% Also contains heat_map_grid.m & ERs_stimp_violin.m
 
+vis_report(dataBase, myDataPath)
 
 %% Make boxplots of the latency and amplitude of the N1 peaks.
 % Folder Violinplot-Matlab has to be added to the path. 
-    boxplot_N1_peak(dataBase, myDataPath)
+boxplot_N1_peak(dataBase, myDataPath)
 
 %% Determine the Cohen's Kappa interobserver variability
 % Determine this with checked files of two raters/observers

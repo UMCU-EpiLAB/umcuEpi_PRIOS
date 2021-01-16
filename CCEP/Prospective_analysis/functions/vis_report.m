@@ -64,4 +64,17 @@ if ~exist(path, 'dir')
 end
 saveas(gcf,[path,outlabel],'jpg')
 
+%% Visualise the network characteristics in a heatmap to later plot on the MRI
+% Create a heatmap of the network characteristics with the outlay of the
+% electrodes from the matlabSjabloon in Excel.
+
+for subj = 1:size(dataBase,2)    
+    heat_map_grid(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).agreement_parameter)
+end
+
+%% Create Violinplot of the ranking of the number of ERs per stimulation pair. 
+
+ERs_perStimp_violin(dataBase,myDataPath) 
+    
+    
 end

@@ -190,36 +190,5 @@ end
 saveas(gcf,[path,outlabel],'jpg')
 
 
-
-
-%% MRI figures with a layer of the network characteristics
-% Currently only for PRIOS06 becuase this patient had the 'easiest' MRI.
-
-if ismember('PRIOS06', subj)
-    
-    figure()
-    MRI = imread('PRIOS06.jpg');
-    imshow(MRI)
-    title(sprintf('%s Indegree SPES-clin',subj{:}))
-
-    % Get the points of the elektrodes in the CT scan
-    % Make sure to select the electrodes in the same order as the electrode
-    % names in dataBase.ch!!! (check excel sjabloon when nessecary)
-%     [xi,yi] = getpts;                                                      % When done, press enter twice to save the coordinates
-    hold on
-    colormap(flipud(hot))  
-    im = scatter(xi, yi, 260, agreement_parameter.indegreeN_Clin(:,1:size(xi,1))' ,'filled');
-    alpha(im,0.5);
-
-    % Save figure
-    outlabel=sprintf('sub-%s_SPES_Clin Indegree.jpg',...
-        subj{1});
-    path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/HeatMap_grid/');
-    if ~exist(path, 'dir')
-        mkdir(path);
-    end
-    saveas(gcf,[path,outlabel],'jpg')
-
-
 end
 end
