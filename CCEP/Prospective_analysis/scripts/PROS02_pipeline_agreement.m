@@ -92,7 +92,7 @@ for subj = 1:size(dataBase,2)
 end
 
 
-%% Visualise the agreement in a scatter plot of the absolute values
+%% Visualise the agreement in a scatter plots
 
 scatter_networkPar(dataBase,myDataPath)
 
@@ -152,7 +152,7 @@ end
 
 vis_report(dataBase, myDataPath)
 
-%% Make boxplots of the latency and amplitude of the N1 peaks.
+%% Make boxplots of the latency of the N1 peaks.
 % Folder Violinplot-Matlab has to be added to the path. 
 boxplot_N1_peak(dataBase, myDataPath)
 
@@ -161,4 +161,5 @@ boxplot_N1_peak(dataBase, myDataPath)
 interobserverKappa(myDataPath);
 
 % Function check_interobs.m can be used to visualise the inter-observer
-% agreement. An excel is saved which is loaded in check_interobs.m
+% agreement. An excel is saved with the different responces between R1 and 
+% R2, this can be loaded in check_interobs.m

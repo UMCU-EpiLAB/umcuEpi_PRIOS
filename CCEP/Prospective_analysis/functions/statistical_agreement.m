@@ -127,19 +127,6 @@ set(gca,'xtick',[])
 str_main = sprintf('%s, \\Delta = %1.1f',SubjectName{1},shift_rank);  
 sgtitle(str_main)
 
-    
-% xlim([1, 2])
-% set(gca,'xtick',[])
-%     if PVAL_stmp(:) <0.01
-%        str_main = sprintf('%s, p < 0.01',SubjectName{1});
-%     elseif PVAL_stmp(:) <0.05
-%         str_main = sprintf('%s, p < 0.05',SubjectName{1});
-%     else
-%         str_main = sprintf('sub-%s, p = %1.2f', SubjectName{1},PVAL_stmp);
-%     end
-% sgtitle(str_main)
-
-
 n=1;
 for k = 1:length(rank.fig_sort_names_SPES_clin)
     if ~strcmp(rank.fig_sort_names_SPES_clin{k},' ')

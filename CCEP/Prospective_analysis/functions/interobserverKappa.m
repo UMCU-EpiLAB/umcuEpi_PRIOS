@@ -1,4 +1,6 @@
 function interobserverKappa(myDataPath)
+% Determine the Cohen's Kappa interobserver variability
+% Determine this with checked files of two raters/observers
 
 clc;
 files = dir(fullfile(myDataPath.CCEP_interObVar));
@@ -21,9 +23,9 @@ for run = 1: size(uni_runlabel,2)
    
         % PRIOS study is rater2, REC2Stim is rater1.
         if contains(files(i).name, uni_runlabel{run}) && contains(files(i).name, 'PRIOS') 
-           rater2(run,:) = load(fullfile(files(i).folder,files(i).name)) ;
+           rater2(run,:) = load(fullfile(files(i).folder,files(i).name)) ; 
         elseif contains(files(i).name, uni_runlabel{run}) && contains(files(i).name, 'REC2Stim')
-           rater1(run,:) =load(fullfile(files(i).folder,files(i).name)) ;
+           rater1(run,:) =load(fullfile(files(i).folder,files(i).name)) ; 
  
         end
     end
@@ -91,7 +93,7 @@ for run = 1: size(uni_runlabel,2)
        
     % Cohens kappa unweighted is used to determine the interobserver
     % variablity
-    C = confusionmat(R1_auto_ER, R2_auto_ER)                        % Convert to confusion matrix
+    C = confusionmat(R1_auto_ER, R2_auto_ER);    disp(C)            % Convert to confusion matrix
     n = sum(C(:));                                                  % get total N
     C = C./n;                                                       % Convert confusion matrix counts to proportion of n
     r = sum(C,2);                                                   % row sum
@@ -110,7 +112,7 @@ for run = 1: size(uni_runlabel,2)
      
     % Find where R1 has an one/zero
     elec_one_R1 = auto_ERs ;
-    elec_one_R1(find(R1_auto_ER == 0)) = [];              % Remain with the electrodes with a one
+    elec_one_R1(find(R1_auto_ER == 0)) = [];              %#ok<*FNDSB> % Remain with the electrodes with a one
         
     % Find where R2 has an one/zero
     elec_one_R2 = auto_ERs ;
@@ -129,7 +131,7 @@ for run = 1: size(uni_runlabel,2)
            stimp = ceil(R1_only(i)/num_elec);
           
            diff_rat{i,1} = R1_only(i)-((stimp-1)*num_elec);                          % Electrode number
-           diff_rat(i,2) = rater1(run).ccep.ch(R1_only(i)-((stimp-1)*num_elec));     % Electrode name
+           diff_rat(i,2) = rater1(run).ccep.ch(R1_only(i)-((stimp-1)*num_elec));     %#ok<*AGROW> % Electrode name
            diff_rat(i,3:4) = num2cell(rater2(run).ccep_clin.stimsets_avg(stimp,1:2));    % Stimpair name
 
        else % for stimpair 1

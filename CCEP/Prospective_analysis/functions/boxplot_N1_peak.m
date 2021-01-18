@@ -1,12 +1,15 @@
 function boxplot_N1_peak(dataBase, myDataPath)
+% Make boxplots of the latency of the N1 peaks.
+
 close all
 clc
+
 % Statistics
 for subj = 1:size(dataBase,2)
     ccep_clin = dataBase(subj).ccep_clin;
     ccep_prop = dataBase(subj).ccep_prop;
 
-    fs = 1/(size(ccep_prop.tt,2)/4);                                        % Devide tt by four because ccep_prop.tt includes 4 seconds.
+    fs = 1/(size(ccep_prop.tt,2)/4);                             % Devide tt by four because ccep_prop.tt includes 4 seconds.
     clin = ccep_clin.n1_peak_sample_check;
     clin = ((clin*fs)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
     prop = ccep_prop.n1_peak_sample_check;
@@ -21,8 +24,8 @@ for subj = 1:size(dataBase,2)
 
         % When both clinical SPES and propofol SPES show an ER
           if ~isnan(clin(elec, stimp)) &&  ~isnan(prop(elec, stimp)) 
-                new_mat(i,1) = clin(elec, stimp);            % plot the SPES-clin amp in column 1
-                new_mat(i,2) = prop(elec, stimp);            % plot the SPES-prop amp in column 2
+                new_mat(i,1) = clin(elec, stimp);            %#ok<AGROW> % plot the SPES-clin amp in column 1
+                new_mat(i,2) = prop(elec, stimp);            %#ok<AGROW> % plot the SPES-prop amp in column 2
                 i = i+1;                
           end
         end      
@@ -122,10 +125,9 @@ end
 saveas(gcf,[path,outlabel],'jpg')
 
         
-%% Make scatter of the amplitude and latency
+%% Make scatter of the latency
 figure('Position',[302,17,938,1039])
 
-% for mode_N1 = 1:size(mode,2)
 for subj = 1:size(dataBase,2)
         
        colm_clin = 2*subj-1;
@@ -166,21 +168,7 @@ for subj = 1:size(dataBase,2)
         % Ymax is determined by the value on the y-axis which is the
         % SPES-prop
         ymin = round(min(prop, [], 'all'),2);
-        ymax = round(max(prop, [], 'all'),2);
-        
-        % PLot reference line when data is NOT significant
-%         if p > 0.05
-%             P = polyfit(clin, prop,1);
-%             X = xmin : 0.1*xmax : xmax+(0.2*xmax);
-%             Y = P(1)*X + P(2);
-% 
-%             hold on
-%             h=plot(X,Y);
-%             hold off
-%             h.LineWidth = 2;
-% %                     legend(sprintf('%s',mode{mode_N1}),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',12)      
-%         end
-        
+        ymax = round(max(prop, [], 'all'),2);      
         xlim([xmin, xmax+2])
         ylim([ymin, ymax+5])
 end 

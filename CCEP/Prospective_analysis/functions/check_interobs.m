@@ -97,7 +97,7 @@ end
 dataBase.ccep.n1_peak_amplitude_check_check = n1_peak_amplitude_check_check;
 dataBase.ccep.n1_peak_sample_check_check = n1_peak_sample_check_check;
 
-%% Visualise the interobserver agreement
+%% Visualise the difference of latency of observer and detector
 % Find the number of samples after the stimulation artefact
 % 9 ms is 19 samples
 % Fs = 2048 
@@ -108,7 +108,7 @@ numel(find(Latency_interOb<19))
 
 % Latencies of detector detected ERs
 Latency_detector = dataBase.ccep.n1_peak_sample-(2*2048);
-Latency_detector = Latency_detector(Num_interOb)';
+Latency_detector = Latency_detector(Num_interOb)'; %#ok<FNDSB>
 
 figure()
 boxplot([Latency_interOb' Latency_detector'],'Notch','on', ...

@@ -1,6 +1,6 @@
 function visualise_gridstructure(myDataPath, ccep_clin, agreement_parameter)
 % Display the values of the network parameters/characterisitcs on the
-% patients grid-structure
+% patients grid-structure from the matlabsjabloon sheet in an excel file
 
 subj = extractBetween(ccep_clin.dataName,'sub-','/ses');
 
