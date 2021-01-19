@@ -1,15 +1,15 @@
 clear; 
 clc;
 
-% Choose patient
-config_CCEP
-
 % set paths
 cfg.mode = 'pros';
 myDataPath = setLocalDataPath(cfg);
 
+% Choose patient
+config_CCEP
+
 %% Load ECOG data
-% Find if there are multiple runs
+% Find SPESclin and SPESprop 
 files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg',...
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
@@ -30,11 +30,12 @@ fprintf('Data of subject %s is loaded. \n',cfg.sub_labels{1})
     
     
 %% Filter
-% When this is used, dataBase.data will change into the fltered data
+% When this is used, dataBase.data will change into the filtered data
 % DataBase.raw_data will not be changed and will keep the raw data
 dataBase = filter_bedArt(dataBase);
 
 fprintf('Both runs of subject %s are filtered. \n',cfg.sub_labels{1})
+
 %% CCEP for SPES-clin stimulations
 % save all stimuli of clinical SPES
 
@@ -232,7 +233,7 @@ end
 %% Determine the amplitude and latency of the P1 and the highest point before N1
 % Necessary to determine the rise and fall times of the N1.
 
-N1_rise_fall(dataBase_clin, dataBase_prop, myDataPath);
+N1_rise_fall(dataBase_clin, dataBase_prop, cfg,myDataPath);
 
 disp('N1_rise and N1_fall are saved, to be later used in PROS02_pipeline_agreement.') 
 

@@ -96,10 +96,9 @@ end
 
 
 % Test the hypothesis of NO correlation
-% When p <0.05, an rho is close to (-)1, rejection of the hypothesis that
-% no correlation exists between the two columns i.e. there is a
-% correlation
-[RHO_stmp,PVAL_stmp] = corr(rank.unsort_SPES_clin(:,3) , rank.unsort_SPES_prop(:,3) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
+% When p <0.05, an rho is close to (-)1, approval of the hypothesis that
+% there is (negative) correlation between the two columns 
+[RHO_stmp,PVAL_stmp] = corr(rank.unsort_SPES_clin(:,3) , rank.unsort_SPES_prop(:,3) ,'Type','Spearman');            % Test the hypothesis that there is a correlation
 fprintf('Spearman Corr between stimpair ranking of SPES-clin and SPES-prop gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
 
 figure('Position',[1074,4,519,1052]);

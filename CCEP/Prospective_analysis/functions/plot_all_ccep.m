@@ -6,6 +6,10 @@ function plot_all_ccep(ccep_clin, ccep_prop, myDataPath)
 tt = ccep_clin.tt;    
 set(groot,'defaultFigureVisible','on')          % 'on' to turn figures showing on, 'off' to not show the figures.  
 
+% x-scale for plotting
+xmin = -0.01;
+xmax = 0.5;
+
 % When the status of the channel is bad, not visualise the response
 bad_sig_clin(:,1) = find(contains(ccep_clin.tb_channels.status, {'bad'}));  
 ccep_clin.cc_epoch_sorted_avg(bad_sig_clin,:,:) = NaN;
@@ -48,7 +52,7 @@ for stimp = 1:length(ccep_clin.stimpnames_avg)            % For each stimulation
         str = sprintf('%s Clinical SPES', Stimpnm_clin);
         title(str)
         set(gca,'YTick',(0:1000:size(plot_ccep_clin,1)*1000-1),'YTickLabel',ccep_clin.ch) ;                  
-        xlim([-.01 0.11]); xlabel('time (s)') 
+        xlim([xmin xmax]); xlabel('time (s)') 
         ylim([-1000 size(plot_ccep_clin,1)*1000-1]); ylabel('All stimuli of this stimulation pair' )
         
        
@@ -65,8 +69,8 @@ for stimp = 1:length(ccep_clin.stimpnames_avg)            % For each stimulation
         str = sprintf('%s Propofol SPES', Stimpnm_prop);
         title(str)
         set(gca,'YTick',(0:1000:size(plot_ccep_prop,1)*1000-1),'YTickLabel',ccep_prop.ch) ;                  
-        xlim([-.01 0.11])
-        ylim([-1000 size(plot_ccep_clin,1)*1000-1])
+        xlim([xmin xmax])
+        ylim([-1000 size(plot_ccep_prop,1)*1000-1])
         ylabel('All stimuli of this stimulation pair' )
         xlabel('time (s)') 
         
