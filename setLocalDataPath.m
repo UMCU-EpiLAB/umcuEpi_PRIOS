@@ -54,6 +54,14 @@ elseif ~isempty(varargin)
             addpath(genpath([RepoPath,'/CCEP/Prospective_analysis']));
 
             localDataPath = personalDataPath_pros(varargin{1});
+            
+        elseif  strcmp(varargin{1}.mode,'NMM')
+            
+            rootPath = which('setLocalDataPath');
+            RepoPath = fileparts(rootPath);
+            
+            % add path to functions
+            addpath(genpath(RepoPath));
 
         end
         

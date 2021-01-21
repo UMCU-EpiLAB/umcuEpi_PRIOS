@@ -18,15 +18,15 @@ if size(runs,2) >1
             
             if ~strcmp(extractBetween(runs(i).name,'_CCEP_','.mat'), extractBetween(runs(i+j).name,'_CCEP_','.mat'))        % if stim size is NOT equal
                 if ~strcmp(extractBetween(runs(i).name,'_run-','_CCEP'), extractBetween(runs(i+j).name,'_run-','_CCEP'))    % if run label is not equal
-                    if all(size(runs(i).ccep.n1_peak_amplitude) == size(runs(i+j).ccep.n1_peak_amplitude))                  % if size of adjacency matrix is equal
+                    if all(size(runs(i).ccep.n1_peak_amplitude_check) == size(runs(i+j).ccep.n1_peak_amplitude_check))                  % if size of adjacency matrix is equal
                         
                         titleclin = extractBetween(runs(i).name,'_run-','_CCEP');
                         titleprop = extractBetween(runs(i+j).name,'_run-','_CCEP');
                         run_labelClin = extractBetween(runs(i).name,'_CCEP_','.mat');
                         run_labelProp = extractBetween(runs(i+j).name,'_CCEP_','.mat');
 
-                        AmatClin = runs(i).ccep.n1_peak_amplitude;
-                        AmatProp = runs(i+j).ccep.n1_peak_amplitude;
+                        AmatClin = runs(i).ccep.n1_peak_amplitude_check;
+                        AmatProp = runs(i+j).ccep.n1_peak_amplitude_check;
                         
                         AmatClin(~isnan(AmatClin)) = 1; % all non-NaNs are amplitudes, so N1s --> 1
                         AmatClin(isnan(AmatClin)) = 0; % all NaNs are no N1s --> 0
@@ -83,65 +83,3 @@ agreement.compare_mat = compare_mat;
 agreement.AmatClin = AmatClin;
 agreement.AmatProp = AmatProp;
 end
-
-%
-% %%
-%
-% % Compare the electrodes which show a N1 in different networks.
-% if length(runs) > 1
-%     % for the number of files to compare
-%     for n = 1:(length(runs)-1)
-%         % Find the extra stimulation pairs
-%         C = setdiff(runs(n+1).ccep.stimpnames,runs(n).ccep.stimpnames);
-%         same_stimpair1 = setdiff(runs(n+1).ccep.stimpnames, C);
-%
-%         D = setdiff(runs(n).ccep.stimpnames, runs(n+1).ccep.stimpnames);
-%         same_stimpair2 = setdiff(runs(n).ccep.stimpnames, D);
-%
-%         if length(same_stimpair1) ~= length(same_stimpair2)
-%             fprintf('WARNING: Extra stimpairs of %s are NOT removed.\n', cfg.sub_labels{:});
-%         end
-%
-%         % Find the extra electrodes
-%         E = setdiff(runs(n+1).ccep.ch', runs(n).ccep.ch');
-%         same_chan1 = setdiff(runs(n+1).ccep.ch', E);
-%
-%         F = setdiff(runs(n).ccep.ch', runs(n+1).ccep.ch');
-%         same_chan2 = setdiff(runs(n).ccep.ch', F);
-%
-%         if length(same_chan1) ~= length(same_chan2)
-%             fprintf('WARNING: Extra channels of %s are NOT removed.\n', cfg.sub_labels{:});
-%         end
-%
-%         for Q = 1:length(runs)
-%             correct_stimpairs{Q,1} = find(ismember(runs(Q).ccep.stimpnames, same_stimpair2));
-%             correct_chans{Q,1} = find(ismember(runs(Q).ccep.ch', same_chan2));
-%             % does not matter whether same_chan1 or 2, should be the same
-%
-%             % Make matrix with the channels and stimpairs which are
-%             % present in all runs
-%             matrix{Q,1} = runs(Q).ccep.n1_peak_sample(correct_chans{Q}, correct_stimpairs{Q});
-%             adjacency_matrix{Q,1} = isnan(matrix{Q,1});  % NAN = 1, value = 0
-%         end
-%         % For two runs, they can be added and the values will be 2, 1
-%         % or 0. When multiple runs are compared, new values have to be
-%         % filled in.
-%         if length(runs) == 2
-%             compare_mat = adjacency_matrix{1} + adjacency_matrix{2};
-%             Z = sum(compare_mat(:)==2);         % Both no-ER
-%             XandY = sum(compare_mat(:)==1);     % One NAN one ER
-%             W = sum(compare_mat(:)==0);         % Two ERs
-%             total = W + XandY + Z ;
-%             check = size(compare_mat,1) .* size(compare_mat,2);
-%         else
-%             fprintf('WARNING: The matrices of >2 runs cannot be added up');
-%         end
-%     end
-%     %end
-%
-%     % Overall, positive and negative agreement between the matrices.
-%     OA = (W + Z) / (W + XandY + Z);
-%     PA = (2 * W) / (2 * W + XandY);
-%     NA = (2 * Z) / (2 * Z + XandY);
-%
-% end

@@ -19,20 +19,47 @@ for subj = 1:size(dataBase,2)
     
     %% define artefact period - stimuli during an artefact become NaNs
     
-    ev_artefact_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));
-    ev_artefact_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));
-    
+%     ev_artefact_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));
+%     ev_artefact_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));
+%     
+%     if iscell(ev_artefact_start)
+%         ev_artefact_start = str2double(ev_artefact_start);
+%     end
+%     if iscell(ev_artefact_stop)
+%         ev_artefact_stop = str2double(ev_artefact_stop);
+%     end
+%     
+%     ev_artefact = [];
+%     for i=1:size(ev_artefact_start,1)
+%         ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)]; 
+%     end
+     
+elec_art = find(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));                % Find rows with artefact in them
+elec_art_all = find(strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all'));  % Find the artefacts which concern all electrodes
+elec_art_in_all = find(ismember(elec_art, elec_art_all));                               % done because notes like STIM_on also concern 'all'.
+
+% Determine the start- and stop-moment of the artefact concerning all
+% electrodes
+ev_artefact_start = dataBase(subj).tb_events.sample_start(elec_art_in_all,:);
+ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
+   
     if iscell(ev_artefact_start)
         ev_artefact_start = str2double(ev_artefact_start);
     end
+
     if iscell(ev_artefact_stop)
         ev_artefact_stop = str2double(ev_artefact_stop);
     end
-    
-    ev_artefact = [];
+
+    ev_artefact_all = zeros(1,max(dataBase(subj).tb_events.sample_end));                % This type of preallocation is necessary because in pipeline_preprocess, structs with empty cells are removed.
+    % When there are multiple artefacts, then the times samples are concatenaded
+    % in the same array. So ev_artefact is not overwritten
     for i=1:size(ev_artefact_start,1)
-        ev_artefact = [ev_artefact, ev_artefact_start(i):ev_artefact_stop(i)]; 
+        ev_artefact_all = [ev_artefact_all, ev_artefact_start(i):ev_artefact_stop(i)];   
     end
+
+    dataBase(subj).ev_artefact_all = ev_artefact_all;
+    
     
     clear i
     
@@ -194,7 +221,7 @@ for subj = 1:size(dataBase,2)
                     % do nothing, because epoch starts before the start of
                     % a file (and gives an error)
                     
-                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact)
+                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact_all)
                     % do nothing, because part of artefact
                 else
                     cc_epoch_sorted_all(elec,n,ll,:) = dataBase(subj).data(elec,dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1:dataBase(subj).tb_events.sample_start(eventnum(n))+round((epoch_length-epoch_prestim)*dataBase(subj).ccep_header.Fs));
@@ -215,7 +242,7 @@ for subj = 1:size(dataBase,2)
     
     for ll = 1:max(IC_avg)                       % Takes every value between 1 and highest unique stimpairnumber, though some numbers are not used therefore the remove_sorted below)
          if sum(IC_avg==ll)>1                    % When ll is not a single stimpair 
-            selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);
+            selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);         % 1:avg_stim       
             selection_avg =  squeeze(nanmean(selection,2));
 
             while size(size(selection_avg),2) >2

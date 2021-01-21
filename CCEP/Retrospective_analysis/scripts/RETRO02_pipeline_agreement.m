@@ -12,9 +12,6 @@ cfg.mode = 'retro';
 myDataPath = setLocalDataPath(cfg);
 
 %% Load all ccep files in the folder CCEP_files_allPat
-% Be aware that for some patients, SPES is saved in multiple runs, but
-% these are already merged in the previous step
-
 files = dir(fullfile(myDataPath.CCEP_allpat));
 
 % Create database with the CCEP information of all patients of all runs and
@@ -28,12 +25,12 @@ for i=1:size(cfg.sub_labels,2)                                                % 
     
     % load all both the 10 stimuli and 2 stimuli of the patient
     for j=1:size(respLoc,2)                                                   % number of rows with the run_label of interest
-       if contains(files(respLoc(j)).name,'10stims') 
+       if contains(files(respLoc(j)).name,'10stims_filtered.') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep10 = ccep10;
           dataBase(i).filename10 = files(respLoc(j)).name;
           
-       elseif contains(files(respLoc(j)).name,'2stims') 
+       elseif contains(files(respLoc(j)).name,'2stims_filtered.') 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep2 = ccep2;   
           dataBase(i).filename2 = files(respLoc(j)).name;
@@ -71,22 +68,6 @@ end
 clear subj agreement runs
 
 
-%% Determine the location of the ones (ER vs. No-ER)
-% ccep10 is only used for the channels and stimpairs and those are
-% equal for 2 and 10 stimuli so does not matter which database is used.
-
-for subj = 1:size(dataBase,2)
-    ccep10 = dataBase(subj).ccep10;
-    agreement = dataBase(subj).agreement;
-    
-    LocOnes = find_ones(ccep10, agreement.agreement_run);
-    dataBase(subj).LocOnes = LocOnes;
-end
-
-% clean up
-clear ccep10 agreement LocOnes subj
-
-
 %% Rewrite the adjacency matrices to electrode x electrode instead of electrode x stimulation pair
 % This is necessary to calculate the indegree, outdegree and BC.
 close all;
@@ -106,15 +87,15 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).agreement_parameter = agreement_parameters(dataBase(subj).agreement, ...
         dataBase(subj).ccep2, dataBase(subj).ccep10);
     
-    dataBase(subj).statistics = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep10);
+    [dataBase(subj).statistics,dataBase(subj).rank] = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep10);
 end
 
 
-%% Scatter plot of the network parameters
-% function corrplot cannot be used because I don't have the Econometrics
-% Toolbox, though refline also works perfectly.
+%% Scatter plot of absolute values per network parameters
+
 close all
 scatter_networkPar(dataBase, myDataPath)
+
 
 %% Load electrodes positions (xlsx/electrodes.tsv)
 plot_fig = 'n';                 % 'n' when you don't want all ER responses per stim, and the SOZ to be plot

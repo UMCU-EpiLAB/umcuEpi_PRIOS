@@ -24,17 +24,16 @@ end
 
 dataBase = struct([]);
 for i=1:size(run_label,2)
-    D = dir(fullfile(dataPath,[ sub_labels{1}],ses_label,'ieeg',...
+    D = dir(fullfile(dataPath,[sub_labels{1}],ses_label,'ieeg',...
         [sub_labels{1} '_' ses_label '_' task_label ,'_',run_label{i}, '_ieeg.eeg']));
     
     if size(D,1) == 0
-        error('%s does not exist',fullfile(dataPath,[ sub_labels],ses_label,'ieeg',...
+        error('%s does not exist',fullfile(dataPath,sub_labels{:},ses_label,'ieeg',...
         [sub_labels '_' ses_label '_' task_label ,'_',run_label{i}, '_ieeg.eeg']))
     end
     
     % determine run_label
-
-   if ~isfield(cfg,'run_label') || size(cfg.run_label{:},2)<=4             % || means or
+   if ~isfield(cfg,'run_label') || size(cfg.run_label{:},2)<=4            
         if size(D,1) == 1
             run_label{i} = D(1).name(strfind(D(1).name,'run-'):strfind(D(1).name,'_ieeg')-1);
         else

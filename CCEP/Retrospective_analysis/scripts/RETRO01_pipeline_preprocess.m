@@ -25,7 +25,6 @@ files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg'
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
 
-% ---- Find run_labels ----
 % pre-allocation
 strings = cell(size(names));
 for n = 1:size(names,2)
@@ -34,14 +33,22 @@ end
 
 % Load data 
 for R = 1:size(strings,2)
-    tic;
     cfg.run_label = strings(R);
-    dataBase(R) = load_ECoGdata(cfg,myDataPath); %#ok<SAGROW>
-    toc;
+    dataBase(R) = load_ECoGdata(cfg,myDataPath); 
 end
 
 fprintf('...Runs of Subject %s have run...\n',cfg.sub_labels{1})
 
+
+%% Filter
+% When this is used, dataBase.data will change into the fltered data
+% DataBase.raw_data will not be changed and will keep the raw data
+
+% 50 Hz filter and 120 low pass filter
+dataBase = filter_bedArt(dataBase(1), cfg, myDataPath);
+% 
+fprintf('Subject %s is filtered. \n',cfg.sub_labels{1})
+% 
 %% CCEP for 2 and 10 stimulations
 % avg_stim : write down the number of stimuli you want to average
 
@@ -65,14 +72,14 @@ end
 fprintf('...%s has been preprocessed... \n',dataBase(1).sub_label)
 
 % Do a quick check by visualizing the stimuli of 2 stims and 10 stims.
-chan = 20; stim=23;
+chan = 16; stim=12;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
-title('two stimuli')
+title('2 signals')
 xlabel('time (s)')
 xlim([-.2 1.0])
            
@@ -83,7 +90,7 @@ plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','
 hold on
 plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
-title('all stimuli')
+title('All signals')
 xlabel('time (s)')
 xlim([-.2 1.0])
 
@@ -109,7 +116,12 @@ dataBaseallstim = detect_n1peak_ECoG_ccep(dataBaseallstim,cfg);
 dataBase2stim.NmbrofStims = '2_stims';
 dataBaseallstim.NmbrofStims = '10_stims';
 
-disp('Detection of ERs is completed')
+disp('Detection of ERs is completed')                
+
+%% visually check the automatically detected CCEPs
+% 
+% dataBase2stim = visualRating_ccep(dataBase2stim);
+% dataBaseallstim = visualRating_ccep(dataBaseallstim);
 
 
 %% save ccep
@@ -125,7 +137,7 @@ end
 [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save 2 stims
-fileName=[extractBefore(filename,'_ieeg'),'_CCEP_2stims.mat'];
+fileName=[extractBefore(filename,'_ieeg'),'_CCEP_2stims_filtered.mat'];
 ccep2 = dataBase2stim.ccep;
 ccep2.stimchans_all = dataBase2stim.cc_stimchans_all;
 ccep2.stimchans_avg = dataBase2stim.cc_stimchans_avg;
@@ -144,7 +156,7 @@ if strcmp(savefiles,'y')
 end
 
 % save all stims
-fileName5=[extractBefore(filename,'_ieeg'),'_CCEP_10stims.mat'];
+fileName5=[extractBefore(filename,'_ieeg'),'_CCEP_10stims_filtered.mat'];
 ccep10 = dataBaseallstim.ccep;
 ccep10.stimchans_all = dataBaseallstim.cc_stimchans_all;
 ccep10.stimchans_avg = dataBaseallstim.cc_stimchans_avg;

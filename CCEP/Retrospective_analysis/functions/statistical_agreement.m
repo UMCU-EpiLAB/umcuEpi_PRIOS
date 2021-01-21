@@ -1,5 +1,5 @@
-function statistics = statistical_agreement(myDataPath, agreement_parameter,ccep10)
-%% Paired t-test or Wilcoxon signed rank non parametric test for two paired groups
+function [statistics,rank] = statistical_agreement(myDataPath, agreement_parameter,ccep10)
+%% Wilcoxon signed rank non parametric test for two paired groups
 % For the number of ERs evoked in 2 and 10 stimuli
 % null hypothesis is that the two means/medians are the same
 SubjectName = extractBetween(ccep10.dataName,'ieeg/sub-','_ses-1_');
@@ -7,29 +7,22 @@ SubjectName = extractBetween(ccep10.dataName,'ieeg/sub-','_ses-1_');
 ER_stimp10 = agreement_parameter.ERs_stimp10;
 ER_stimp2 = agreement_parameter.ERs_stimp2;
 
-NorDis10 = lillietest(ER_stimp10);                  % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected
-NorDis2 = lillietest(ER_stimp2);
+% NorDis10 = lillietest(ER_stimp10);                  % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected
+% NorDis2 = lillietest(ER_stimp2);
 
-% Check for monotonic relation
-figure(2)
-scatter(ER_stimp10,ER_stimp2)
-refline
+% % Check for monotonic relation
+% figure(2)
+% scatter(ER_stimp10,ER_stimp2)
+% refline
+% 
+% % Check for normal distribution
+% figure(1)
+% subplot(2,1,1)
+% normplot(ER_stimp10)                                % normal distribution is datapoints along the reference line
+% subplot(2,1,2)
+% normplot(ER_stimp2)
 
-% Check for normal distribution
-figure(1)
-subplot(2,1,1)
-normplot(ER_stimp10)                                % normal distribution is datapoints along the reference line
-subplot(2,1,2)
-normplot(ER_stimp2)
-
-
-if NorDis10 == 1 && NorDis2 ==1
-    p = signrank(ER_stimp10, ER_stimp2) ;           % tests the null hypothesis that data in x and y are samples from continuous distributions with equal medians
-    fprintf('The detected ERs per stimulation pair is NOT normally distributed, Wilcoxon Signed Rank test is used.\n')
-else
-    fprintf('The detected ERs per stimulation pair is normally distributed, still the Wilcoxon Signed Rank test is used.\n')
-    p = signrank(ER_stimp10, ER_stimp2);          % alpha default = 0.05
-end
+p = signrank(ER_stimp10, ER_stimp2) ;           % tests the null hypothesis that data in x and y are samples from continuous distributions with equal medians
 
 if p<0.05
     fprintf('Test between the number of ERs evoked in 10 and in 2 stims per stimulation pair gives p-value = %1.4f. This means that there is a significant difference between stimulating 10 or 2 times for %s \n', p, SubjectName{1});
@@ -53,7 +46,7 @@ for i=1:size(mode,2)
     
     rank.(mode{i})(:,1:2) = ccep10.stimsets_avg;
     rank.(mode{i})(:,3) = ERs;
-    [~, order] = sort(rank.(mode{i})(:,3), 'descend');          % most ER evoking stimpairs first
+    [~, order] = sort(rank.(mode{i})(:,3), 'descend','MissingPlacement','last');          % most ER evoking stimpairs first, place NaN's at the end of the ranking)
     rank.(['sort_' mode{i}]) = rank.(mode{i})(order, :);
     
     % If the next stimpair has the same number of ERs, give it the same order number
@@ -82,6 +75,25 @@ for i=1:size(mode,2)
     rank.(['fig_sort_names_' mode{i}]) = vertcat({' '}, newgroups{:});
 end
 
+% Sorted matrix based on stimpair number, so ranking isunsorted 
+for i=1:size(mode,2)
+    [~,order] = sortrows(rank.(['sort_' mode{i}])(:,1:2));
+    rank.(['unsort_' mode{i}]) = rank.(['sort_' mode{i}])(order,:);         
+end
+
+% If the order of the stimulation pairs is not equal, than the ranking
+% cannot be compared
+if ~isequal(rank.unsort_stims10(:,1:2),rank.unsort_stims2(:,1:2))
+    error('Sorting stimulus pairs is incorrect and led to unequal matrices in 10 and 2 stims')
+end
+
+% Test the hypothesis of NO correlation
+% When p <0.05, an rho is close to (-)1, rejection of the hypothesis that
+% no correlation exists between the two columns i.e. there is a
+% correlation
+[RHO_stmp,PVAL_stmp] = corr(rank.unsort_stims10(:,3) , rank.unsort_stims2(:,3) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
+fprintf('Spearman Corr between stimpair ranking of 10 stims and 2 stims gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
+
 figure('Position',[1074,4,519,1052]);
 cm = colormap(parula(max(rank.sort_stims10(:,4))));
 colororder({'k','k'})
@@ -98,10 +110,22 @@ set(gca, 'YDir', 'reverse');
 ylim([1, max([size(rank.fig_sort_names_stims10,1) size(rank.fig_sort_names_stims2,1)])])
 ylabel('order 2 stims')
 
+% Median number of places shifted on the ranking
+shift_rank = median(rank.unsort_stims10(:,4) - rank.unsort_stims2(:,4));
+
 xlim([1, 2])
 set(gca,'xtick',[])
-str_main = sprintf('sub-%s', SubjectName{1});
+str_main = sprintf('%s, \\Delta = %1.1f',SubjectName{1},shift_rank);  
 sgtitle(str_main)
+
+% if PVAL_stmp(:) <0.01
+%        str_main = sprintf('%s, p < 0.01',SubjectName{1});
+%     elseif PVAL_stmp(:) <0.05
+%         str_main = sprintf('%s, p < 0.05',SubjectName{1});
+%     else
+%         str_main = sprintf('sub-%s, p = %1.2f', SubjectName{1},PVAL_stmp);
+%     end
+% sgtitle(str_main)
 
 n=1;
 for k = 1:length(rank.fig_sort_names_stims10)
@@ -122,24 +146,6 @@ end
 saveas(gcf,[path,outlabel],'jpg')
 
 
-% Sorted matrix based on stimpair number, so ranking isunsorted 
-for i=1:size(mode,2)
-    [~,order] = sortrows(rank.(['sort_' mode{i}])(:,1:2));
-    rank.(['unsort_' mode{i}]) = rank.(['sort_' mode{i}])(order,:);         
-end
-
-% If the order of the stimulation pairs is not equal, than the ranking
-% cannot be compared
-if ~isequal(rank.unsort_stims10(:,1:2),rank.unsort_stims2(:,1:2))
-    error('Sorting stimulus pairs is incorrect and led to unequal matrices in stims10 and stims2')
-end
-
-% Test the hypothesis of NO correlation
-% When p <0.05, an rho is close to (-)1, rejection of the hypothesis that no correlation exists between the two columns
-[RHO_stmp,PVAL_stmp] = corr(rank.unsort_stims10(:,4) , rank.unsort_stims2(:,4) ,'Type','Spearman');            % Test the hypothesis that the correlation is NOT 0
-fprintf('Spearman Corr between stimpair ranking of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
-
-
 %% Spearman correlation
 % For the indegree, outdegree and betweenness centrality per electrode
 measure = {'indegree','outdegree','BC'};
@@ -155,7 +161,7 @@ for n=1:size(measure,2)
         
         rank.([measure{n}, mode{i}])(:,1) = 1:size(ccep10.ch,1);
         rank.([measure{n}, mode{i}])(:,2) = ERs;
-        [~, order] = sort(rank.([measure{n} mode{i}])(:,2), 'descend');
+        [~, order] = sort(rank.([measure{n} mode{i}])(:,2), 'descend','MissingPlacement','last');       % Use 'MissingPlacement','last', to place NaN's at the end of the ranking
         rank.(['sort_' measure{n} mode{i}]) = rank.([measure{n} mode{i}])(order, :);
         
         % If the next stimpair has the same number of ERs, give it the same order number
@@ -171,14 +177,15 @@ for n=1:size(measure,2)
         rank.(['sort_names_' measure{n} mode{i}]) = ccep10.ch(order);
         
         % Sorted matrix based on stimpair number, so ranking isunsorted 
-        [~,order] = sort(rank.(['sort_' measure{n} mode{i}])(:,1));
+        [~,order] = sort(rank.(['sort_' measure{n} mode{i}])(:,1),'MissingPlacement','last');
         rank.(['unsort_' measure{n} mode{i}]) = rank.(['sort_' measure{n} mode{i}])(order,:);        
     end
     
+    % To determine the significance for the ranking
+    [RHO.(measure{n}), PVAL.(measure{n})] = corr(rank.(['unsort_' measure{n} mode{1}])(:,2), rank.(['unsort_', measure{n} mode{2}])(:,2),'Type','Spearman','rows','pairwise');
     
-    [RHO.(measure{n}), PVAL.(measure{n})] = corr(rank.(['unsort_' measure{n} mode{1}])(:,3), rank.(['unsort_', measure{n} mode{2}])(:,3),'Type','Spearman','rows','pairwise');
-    
-    fprintf('Spearman Corr between %s per electrode of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', measure{n}, PVAL.(measure{n}), RHO.(measure{n}), SubjectName{1});
+    fprintf('Spearman Corr (ranking) between %s per electrode of 10 and 2 stimuli gives, p-value = %1.4f, rho = %1.3f, for %s \n', measure{n}, PVAL.(measure{n}), RHO.(measure{n}), SubjectName{1});
+
 end
 
 fprintf('------------ NEXT PATIENT ------------\n')
@@ -195,6 +202,7 @@ statistics.rho_stimp = RHO_stmp;
 statistics.p_ERsperStimp = p;
 % statistics.ranking2stimp = sort_rank2;
 % statistics.ranking10stimp = sort_rank10;
+
 
 end
 
