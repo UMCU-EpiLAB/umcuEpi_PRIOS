@@ -3,19 +3,19 @@ function ERs_perStimp_violin(dataBase,myDataPath)
 
 % Pre-allocation of matrix with the number of ERs of every session of every
 % patient.
-new_mat = NaN([54,12]);
+new_mat = NaN([87,12]);
     
 for subj = 1:size(dataBase,2)
-    Clin = dataBase(subj).agreement_parameter.ERs_stimpClin;
-    Prop = dataBase(subj).agreement_parameter.ERs_stimpProp;   
+    Stim10 = dataBase(subj).agreement_parameter.ERs_stimp10;
+    Stim2 = dataBase(subj).agreement_parameter.ERs_stimp2;   
         
      i = 1;
-     clin_colm = 2*subj-1;                                  % prealloction of the column number
-     prop_colm = 2*subj;                                    % prealloction of the column number
+     ten_colm = 2*subj-1;                                  % prealloction of the column number
+     two_colm = 2*subj;                                    % prealloction of the column number
 
-        for stimp = 1:size(Clin,1)                          % For each stimpair                                          
-            new_mat(i,clin_colm) = Clin(stimp);             % write the SPES-clin in column 1
-            new_mat(i,prop_colm) = Prop(stimp);             % write the SPES-prop in column 2
+        for stimp = 1:size(Stim10,1)                          % For each stimpair                                          
+            new_mat(i,ten_colm) = Stim10(stimp);             % write the SPES-clin in column 1
+            new_mat(i,two_colm) = Stim2(stimp);             % write the SPES-prop in column 2
             i = i+1;           
         end               
 end
@@ -61,7 +61,7 @@ end
     title(sprintf('ERs evoked per stimulation pair'),'FontSize', 15, 'FontWeight', 'bold')
     ylabel('ERs evoked per stimulation pair','FontSize', 15, 'FontWeight', 'bold')
 
-    legend([violins(1).ViolinPlot,violins(2).ViolinPlot], 'Clinical SPES','Propofol SPES','FontSize', 12, 'FontWeight', 'bold','Position',[0.78,0.80,0.12,0.07])
+    legend([violins(1).ViolinPlot,violins(2).ViolinPlot], '10 stimuli','2 stimuli','FontSize', 12, 'FontWeight', 'bold','Position',[0.81,0.78,0.090,0.086])
 
     medians = median(new_mat,'omitnan');
     ymin = min(ylim);
@@ -73,7 +73,7 @@ end
 
 
     % Save figure
-    outlabel=sprintf('ERsPerStimp_violin.jpg');
+    outlabel=sprintf('ERsPerStimp_violin_retro.jpg');
     path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
     if ~exist(path, 'dir')
         mkdir(path);

@@ -41,7 +41,7 @@ strout.C3=0.25*C;   % py->in
 strout.C4=0.25*C;   % in->py
 strout.C5=0.3*C;    % py->if
 strout.C6=0.1*C;    % in->if
-strout.C7=0.8*C;    % if->py
+strout.C7=1.2*C;    % if->py
 strout.C8=0.0*C;    % if->if (Not used in the manuscript, self-loop fast inhibitory population)
 
 strout.sd=sd;

@@ -45,7 +45,7 @@ fprintf('...Runs of Subject %s have run...\n',cfg.sub_labels{1})
 % DataBase.raw_data will not be changed and will keep the raw data
 
 % 50 Hz filter and 120 low pass filter
-dataBase = filter_bedArt(dataBase(1), cfg, myDataPath);
+dataBase = filter_bedArt(dataBase);
 % 
 fprintf('Subject %s is filtered. \n',cfg.sub_labels{1})
 % 
@@ -53,26 +53,29 @@ fprintf('Subject %s is filtered. \n',cfg.sub_labels{1})
 % avg_stim : write down the number of stimuli you want to average
 
 % save only first stimulus in both directions
-avg_stim = 1;
-dataBase2stim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
-tt = dataBase2stim.tt;
+for i = 1:size(dataBase,2)
+    avg_stim = 1;
+    dataBase2stim(i,:) = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim);
+    tt = dataBase2stim.tt;
+end
 
 % save all stimuli (5) in each direction
-avg_stim = 5;
-dataBaseallstim = preprocess_ECoG_spes(dataBase,cfg,avg_stim);
-
+for i = 1:size(dataBase,2)
+    avg_stim = 5;
+    dataBaseallstim(i,:) = preprocess_ECoG_spes(dataBase(i),cfg,avg_stim);
+end
 % When SPES was ran in multiple runs it has to be merge to combine all stimulations into one file.
 % Since dataBase2stim and dataBaseallstim are based on the same stimulation, it does not matter whether you determine the size of
 % dataBase2stims or dataBaseallstims
-if size(dataBase2stim,2) >1         
+if size(dataBase2stim,1) >1         
     dataBase2stim = merge_runs(dataBase2stim);
     dataBaseallstim = merge_runs(dataBaseallstim);       
 end
 
 fprintf('...%s has been preprocessed... \n',dataBase(1).sub_label)
 
-% Do a quick check by visualizing the stimuli of 2 stims and 10 stims.
-chan = 16; stim=12;
+%% Do a quick check by visualizing the stimuli of 2 stims and 10 stims.
+chan = 52; stim=23;
 figure, 
 subplot(2,1,1),
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -94,21 +97,24 @@ title('All signals')
 xlabel('time (s)')
 xlim([-.2 1.0])
 
-figure()
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(3,stim,1:5,:))','Color','b','LineWidth',1)
+figure('Position',[256,618,677,357])
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,1,:))','Color','b','LineWidth',1)
 hold on
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(3,stim,6:10,:))','Color','r','LineWidth',1)
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,6,:))','Color','r','LineWidth',1)
 hold on
 plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(3,stim,:)),'k','LineWidth',3)
 hold off
-title('All 10 signals and their average')
-xlabel('time (s)')
-xlim([-0.1 0.2])
-ylim([-750 750])
-xlabel('Time (s)')
-ylabel('Voltage (uV)')
+% title('All 10 signals and their average')
+title(sprintf('First positive and negative response \n%s, evoked by %s',dataBaseallstim.ch{chan},dataBaseallstim.stimpnames_avg{stim}))
+line([0 0],[-200 350],'LineStyle','--','LineWidth',1.5,'color','k')
 
-clear R stim strings chan n names
+xlabel('time (s)')
+xlim([-0.1 1])
+ylim([-1200 350])
+xlabel('Time (s)')
+ylabel('Potential (\muV)')
+legend('Positive direction','Negative direction')
+
 
 %% Use the automatic N1 detector to detect ccep 
 dataBase2stim = detect_n1peak_ECoG_ccep(dataBase2stim,cfg);

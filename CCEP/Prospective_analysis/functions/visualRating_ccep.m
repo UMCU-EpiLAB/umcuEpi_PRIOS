@@ -47,15 +47,15 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             plot(tt,this_plot_avg,'k','linewidth',2);
             plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b')
             hold off
-            xlim([-0.2 0.5])
-            ylim([-750 750])
+            xlim([-0.05 0.2])
+            ylim([-800 750])
             title('Zoomed average signal')
             xlabel('Time (s)')
             ylabel('Potential \muV')
             
             % Create a patch for the -1/5:9 ms interval in which no
             % physiological activity can be measured.
-            patch([0 0.009 0.009 0],[-750 -750 750 750],[0.6,0.2,0.2],'EdgeAlpha',0)
+            patch([0 0.009 0.009 0],[-800 -800 750 750],[0.6,0.2,0.2],'EdgeAlpha',0)
             alpha(0.2)
             
             currkey = 0;

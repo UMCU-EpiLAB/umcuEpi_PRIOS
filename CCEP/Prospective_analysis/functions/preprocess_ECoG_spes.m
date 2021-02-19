@@ -136,6 +136,8 @@ end
      idx_tbelec = contains(dataBase.tb_events.trial_type,'electrical_stimulation');
      tb_stim = dataBase.tb_events(idx_tbelec,:);
      
+     % Keep stimulations that are at least 3 seconds apart (because of
+     % mechanical problems with the stimulator
      idx_keep5s = [true(1); diff([tb_stim.onset])>=3];
      dataBase.tb_events = tb_stim(idx_keep5s,:);
        
@@ -319,9 +321,6 @@ end
    end
 
     %% Average epochs
-%     if isempty(avg_stim)
-%         avg_stim = max_stim;
-%     end
     
     % preallocation
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
@@ -334,7 +333,7 @@ end
         if any(~isnan(cc_epoch_sorted_all(1,:,stimps(1),1))) && any(~isnan(cc_epoch_sorted_all(1,:,stimps(2),1))) % Check whether the stimpair is stimulated in both directions.      
             
             % Average ALL stimuli given to certain stimpair
-            selection = cc_epoch_sorted_all(:,:,IC_avg==ll,:);         
+            selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);         
             selection_avg =  squeeze(nanmean(selection,2));
             
             while size(size(selection_avg),2) >2

@@ -1,19 +1,17 @@
 function boxplot_N1_peak(dataBase, myDataPath)
 % Make boxplots of the latency of the N1 peaks.
 
-close all
-clc
 
 % Statistics
 for subj = 1:size(dataBase,2)
     ccep_clin = dataBase(subj).ccep_clin;
     ccep_prop = dataBase(subj).ccep_prop;
 
-    fs = 1/(size(ccep_prop.tt,2)/4);                             % Devide tt by four because ccep_prop.tt includes 4 seconds.
+    ts = 1/(size(ccep_prop.tt,2)/4);                             % Devide tt by four because ccep_prop.tt includes 4 seconds.
     clin = ccep_clin.n1_peak_sample_check;
-    clin = ((clin*fs)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
+    clin = ((clin*ts)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
     prop = ccep_prop.n1_peak_sample_check;
-    prop = ((prop*fs)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
+    prop = ((prop*ts)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
 
 
     % Create matrix with the clinical values in the first column and
@@ -36,11 +34,13 @@ for subj = 1:size(dataBase,2)
 %         NorDisClin = lillietest(new_mat(:,1))   ;               % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected 
 %         NorDisProp = lillietest(new_mat(:,2));
 
-    % Paired, non-gaussian, comparison of two rankings
-    p = ranksum(new_mat(:,1), new_mat(:,2)) ;                       % tests the null hypothesis that data in x and y are samples from continuous distributions with equal medians
-    dataBase(subj).ccep_clin.p_n1 = {sprintf('%1.4f',p)};
+    % Paired, non-prametric, comparison of two measurements
+    % Determine whether the median of the two measurements are
+    % significantly different. 
+    p = signrank(new_mat(:,1), new_mat(:,2)) ;                       
+    dataBase(subj).ccep_clin.p_n1 = p;
     dataBase(subj).ccep_clin.mean_N1_lat = mean(new_mat(:,1));
-    dataBase(subj).ccep_prop.p_n1 = {sprintf('%1.4f',p)};
+    dataBase(subj).ccep_prop.p_n1 = p;
     dataBase(subj).ccep_prop.mean_N1_lat = mean(new_mat(:,2));
 
     % Display the p value 
@@ -49,73 +49,105 @@ for subj = 1:size(dataBase,2)
     else
         fprintf('Test between the N1-Latency of %s SPES-clin and SPES-prop gives p-value = %1.4f. This means that there is NO significant difference between the two protocols \n',dataBase(subj).sub_label, p);
     end
-
 end
 
-%% Make boxPlots    
+%% Make VIOLINPlots    
 new_mat = [];  
-fs = 1/(size(ccep_prop.tt,2)/4);                                        % Devide tt by four because ccep_prop.tt includes 4 seconds.
+ts = 1/(size(ccep_prop.tt,2)/4);                                        % Devide tt by four because ccep_prop.tt includes 4 seconds.
               
 for subj = 1:size(dataBase,2)
     ccep_clin = dataBase(subj).ccep_clin;
     ccep_prop = dataBase(subj).ccep_prop;
 
     clin = ccep_clin.n1_peak_sample_check;
-    clin = ((clin*fs)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
+    clin = ((clin*ts)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
     prop = ccep_prop.n1_peak_sample_check;
-    prop = ((prop*fs)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
+    prop = ((prop*ts)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
 
      i = 1;
      clin_colm = 2*subj-1;                      % prealloction of the column number
      prop_colm = 2*subj;                        % prealloction of the column number
 
 
+    for stimp = 1:size(ccep_prop.stimpnames_avg,2)                          % For each stimpair
+        for elec = 1:size(ccep_prop.ch,1)                                   % For each electrode
 
-            for stimp = 1:size(ccep_prop.stimpnames_avg,2)                          % For each stimpair
-                for elec = 1:size(ccep_prop.ch,1)                                   % For each electrode
+        % When both clinical SPES and propofol SPES show an ER
+          if ~isnan(clin(elec, stimp)) &&  ~isnan(prop(elec, stimp)) 
+                new_mat(i,clin_colm) = clin(elec, stimp);            % plot the SPES-clin amp in column 1
+                new_mat(i,prop_colm) = prop(elec, stimp);          % plot the SPES-prop amp in column 2
+                i = i+1;
 
-                % When both clinical SPES and propofol SPES show an ER
-                  if ~isnan(clin(elec, stimp)) &&  ~isnan(prop(elec, stimp)) 
-                        new_mat(i,clin_colm) = clin(elec, stimp);            % plot the SPES-clin amp in column 1
-                        new_mat(i,prop_colm) = prop(elec, stimp);          % plot the SPES-prop amp in column 2
-                        i = i+1;
-
-                  end
-                end      
-            end             
+          end
+        end      
+    end             
 end
 
 new_mat((new_mat == 0)) = NaN;                                      % replace zero with NaN to avoid influence on the mean
-means =  median(new_mat,'omitnan');
-Ns = sum(~isnan(new_mat(:,:)) ) ;                                       % Number of ERs
+medians =  median(new_mat,'omitnan');
 
 % Create boxplot with the amplitude of SPES clin and SPES prop
 figure('Position',[205,424,1530,638]);
 % columnMeans = mean(new_mat, 1, 'omitnan');
-grouporder = {'PRIOS01','','  PRIOS02**','','  PRIOS03**','','  PRIOS04','','  PRIOS05*','','  PRIOS06',''};
 
-violins = violinplot(new_mat,grouporder) ;
+violins = violinplot(new_mat) ;
 for i = 1:2:size(new_mat,2)
     violins(1,i).ViolinColor = [1 0 0];
     violins(1,i+1).ViolinColor = [0 0 1];
 end
+
+% Set significance in plot with a line and not in name
+ count = 1;
+ ymax = max(max(new_mat));
+ 
+ for subj=1:size(dataBase,2)
+        if dataBase(subj).ccep_clin.p_n1   < 0.01 
+            text(count+0.5,ymax-0.2,'**','FontSize',20,'FontWeight','bold')
+            plot(count+0.1:0.1:count+0.9, ymax-0.43*ones(9,1),'k','LineWidth',2)
+        
+        
+        elseif dataBase(subj).ccep_clin.p_n1  < 0.05 
+            text(count+0.5,ymax-0.2,'*','FontSize',20,'FontWeight','bold')
+            plot(count+0.1:0.1:count+0.9, ymax-0.43*ones(9,1),'k','LineWidth',2)
+                
+        end
+        count = count+2;
+end
+
 
 ax = gca;
 ax.XAxis.FontSize = 12;
 ax.YAxis.FontSize = 12;
 ax.XAxis.FontWeight = 'bold';
 ax.YAxis.FontWeight = 'bold';
-ax.XLabel.Position = [6.5, -28.4, -1];
+
+% Set double xlabel
+ax.XTick = 1.5:2:size(new_mat,2);
+ax.XTickLabel = extractAfter({dataBase(:).sub_label},'sub-');
+
+ymin = min(ylim);
+y_range = diff(ylim);
+x_as = 1:size(new_mat,2);
+size_pat = size(new_mat,2); 
+second_row_txt = cellstr(strsplit(num2str(medians,'%.2f '),' '));
+text([(x_as(1)-x_as(2))*0.5 x_as], ones(1,size_pat+1)*ymin-0.1*y_range, ['Median' second_row_txt],'HorizontalAlignment','center','FontSize', 12, 'FontWeight', 'bold')
+
+% Draw lines between patients 
+ymax = max(ylim); 
+for i = 1:2:size(x_as,2)
+    x1 = x_as(i)-0.5; 
+    if x1 > 0.5
+        hold on
+        line([x1,x1],[ymin,ymax],'color',[0.8 0.8 0.8]);
+    end
+end
 
 title(sprintf('N1 Latency'),'FontSize', 15, 'FontWeight', 'bold')
 ylabel('Latency (milliseconds)','FontSize', 15, 'FontWeight', 'bold')
+legend([violins(1).ViolinPlot,violins(2).ViolinPlot], 'Clinical SPES','Propofol SPES','FontSize', 12, 'FontWeight', 'bold','Position',[0.78,0.80,0.12,0.07])
 
-% Plot the mean on the xaxis  
-stringsz = [repmat('n = %2.0f,    ',1,size(means,2)-1),'n = %2.0f'];
-xlabel(sprintf(stringsz,Ns))
 
-legend([violins(1).ViolinPlot,violins(2).ViolinPlot], 'Clinical SPES','Propofol SPES','FontSize', 12, 'FontWeight', 'bold')
-
+    
 % Save figure
 outlabel=sprintf('Latency_violin.jpg');
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/N1_compare/');
@@ -126,7 +158,7 @@ saveas(gcf,[path,outlabel],'jpg')
 
         
 %% Make scatter of the latency
-figure('Position',[302,17,938,1039])
+fig = figure('Position',[302,17,938,1039]);
 
 for subj = 1:size(dataBase,2)
         
@@ -134,7 +166,7 @@ for subj = 1:size(dataBase,2)
        colm_prop = (2*subj);
        clin = new_mat(:,colm_clin);
        prop = new_mat(:,colm_prop);
-       p = round(str2double(dataBase(subj).ccep_clin.p_n1{:}),3);
+       p = dataBase(subj).ccep_clin.p_n1;
        
        % do not plot values with NaN
        if size(clin(isnan(clin)),1) > 1
@@ -143,63 +175,89 @@ for subj = 1:size(dataBase,2)
        end
        
         subplot(size(dataBase,2),1,subj)
-        scatter(clin  , prop); 
-        ylabel('SPES-prop (ms)','FontSize',10)
-        xlabel("SPES-clin (ms)"+newline+"   ",'FontSize',10)
-        title(sprintf('%s, p =  %0.3f', dataBase(subj).sub_label, p));
-            if p< 0.05
-                title(sprintf('%s, p < 0.05', dataBase(subj).sub_label));
-            elseif p<0.01
-                title(sprintf('%s, p < 0.01', dataBase(subj).sub_label));
-            end
-            
-        str_main = ('N1 Latency');
-        sgtitle(str_main)
+        plot(clin  , prop,'*'); 
+        title(sprintf('%s, p =  %0.3f', dataBase(subj).sub_label, p),'FontSize',12);
+        % Change fontsize
         ax = gca;
-        ax.YAxis.FontSize = 10;
-        ax.XAxis.FontSize = 10;
-        
-        
+        ax.XAxis.FontSize = 14;    ax.YAxis.FontSize = 14;
+        if p < 0.01
+             title(sprintf('%s, p = <0.01', dataBase(subj).sub_label),'FontSize',12)
+         elseif p<0.05
+             title(sprintf('%s, p = <0.05', dataBase(subj).sub_label),'FontSize',12)
+        end 
+                 
+  
+%             if p< 0.05
+%                 
+%                 [P,S] = polyfit(clin,prop,1);
+%                 [y_fit, ~] = polyval(P,clin,S);
+% 
+%                 plot(clin,prop,'*')                        % This is equal to scatter
+%                 hold on
+% 
+%                 % Plot polyfit throught data points
+%                 plot(clin,y_fit,'Color',[0.8,0.2,0.2],'LineWidth',2)
+%                 hold on
+%                 
+%                  
+%             
+%             end
+           
         % Xmax is determined by the value on the x-axis which is the
         % SPES-clin
-        xmin = round(min(clin, [], 'all'),2);
-        xmax = round(max(clin, [], 'all'),2);
-        
-        % Ymax is determined by the value on the y-axis which is the
-        % SPES-prop
-        ymin = round(min(prop, [], 'all'),2);
-        ymax = round(max(prop, [], 'all'),2);      
-        xlim([xmin, xmax+2])
-        ylim([ymin, ymax+5])
+        xmin = min(clin);                 
+        xmax = max(clin);   
+        xlim([xmin, xmax]) 
+                           
 end 
-          % Save figure
-        outlabel=sprintf('n1_scatter_Latency.jpg');
-        path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/N1_compare/Scatter/');
-        if ~exist(path, 'dir')
-            mkdir(path);
-        end
-        saveas(gcf,[path,outlabel],'jpg')
+
+% Create main title without decreasing the subplots sizes
+annotation(gcf,'textbox',[0.32 0.95 0.35 0.043],'VerticalAlignment','middle','String',sprintf('N1-Latency'),'HorizontalAlignment','center','FontWeight','bold','FontSize',15,'FitBoxToText','off','EdgeColor','none');   
+     
+%Create one main x- and y-label
+han=axes(fig,'visible','off'); 
+han.YLabel.Visible='on';
+han.YLabel.Position = [-0.0584    0.5000         0];
+ylabel(han,{'Value SPES-prop'}, 'FontSize',17,'fontweight','bold')
+
+han.XLabel.Visible='on';
+xlabel(han,{'Value SPES-clin'}, 'FontSize',17,'fontweight','bold')
+
+     
+
+  % Save figure
+outlabel=sprintf('n1_scatter_Latency.jpg');
+path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/N1_compare/Scatter/');
+if ~exist(path, 'dir')
+    mkdir(path);
+end
+saveas(gcf,[path,outlabel],'jpg')
         
 %% Determine the multiplication factor
 
 for subj = 1:size(dataBase,2)
-  M_Clin = means(1:2:end);
-  M_Prop = means(2:2:end);
+  M_Clin = medians(1:2:end);
+  M_Prop = medians(2:2:end);
 end
 
+%%%% Remove this (just for the report)
+per_N1_clin = prctile(M_Clin(2:end), [25 50 75])                % not the first since PRIOS01 is not significantly different 
+per_N1_prop= prctile(M_Prop(2:end), [25 50 75])
+
+
 % Pre-allocation
-T_N1(:,1) = means(1:2:end);
-T_N1(:,2) = means(2:2:end);
+T_N1(:,1) = medians(1:2:end);
+T_N1(:,2) = medians(2:2:end);
 
 for i = 1:size(T_N1,1)
-    T_N1(i,3) = T_N1(i,1)/T_N1(i,2);
+    T_N1(i,3) = T_N1(i,2)/T_N1(i,1);
 end
 
 % Make a table to facilitate reading the data
 Size_mat = (size(T_N1,1)+1);
 T_N1(Size_mat,1) = median(M_Clin);
 T_N1(Size_mat,2) = median(M_Prop);
-T_N1(Size_mat,3) = median(T_N1(:,3));
+% T_N1(Size_mat,3) = median(T_N1(1:size(M_Clin,2),3));
 
 variables = {'N1 clinical','N1 propofol','Mult-factor'};
 

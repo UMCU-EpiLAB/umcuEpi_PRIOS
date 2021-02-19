@@ -4,7 +4,7 @@ clc;
 % Choose patient
 config_CCEP
 
-% set paths
+% set pathsPRIOS06
 cfg.mode = 'pros';
 myDataPath = setLocalDataPath(cfg);
 
@@ -76,7 +76,7 @@ end
 
 
 % Visualise the signal of specified stimpair and channel
-chan = 4; stim=1;
+chan =1; stim=2;
 
 tt = dataBase_clin.tt;
 figure('Position',[515,333,1034,707]); 
@@ -88,9 +88,11 @@ hold off
 title(sprintf('SPES prop, %s, %s, %s',dataBase(1).sub_label, dataBase_prop.stimpnames_avg{stim},  dataBase_prop.ch{chan}))
 xlabel('time (s)'); xlim([-.2 0.5]); ylabel('Potential \muV');            
 % Create patch to indicate the 9 ms interval
-patch([0 0.009 0.009 0],[-400 -400 1000 1000],[0.6,0.2,0.2], 'EdgeAlpha',0)
+ax = gca; ylimits = ax.YTick;
+patch([0 0.009 0.009 0],[min(ylimits) min(ylimits) max(ylimits) max(ylimits)],[0.6,0.2,0.2], 'EdgeAlpha',0)
 alpha(0.1)                % set patches transparency
-
+ylim([-600 600])
+xlim([-0.01 0.3])
 
 subplot(2,1,2),
 plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -100,8 +102,13 @@ hold off
 title(sprintf('SPES clin, %s, %s, %s',dataBase(1).sub_label, dataBase_clin.stimpnames_avg{stim},  dataBase_clin.ch{chan}))
 xlabel('time (s)'); xlim([-.2 0.5]); ylabel('Potential \muV');
 % Create patch to indicate the 9 ms interval
-patch([0 0.009 0.009 0],[-400 -400 1000 1000],[0.6,0.2,0.2], 'EdgeAlpha',0)
+ax = gca; ylimits = ax.YTick;
+patch([0 0.009 0.009 0],[min(ylimits) min(ylimits) max(ylimits) max(ylimits)],[0.6,0.2,0.2], 'EdgeAlpha',0)
 alpha(0.1)                % set patches transparency
+ylim([-600 600])
+xlim([-0.01 0.3])
+
+
 
 
 %% Use the automatic N1 detector to detect ccep 
@@ -172,7 +179,15 @@ end
 % [~,filename,~] = fileparts(dataBase(1).dataName);
 
 % save propofol SPES
-fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_check.mat'];       % Make sure to identify with _filt_ or _check_ or _check_N2 when necessary
+% When visual check is performed and data is checked, then save with
+% correct name (also ensures that checked file is not overwritten when
+% file is completely run)
+if isfield(dataBase_prop.ccep, 'n1_peak_amplitude_check')
+    fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_check19022021.mat'];      
+else 
+    fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_Check_21012021.mat'];    
+end
+
 ccep_prop = dataBase_prop.ccep;
 ccep_prop.stimchans_all = dataBase_prop.cc_stimchans_all;
 ccep_prop.stimchans_avg = dataBase_prop.cc_stimchans_avg;
@@ -183,8 +198,6 @@ ccep_prop.stimsets_avg = dataBase_prop.cc_stimsets_avg;
 ccep_prop.dataName = dataBase_prop.dataName;
 ccep_prop.ch = dataBase_prop.ch;
 ccep_prop.tt = dataBase_prop.tt;
-%ccep2.epoch_sorted_avg = dataBase2stim.cc_epoch_sorted_avg;
-%ccep2.epoch_sorted_select_avg = dataBase2stim.cc_epoch_sorted_select_avg;
 
 if strcmp(savefiles,'y')
     save([targetFolder_prop,fileName_prop], 'ccep_prop');
@@ -197,8 +210,15 @@ if ~exist(targetFolder_clin, 'dir')
     mkdir(targetFolder_clin);
 end
 
-% save all stims
-fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_filt_check.mat'];           % Make sure to identify with _filt_ or _check_ or _check_N2 when necessary
+% save Clinical-SPES
+% When N1s are visually checked save with check in the name
+if isfield(dataBase_clin.ccep, 'n1_peak_amplitude_check')
+    fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_filt_check.mat'];           
+    
+else % When N1s are not visually checked.
+    fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_Check_21012021.mat'];              
+end
+
 ccep_clin = dataBase_clin.ccep;
 ccep_clin.stimchans_all = dataBase_clin.cc_stimchans_all;
 ccep_clin.stimchans_avg = dataBase_clin.cc_stimchans_avg;
@@ -209,8 +229,6 @@ ccep_clin.stimsets_avg = dataBase_clin.cc_stimsets_avg;
 ccep_clin.dataName = dataBase_clin.dataName;
 ccep_clin.ch = dataBase_clin.ch;
 ccep_clin.tt = dataBase_clin.tt;
-%ccep10.epoch_sorted_avg = dataBaseallstim.cc_epoch_sorted_avg;          % Deze epoch_sorted heb ik nodig voor plot_all_ccep_and_av maar hierdoor duurt het opslaan mega lang
-%ccep10.epoch_sorted_select_avg = dataBaseallstim.cc_epoch_sorted_select_avg;
 
 if strcmp(savefiles,'y')
     save([targetFolder_clin,fileName_clin], 'ccep_clin');
@@ -229,11 +247,32 @@ if strcmp(dataBase_clin.save_fig, 'y')
     plot_all_ccep(dataBase_clin, dataBase_prop, myDataPath)
 end
 
+
+
 %% Determine the amplitude and latency of the P1 and the highest point before N1
 % Necessary to determine the rise and fall times of the N1.
+% Amplitude of the P1 is not correct. Latency is.
 
-N1_rise_fall(dataBase_clin, dataBase_prop, myDataPath);
+P1_latency(dataBase_clin, dataBase_prop, myDataPath);
 
-disp('N1_rise and N1_fall are saved, to be later used in PROS02_pipeline_agreement.') 
+disp('P1_latency is saved to be later used in PROS02_pipeline_agreement.') 
 
+%% Unique occurence 
+% Determine how often each stimulation pair is stimulated during
+% propofol-SPES and clinical-SPES
+% null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected 
+NorDisClin = lillietest(occ)                 
+NorDisProp = lillietest(occ_prop)
+
+XX = dataBase(1).tb_events.electrical_stimulation_site;
+[uniqueXX, ~, J]=unique(XX) ;
+occ = histc(J, 1:numel(uniqueXX));
+
+mean_occ = median(occ)
+
+XX_prop = dataBase(2).tb_events.electrical_stimulation_site;
+[uniqueXX_prop, ~, J_prop]=unique(XX_prop) ;
+occ_prop = histc(J_prop, 1:numel(uniqueXX_prop));
+
+mean_occ_prop = mean(occ_prop)
 

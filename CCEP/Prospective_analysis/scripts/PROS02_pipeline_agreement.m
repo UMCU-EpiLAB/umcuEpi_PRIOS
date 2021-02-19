@@ -35,7 +35,6 @@ for i = 1:size(ccep_allPat.sub_labels,2)
     end
 end
 
-
 %% determine the agreement between 2 and 10 stims per run
 % The determine_agreement function is not only determining the agreement
 % when 2 sessions are compared. It could be possible to compare more, but
@@ -163,3 +162,9 @@ interobserverKappa(myDataPath);
 % Function check_interobs.m can be used to visualise the inter-observer
 % agreement. An excel is saved with the different responces between R1 and 
 % R2, this can be loaded in check_interobs.m
+
+%% Rise and Fall times N1 peak
+vis_P1(myDataPath,dataBase);
+
+
+

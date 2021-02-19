@@ -90,6 +90,8 @@ for subj = 1:size(dataBase,2)
     [dataBase(subj).statistics,dataBase(subj).rank] = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep10);
 end
 
+%% Use Violin plot
+ERs_perStimp_violin(dataBase,myDataPath)
 
 %% Scatter plot of absolute values per network parameters
 
@@ -105,6 +107,46 @@ for subj = 1:size(dataBase,2)
     visualise_gridstructure(myDataPath, dataBase(subj).ccep10, dataBase(subj).ccep2, dataBase(subj).agreement_parameter,plot_fig);
 end
 
+
+
+%% Determine multiplication factor of the network parameters    
+% Data is not normally distributed therefore the median is calculated
+measure = {'ERs per stimp','Indegree','Outdegree','BC'};
+
+Mult_factor = zeros(size(dataBase,2), size(measure,2));
+        
+for subj = 1:size(dataBase,2)
+
+    for n=1:size(measure,2)
+        
+        if strcmp(measure{n},'ERs per stimp')
+             M_10 = median(dataBase(subj).agreement_parameter.ERs_stimp10,'omitnan');
+             M_2 = median(dataBase(subj).agreement_parameter.ERs_stimp2,'omitnan');       
+        elseif strcmp(measure{n},'Indegree')
+             M_10 = median(dataBase(subj).agreement_parameter.indegreeN_10,'omitnan');
+             M_2 = median(dataBase(subj).agreement_parameter.indegreeN_2,'omitnan');
+        elseif strcmp(measure{n},'Outdegree')
+             M_10 = median(dataBase(subj).agreement_parameter.outdegreeN_10,'omitnan');
+             M_2 = median(dataBase(subj).agreement_parameter.outdegreeN_2,'omitnan');
+        elseif strcmp(measure{n},'BC')
+             M_10 = median(dataBase(subj).agreement_parameter.BCN_10,'omitnan');
+             M_2 = median(dataBase(subj).agreement_parameter.BCN_2,'omitnan');
+        end
+    
+        
+        Mult_factor(subj,n) = M_10/M_2;       
+    end
+end
+
+T = table(Mult_factor(:,1),Mult_factor(:,2),Mult_factor(:,3),Mult_factor(:,4), 'VariableNames',measure,'RowNames',{'RESP0701','RESP0702','RESP0703','RESP0706','RESP0724','RESP0728'});
+disp(T)                
+    for n=1:size(measure,2)
+
+        Mult = sum(Mult_factor(:,n)) / 6;
+        fprintf('Multiplication factor of the %s of the SPES-10 and SPES-2 = %1.1f \n', measure{n}, Mult);
+
+    end
+    
 %% Display agreement parameters on brain image
 
 %%% DIT IS EVEN VOOR HET VOORBEELD VOOR IN MIJN VERSLAG!!!

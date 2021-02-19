@@ -1,11 +1,8 @@
-function dataBase = filter_bedArt(dataBase, cfg, myDataPath)
+function dataBase = filter_bedArt(dataBase)
 
 % Filter
 Fs = dataBase(1).ccep_header.Fs;
 Fn = Fs/2;
-epoch_length = cfg.epoch_length;         
-epoch_prestim = cfg.epoch_prestim;
-% tt = (1:epoch_length*Fs) / Fs - epoch_prestim;
 
 % Filters: Butterworth, 4th order
 [b50,a50] =butter(4,[49/Fn 51/Fn],'stop');
@@ -18,18 +15,20 @@ epoch_prestim = cfg.epoch_prestim;
 
 % Remove all stimulation artefacts. 
 % Interpolate for the stimulation artefact  
-    data = dataBase.raw_data;
+for i = 1:size(dataBase,2)
+
+    data = dataBase(i).raw_data;
     
-    for event = 1:size(dataBase.tb_events,1)
-         if strcmp(dataBase.tb_events.trial_type(event), 'electrical_stimulation')
+    for event = 1:size(dataBase(i).tb_events,1)
+         if strcmp(dataBase(i).tb_events.trial_type(event), 'electrical_stimulation')
              % To remove the stimulation artefact = nr_samples = t_stimart/Ts
       %%%% Verslag Dorien zegt 19 samples!!!!
              % Ts = 1/Fs = 0.0005 sec
              % t_stimart = 0.02 sec
              % nr_samples = 0.02/0.0005 = 40 samples
              
-            stimart_start = dataBase.tb_events.sample_start(event) - 3;       % Stim_start is almost correctly the start time of the stimulation artefact
-            stimart_stop =  dataBase.tb_events.sample_start(event) +19;         % the true stimulation artefact is ~40 samples instead of the 3 suggested by the sample_end
+            stimart_start = dataBase(i).tb_events.sample_start(event) - 3;       % Stim_start is almost correctly the start time of the stimulation artefact
+            stimart_stop =  dataBase(i).tb_events.sample_start(event) +19;         % the true stimulation artefact is ~40 samples instead of the 3 suggested by the sample_end
  
             % Remove the stimulation artefact in every channel
             for channel = 1:size(data,1)                                   
@@ -134,5 +133,7 @@ epoch_prestim = cfg.epoch_prestim;
 %     savefig(Frequencies);
 
       
-dataBase.data = signal_filt_pass;    
+dataBase(i).data = signal_filt_pass;    
 end
+end
+

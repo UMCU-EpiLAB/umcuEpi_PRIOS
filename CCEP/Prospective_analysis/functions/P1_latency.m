@@ -1,4 +1,4 @@
-function N1_rise_fall(dataBase_clin, dataBase_prop, myDataPath)
+function P1_latency(dataBase_clin, dataBase_prop, myDataPath)
 % Determine the amplitude and latency of the P1 and the highest point before N1
 % Necessary to determine the rise and fall times of the N1.
 
@@ -66,15 +66,13 @@ for i = 1:size(mode,2)
                 % Find highest peak after the N1 (P1)
                 % The interval in wich de P1 is found is [N1 location:500 ms (2*fs+1024 samples = 5120)]
         
-                [~,xP1] = findpeaks(squeeze(dataBase.cc_epoch_sorted_avg(chan,stim,:)),'MinPeakDistance',100);
+                [~,xP1] = findpeaks(squeeze(dataBase.cc_epoch_sorted_avg(chan,stim,:)));
 
                 % When multiple peaks are found, select the first peak (x)
-                % or highest (y)???
 
                 if size(xP1,1) > 1    
 
                    remove = xP1<(xN1+2*fs) ;                    % Remove all peaks before xN1
-                   xP1 = xP1+xN1;
                    xP1(remove) = [];
                    remove2 = xP1>((xN1+2*fs)+1024);             % remove all peaks after 500 ms
                    xP1(remove2) = [];
@@ -87,9 +85,9 @@ for i = 1:size(mode,2)
                     warning('geen xP1')
 
                 end
-            
-                latency_P1.(mode{i})(r,:) = xP1;
                 
+                % Convert to samples after the stimulation artefact
+                latency_P1.(mode{i})(r,:) = xP1-(2*fs);
 
             end
           
@@ -123,13 +121,14 @@ latency_P1.percentiles_P1_prop = prctile(latency_P1.SPES_prop,[25 50 75]);
 
 % Save N1 rise and fall times for mathematical analysis
 targetFolder = fullfile(myDataPath.CCEPpath, 'Visualise_agreement/N1_compare/P1_latency/');
+fileName = [dataBase(1).sub_label,'_P1_latency.mat'];    
 
 % Create the folder if it doesn't exist already.
 if ~exist(targetFolder, 'dir')
     mkdir(targetFolder);
 end
 
-save([targetFolder,fileName_rise], 'latency_P1');
+save([targetFolder,fileName], 'latency_P1');
 
 
 end

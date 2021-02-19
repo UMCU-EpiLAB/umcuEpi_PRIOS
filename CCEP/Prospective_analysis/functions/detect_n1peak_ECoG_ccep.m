@@ -175,8 +175,9 @@ for subj = 1:length(dataBase)
                     n1_peak_sample = temp_n1_peaks_samp(max_n1_ampl(1));
                     n1_peak_amplitude = temp_n1_peaks_ampl(max_n1_ampl(1));
                     % otherwise give the amplitude the value NaN
-                elseif isempty(temp_n1_peaks_samp)
+                elseif isempty(temp_n1_peaks_samp)          % When nog peaks are found
                     n1_peak_amplitude = NaN;
+                    n1_peak_sample = NaN;
                 end
                 
                 % if N1 exceeds positive threshold, it is deleted
