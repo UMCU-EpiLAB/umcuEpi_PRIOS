@@ -1,15 +1,22 @@
 clear; 
 clc;
 
+<<<<<<< HEAD
 % Choose patient
 config_CCEP
 
 % set pathsPRIOS06
+=======
+% set paths
+>>>>>>> upstream/master
 cfg.mode = 'pros';
 myDataPath = setLocalDataPath(cfg);
 
+% Choose patient
+config_CCEP
+
 %% Load ECOG data
-% Find if there are multiple runs
+% Find SPESclin and SPESprop 
 files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg',...
     [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
 names = {files.name};
@@ -30,11 +37,12 @@ fprintf('Data of subject %s is loaded. \n',cfg.sub_labels{1})
     
     
 %% Filter
-% When this is used, dataBase.data will change into the fltered data
+% When this is used, dataBase.data will change into the filtered data
 % DataBase.raw_data will not be changed and will keep the raw data
 dataBase = filter_bedArt(dataBase);
 
 fprintf('Both runs of subject %s are filtered. \n',cfg.sub_labels{1})
+
 %% CCEP for SPES-clin stimulations
 % save all stimuli of clinical SPES
 
@@ -268,7 +276,11 @@ XX = dataBase(1).tb_events.electrical_stimulation_site;
 [uniqueXX, ~, J]=unique(XX) ;
 occ = histc(J, 1:numel(uniqueXX));
 
+<<<<<<< HEAD
 mean_occ = median(occ)
+=======
+N1_rise_fall(dataBase_clin, dataBase_prop, cfg,myDataPath);
+>>>>>>> upstream/master
 
 XX_prop = dataBase(2).tb_events.electrical_stimulation_site;
 [uniqueXX_prop, ~, J_prop]=unique(XX_prop) ;

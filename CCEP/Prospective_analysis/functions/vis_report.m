@@ -3,6 +3,9 @@ function vis_report(dataBase, myDataPath)
 % results for the report
 
 %% Visualise the number of ERs per SPES session per patient with bar graphs
+% TODO: total number of ERs does not make much sense, because it depends on
+% the number of stimulus pairs and number of channels. Normalizing it to
+% ERs per stimulus pairs would make more sense. 
 figure('Position',[407,689,939,373])
 ax1 = axes('Position',[0.074,0.11,0.9,0.82]);
 

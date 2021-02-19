@@ -9,11 +9,12 @@ Fs = dataBase(1).ccep_header.Fs;
 Fn = Fs/2;
 
 % Filters: Butterworth, 4th order
-[b50,a50] =butter(4,[49/Fn 51/Fn],'stop');
-[b36,a36] = butter(4,[33/Fn 38/Fn],'stop');
-[b110,a110] = butter(4,[108/Fn 112/Fn], 'stop');
-[bP,aP] = butter(4,120/Fn,'low');
+[b50,a50] = butter(4,[49/Fn 51/Fn],'stop'); % band stop 49-51Hz
+[b36,a36] = butter(4,[33/Fn 38/Fn],'stop'); % band stop 33-38Hz
+[b110,a110] = butter(4,[108/Fn 112/Fn], 'stop'); % band stop 108-112 Hz
+[bP,aP] = butter(4,120/Fn,'low'); % lowpass filter untill 120 Hz
  
+interplwindow = 40;
 % fvtool(b36,a36)               % Check the effect of the filter
 % fvtool(bP,aP)
 
@@ -25,7 +26,7 @@ for i = 1:size(dataBase,2)
     for event = 1:size(dataBase(i).tb_events,1)
          if strcmp(dataBase(i).tb_events.trial_type(event), 'electrical_stimulation')
              
-            % The [-1.5 ms : 9 ms] interval surrounding the stimulus was removed using interpolation
+            % The [-1.5 ms : 9 ms] = [-3 samples: 19 samples] interval surrounding the stimulus was removed using interpolation
             % to avoid incorrect filtering becuase of the saturation effect induced by the amplifier 
             % (the stimulation artefact) @VanBlooijs2015, @VantKlooster2011
             
@@ -38,12 +39,14 @@ for i = 1:size(dataBase,2)
                 
                  % interpolate between the points of the stimulation artefact.
                  % Use 40 samples before and after the artefact to calculate the value in the [-1.5 ms : 9 ms] interval. 
-                 Interpol_period = data(channel,((stimart_start - 40) : (stimart_stop + 40))) ;              % find the signal 40 samples before and after stimulation artefact,
+                 Interpol_period = data(channel,((stimart_start - interplwindow) : (stimart_stop + interplwindow))) ;              % find the signal 40 samples before and after stimulation artefact,
                  IX = 1:numel(Interpol_period);
                  tf = isnan(Interpol_period);                                                        % Find the NaN's (interval that has to be interpolated)
                  Interpol_period(tf) = interp1(IX(~tf),Interpol_period(~tf),IX(tf));                 % Interpolate between the value -40 and +40 samples around the stimulation artefact
-             
-                 data(channel, ((stimart_start - 40) : (stimart_stop + 40))) = Interpol_period;
+%                  Interpol_period2(tf) = interp1(IX(~tf),Interpol_period(~tf),IX(tf),'spline');                 % Interpolate between the value -40 and +40 samples around the stimulation artefact
+                 % spline might be more interesting for future analysis
+                 
+                 data(channel, ((stimart_start - interplwindow) : (stimart_stop + interplwindow))) = Interpol_period;
                   
             end
          end        
@@ -64,20 +67,25 @@ for i = 1:size(dataBase,2)
     
     % Filter every signal
     % Preallocation
-    signal = zeros(size(data,1), size(data,2));
-    signal_filt_36 = zeros(size(data,1), size(data,2));
-    signal_filt_3650 = zeros(size(data,1), size(data,2));
-    signal_filt_3650110 = zeros(size(data,1), size(data,2));
-    signal_filt_pass = zeros(size(data,1), size(data,2));
+%     signal = zeros(size(data,1), size(data,2));
+%     signal_filt_36 = zeros(size(data,1), size(data,2));
+%     signal_filt_3650 = zeros(size(data,1), size(data,2));
+%     signal_filt_3650110 = zeros(size(data,1), size(data,2));
+%     signal_filt_pass = zeros(size(data,1), size(data,2));
+    signal = data'; % [samples x channels]
+    signal_filt_36 = filtfilt(b36,a36,signal);              % First filter the 36 Hz artefact out
+    signal_filt_3650 = filtfilt(b50,a50,signal_filt_36);
+    signal_filt_3650110 = filtfilt(b110,a110,signal_filt_3650);
+    signal_filt_pass = filtfilt(bP,aP, signal_filt_3650110);   % Then use the 120 Hz low pass filter to remove all frequencies above 120 Hz.
     
-    for ch = 1:size(data,1)   
-        signal(ch,:) = data(ch,:);                                          % use the data without stimulation artefact.
-        signal_filt_36(ch,:) = filtfilt(b36,a36,signal(ch,:));              % First filter the 36 Hz artefact out
-        signal_filt_3650(ch,:) = filtfilt(b50,a50,signal_filt_36(ch,:));
-        signal_filt_3650110(ch,:) = filtfilt(b110,a110,signal_filt_3650(ch,:));
-        signal_filt_pass(ch,:) = filtfilt(bP,aP, signal_filt_3650110(ch,:));   % Then use the 120 Hz low pass filter to remove all frequencies above 120 Hz.
-              
-    end
+%     for ch = 1:size(data,1)
+%         signal(ch,:) = data(ch,:);                                          % use the data without stimulation artefact.
+%         signal_filt_36(ch,:) = filtfilt(b36,a36,signal(ch,:));              % First filter the 36 Hz artefact out
+%         signal_filt_3650(ch,:) = filtfilt(b50,a50,signal_filt_36(ch,:));
+%         signal_filt_3650110(ch,:) = filtfilt(b110,a110,signal_filt_3650(ch,:));
+%         signal_filt_pass(ch,:) = filtfilt(bP,aP, signal_filt_3650110(ch,:));   % Then use the 120 Hz low pass filter to remove all frequencies above 120 Hz.
+%               
+%     end
 
     
 % % Periodograms to determine the frequencies in the whole signal
@@ -115,7 +123,7 @@ for i = 1:size(dataBase,2)
 
 
       
-dataBase(i).data = signal_filt_pass;    
+dataBase(i).data = signal_filt_pass';    
 end 
 
 % subtract the median .

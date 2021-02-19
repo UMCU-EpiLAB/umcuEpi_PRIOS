@@ -1,6 +1,6 @@
-% Script pipeline_preproces.m should be performed first to obtain the correct documents.
+% Script PROS01_pipeline_preproces.m should be performed first to obtain the correct documents.
 
-clear; 
+% clear; 
 % %% Choose patient
 ccep_allPat.sub_labels = {'sub-PRIOS01','sub-PRIOS02','sub-PRIOS03','sub-PRIOS04','sub-PRIOS05','sub-PRIOS06'};
 %ccep_allPat.name = {[input('Patient number type (PRIOSXX): ','s')]};
