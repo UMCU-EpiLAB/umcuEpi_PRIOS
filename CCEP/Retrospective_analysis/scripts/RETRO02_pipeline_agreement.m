@@ -67,6 +67,17 @@ end
 % short clean up
 clear subj agreement runs
 
+for subj = 1:size(dataBase,2)
+   OA_all(subj,:) = dataBase(subj).agreement.agreement_run.OA;  
+   PA_all(subj,:) = dataBase(subj).agreement.agreement_run.PA;
+   NA_all(subj,:) = dataBase(subj).agreement.agreement_run.NA;
+
+end
+
+median_OA = prctile(OA_all,[25 50 75]);
+median_PA = prctile(PA_all,[25 50 75]);
+median_NA = prctile(NA_all,[25 50 75]);
+
 
 %% Rewrite the adjacency matrices to electrode x electrode instead of electrode x stimulation pair
 % This is necessary to calculate the indegree, outdegree and BC.

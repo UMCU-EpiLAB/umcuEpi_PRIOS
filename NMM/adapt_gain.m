@@ -14,10 +14,10 @@ Tinterstim=5;   % Time between stimulations
 Tstim=0.005;    % Length of the blockpulse
 Amp=1500;       % Amplitude of the blockpulse
 
-SI_gain = [repmat(7.6, [1,10]), repmat(7.9, [1,10])];                     % Slow inhibitory synaptic gain (norm = 7 mV)
-SI_reci = [repmat(4.6, [1,10]), repmat(4.6, [1,10])]   ;                  % Reciprocal of slow inhibitory time constant (norm = 10 s-1)
+SI_gain = [repmat(15, [1,10]), repmat(15, [1,10])];                     % Slow inhibitory synaptic gain (norm = 7 mV)
+SI_reci = [repmat(5, [1,10]), repmat(3.4, [1,10])]   ;                  % Reciprocal of slow inhibitory time constant (norm = 10 s-1)
 
-FI_gain = [repmat(25, [1,10]), repmat(16.3, [1,10])]    ;               % Fast inhibitory synaptic gain (norm = 25 mV)
+FI_gain = [repmat(19, [1,10]), repmat(13, [1,10])]    ;               % Fast inhibitory synaptic gain (norm = 25 mV)
 FI_reci = [repmat(300, [1,10]),repmat(180, [1,10])];                               % Reciprocal of fast inhibitory time constant (norm = 300 s-1)8
 
 

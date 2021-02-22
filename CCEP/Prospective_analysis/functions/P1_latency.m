@@ -1,4 +1,4 @@
-function P1_latency(dataBase_clin, dataBase_prop, myDataPath)
+function P1_latency(dataBase_clin, dataBase_prop,cfg, myDataPath)
 % Determine the amplitude and latency of the P1 and the highest point before N1
 % Necessary to determine the rise and fall times of the N1.
 
@@ -10,8 +10,12 @@ fs = dataBase_clin.ccep_header.Fs;
 
 % Load the CCEP_checked files
 filename = dir([myDataPath.CCEP_allpat,dataBase_clin.sub_label,'*_CCEP_clin_filt_check.mat']);
-if exist(fullfile(filename.folder,filename.name),'file')
-   ER_checked_clin = load(fullfile(filename.folder,filename.name));
+if ~isempty(filename)
+   if exist(fullfile(filename.folder,filename.name),'file')
+       ER_checked_clin = load(fullfile(filename.folder,filename.name));
+   else
+       warning('No N1-checked file is found')
+   end
 else
     warning('No N1-checked file is found')
 end
@@ -20,8 +24,12 @@ ER_clin = ER_checked_clin.ccep_clin.n1_peak_sample_check;
          
 % Load the CCEP_checked files
 filename = dir([myDataPath.CCEP_allpat,dataBase_prop.sub_label,'*_CCEP_prop_filt_check.mat']);
-if exist(fullfile(filename.folder,filename.name),'file')
-   ER_checked_prop = load(fullfile(filename.folder,filename.name));
+if ~isempty(filename)
+    if exist(fullfile(filename.folder,filename.name),'file')
+        ER_checked_prop = load(fullfile(filename.folder,filename.name));
+    else
+        warning('No N1-checked file is found')
+    end
 else
     warning('No N1-checked file is found')
 end
@@ -52,14 +60,17 @@ for i = 1:size(mode,2)
           if ~isnan(ER_clin(chan, stim)) &&  ~isnan(ER_prop(chan, stim))           
 
               if strcmp(mode{i},'SPES_clin')
-                  xN1 = ER_checked_clin.ccep_clin.n1_peak_sample_check(chan,stim)-(2*fs) ;      % Minus the period before stimulation, in SAMPLES
+                  xN1 = ER_checked_clin.ccep_clin.n1_peak_sample_check(chan,stim)-(cfg.epoch_prestim*fs) ;      % Minus the period before stimulation, in SAMPLES
               elseif strcmp(mode{i},'SPES_prop')
-                  xN1 = ER_checked_prop.ccep_prop.n1_peak_sample_check(chan,stim)-(2*fs) ;      % Minus the period before stimulation
+                  xN1 = ER_checked_prop.ccep_prop.n1_peak_sample_check(chan,stim)-(cfg.epoch_prestim*fs) ;      % Minus the period before stimulation
               end
 
              r = r+1;
              % The N1 peak must at least be 3 samples further than the 9 ms and before 500 ms 
-             if xN1 > 19+3  && xN1+2*fs <5120-3      
+             
+             max_latP1 = 1024;     %before 500 ms.
+             
+             if xN1 > 19+3  && xN1+cfg.epoch_prestim*fs < (max_latP1+cfg.epoch_prestim*fs)-3      
                     
                 
                 %%%%%%%% P1 %%%%%%%%%%%%%%%%%%%%
@@ -72,9 +83,9 @@ for i = 1:size(mode,2)
 
                 if size(xP1,1) > 1    
 
-                   remove = xP1<(xN1+2*fs) ;                    % Remove all peaks before xN1
+                   remove = xP1<(xN1+cfg.epoch_prestim*fs) ;                    % Remove all peaks before xN1
                    xP1(remove) = [];
-                   remove2 = xP1>((xN1+2*fs)+1024);             % remove all peaks after 500 ms
+                   remove2 = xP1>((xN1+cfg.epoch_prestim*fs)+max_latP1);             % remove all peaks after 500 ms
                    xP1(remove2) = [];
                    
                    [xP1,~] = (min(xP1) );                       % Select the first peak to be the P1
@@ -87,7 +98,7 @@ for i = 1:size(mode,2)
                 end
                 
                 % Convert to samples after the stimulation artefact
-                latency_P1.(mode{i})(r,:) = xP1-(2*fs);
+                latency_P1.(mode{i})(r,:) = xP1-(cfg.epoch_prestim*fs);
 
             end
           

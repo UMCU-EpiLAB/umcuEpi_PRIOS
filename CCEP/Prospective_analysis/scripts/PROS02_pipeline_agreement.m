@@ -120,7 +120,7 @@ for subj = 1:size(dataBase,2)
         end
     
         
-        Mult_factor(subj,n) = M_Clin/M_Prop;       
+        Mult_factor(subj,n) = M_Prop/M_Clin;       
     end
 end
 

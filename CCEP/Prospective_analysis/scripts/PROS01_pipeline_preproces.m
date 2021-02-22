@@ -1,14 +1,7 @@
 clear; 
 clc;
 
-<<<<<<< HEAD
-% Choose patient
-config_CCEP
-
-% set pathsPRIOS06
-=======
 % set paths
->>>>>>> upstream/master
 cfg.mode = 'pros';
 myDataPath = setLocalDataPath(cfg);
 
@@ -261,7 +254,7 @@ end
 % Necessary to determine the rise and fall times of the N1.
 % Amplitude of the P1 is not correct. Latency is.
 
-P1_latency(dataBase_clin, dataBase_prop, myDataPath);
+P1_latency(dataBase_clin, dataBase_prop,cfg, myDataPath);
 
 disp('P1_latency is saved to be later used in PROS02_pipeline_agreement.') 
 
@@ -269,22 +262,20 @@ disp('P1_latency is saved to be later used in PROS02_pipeline_agreement.')
 % Determine how often each stimulation pair is stimulated during
 % propofol-SPES and clinical-SPES
 % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected 
-NorDisClin = lillietest(occ)                 
-NorDisProp = lillietest(occ_prop)
+NorDisClin = lillietest(occ)     ;            
+NorDisProp = lillietest(occ_prop);
 
 XX = dataBase(1).tb_events.electrical_stimulation_site;
 [uniqueXX, ~, J]=unique(XX) ;
-occ = histc(J, 1:numel(uniqueXX));
+occ = histcounts(J, 1:numel(uniqueXX));
 
-<<<<<<< HEAD
-mean_occ = median(occ)
-=======
+
+mean_occ = median(occ);
 N1_rise_fall(dataBase_clin, dataBase_prop, cfg,myDataPath);
->>>>>>> upstream/master
 
 XX_prop = dataBase(2).tb_events.electrical_stimulation_site;
 [uniqueXX_prop, ~, J_prop]=unique(XX_prop) ;
-occ_prop = histc(J_prop, 1:numel(uniqueXX_prop));
+occ_prop = histcounts(J_prop, 1:numel(uniqueXX_prop));
 
-mean_occ_prop = mean(occ_prop)
+mean_occ_prop = mean(occ_prop);
 

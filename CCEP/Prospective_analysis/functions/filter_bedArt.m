@@ -52,79 +52,16 @@ for i = 1:size(dataBase,2)
          end        
     end
           
-%   % plot the whole signal without stimulation artefacts
-%     figure()
-%     ch = 5;
-%     subplot(2,1,1)
-%     plot(dataBase(i).raw_data(ch,:))
-%     legend('original')
-%     subplot(2,1,2)
-%     plot(data(ch,:))
-%     legend('without artefact')
-%     title('Whole signal with and without the stimulation artefacts')
-%     xlabel('time (samples')
-     
+% Filter every signal
+% Preallocation
+signal = data'; % [samples x channels]
+signal_filt_36 = filtfilt(b36,a36,signal);              % First filter the 36 Hz artefact out
+signal_filt_3650 = filtfilt(b50,a50,signal_filt_36);
+signal_filt_3650110 = filtfilt(b110,a110,signal_filt_3650);
+signal_filt_pass = filtfilt(bP,aP, signal_filt_3650110);   % Then use the 120 Hz low pass filter to remove all frequencies above 120 Hz.
     
-    % Filter every signal
-    % Preallocation
-%     signal = zeros(size(data,1), size(data,2));
-%     signal_filt_36 = zeros(size(data,1), size(data,2));
-%     signal_filt_3650 = zeros(size(data,1), size(data,2));
-%     signal_filt_3650110 = zeros(size(data,1), size(data,2));
-%     signal_filt_pass = zeros(size(data,1), size(data,2));
-    signal = data'; % [samples x channels]
-    signal_filt_36 = filtfilt(b36,a36,signal);              % First filter the 36 Hz artefact out
-    signal_filt_3650 = filtfilt(b50,a50,signal_filt_36);
-    signal_filt_3650110 = filtfilt(b110,a110,signal_filt_3650);
-    signal_filt_pass = filtfilt(bP,aP, signal_filt_3650110);   % Then use the 120 Hz low pass filter to remove all frequencies above 120 Hz.
-    
-%     for ch = 1:size(data,1)
-%         signal(ch,:) = data(ch,:);                                          % use the data without stimulation artefact.
-%         signal_filt_36(ch,:) = filtfilt(b36,a36,signal(ch,:));              % First filter the 36 Hz artefact out
-%         signal_filt_3650(ch,:) = filtfilt(b50,a50,signal_filt_36(ch,:));
-%         signal_filt_3650110(ch,:) = filtfilt(b110,a110,signal_filt_3650(ch,:));
-%         signal_filt_pass(ch,:) = filtfilt(bP,aP, signal_filt_3650110(ch,:));   % Then use the 120 Hz low pass filter to remove all frequencies above 120 Hz.
-%               
-%     end
-
-    
-% % Periodograms to determine the frequencies in the whole signal
-%     t_start = 1704324;
-%     t_stop = 2553463;
-% 
-%     [pww,f] = periodogram(signal(ch,((t_start) : (t_stop))),[],[],Fs);                     % original with bed art
-%     [pww_filt,f_filt] = periodogram(signal_filt_pass(ch,((t_start) : (t_stop))), [], [], Fs);      % Filtered signal    
-% 
-%     % Plot the frequencies
-%     figure('Position',[318,133,1222,904])
-%     subplot(2,2,1)
-%     plot(f,pww,'LineWidth',2)
-%     legend('Original')
-%     xlim([12 122])
-%     xlabel('Frequencies (Hz)')
-%     title(sprintf('%s, %s, channel: %s',dataBase(i).sub_label, dataBase(i).run_label,dataBase(i).ch{ch}))
-% 
-%     subplot(2,2,3)
-%     plot(f_filt ,pww_filt,'LineWidth',2)
-%     legend('Filtered')
-% %     ylim([0 300])
-%     xlim([12 122])
-%     title(sprintf('%s, %s, channel: %s',dataBase(i).sub_label, dataBase(i).run_label,dataBase(i).ch{ch}))
-%     xlabel('Frequencies (Hz)')
-% 
-%     % Plot the signal response filtered and original  
-%     subplot(2,2,[2 4])
-%     plot(signal_filt_pass(ch,(t_start : t_start+500)));
-%     hold on
-%     plot(signal(ch,(t_start : t_start+500)));
-% %     ylim([-1000 2000])
-%     legend('Filtered','Original')
-%     title(sprintf('%s, %s, channel: %s',dataBase(i).sub_label, dataBase(i).run_label,dataBase(i).ch{ch}))
-
-
       
 dataBase(i).data = signal_filt_pass';    
 end 
 
-% subtract the median .
 end
