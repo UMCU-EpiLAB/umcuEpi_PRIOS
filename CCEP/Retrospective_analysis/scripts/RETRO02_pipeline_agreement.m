@@ -64,8 +64,6 @@ for subj = 1:size(dataBase,2)
         dataBase(subj).sub_label, agreement.agreement_run.OA, agreement.agreement_run.PA, agreement.agreement_run.NA)
 end
 
-% short clean up
-clear subj agreement runs
 
 for subj = 1:size(dataBase,2)
    OA_all(subj,:) = dataBase(subj).agreement.agreement_run.OA;  
