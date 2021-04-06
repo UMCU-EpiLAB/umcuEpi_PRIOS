@@ -77,7 +77,7 @@ end
 
 
 % Visualise the signal of specified stimpair and channel
-chan =1; stim=2;
+chan =26; stim=7;
 
 tt = dataBase_clin.tt;
 figure('Position',[515,333,1034,707]); 
@@ -107,7 +107,7 @@ ax = gca; ylimits = ax.YTick;
 patch([0 0.009 0.009 0],[min(ylimits) min(ylimits) max(ylimits) max(ylimits)],[0.6,0.2,0.2], 'EdgeAlpha',0)
 alpha(0.1)                % set patches transparency
 ylim([-600 600])
-xlim([-0.01 0.3])
+xlim([-0.02 0.5])
 
 
 

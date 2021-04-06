@@ -45,17 +45,17 @@ topo.y = y;
 
 %% Indegree of electrodes and ERs per stimulation pair, for all stims
 
-mode = {'Indegree & ERs per stimpair, all stimuli','Indegree & ERs per stimpair, 2 stimuli'};
+mode = {'In-degree & ERs per stimpair, all stimuli','In-degree & ERs per stimpair, 2 stimuli'};
 figure1 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
 
 for J = 1:size(mode,2)
     
-    if strcmp(mode{J},'Indegree & ERs per stimpair, all stimuli')
+    if strcmp(mode{J},'In-degree & ERs per stimpair, all stimuli')
         Ind = (agreement_parameter.indegreeN_10)';
         ERs = agreement_parameter.ERs_stimp10;
         axes1 = axes('Parent',figure1,'Position',[0.04,0.5,0.9,0.4]);
         
-    elseif strcmp(mode{J},'Indegree & ERs per stimpair, 2 stimuli')
+    elseif strcmp(mode{J},'In-degree & ERs per stimpair, 2 stimuli')
         Ind = (agreement_parameter.indegreeN_2)';
         ERs = agreement_parameter.ERs_stimp2;
         axes1 = axes('Parent',figure1,'Position',[0.04,0.07,0.9,0.4]);
@@ -130,13 +130,13 @@ saveas(gcf,[path,outlabel],'jpg')
 
 %% Plot the outdegree and the BC
 
-mode = {'Outdegree','BC','Indegree'};
+mode = {'Out-degree','BC','In-degree'};
 
 for J = 1:size(mode,2)
     
     figure2 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
     
-    if strcmp(mode{J},'Outdegree')
+    if strcmp(mode{J},'Out-degree')
         par10 = (agreement_parameter.outdegreeN_10)';
         par2 = (agreement_parameter.outdegreeN_2)';
         
@@ -144,7 +144,7 @@ for J = 1:size(mode,2)
         par10 = (agreement_parameter.BCN_10)';
         par2 = (agreement_parameter.BCN_2)';
    
-    elseif strcmp(mode{J},'Indegree')
+    elseif strcmp(mode{J},'In-degree')
         par10 = (agreement_parameter.indegreeN_10)';
         par2 = (agreement_parameter.indegreeN_2)';
         

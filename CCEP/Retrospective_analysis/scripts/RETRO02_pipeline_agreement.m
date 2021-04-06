@@ -117,7 +117,6 @@ for subj = 1:size(dataBase,2)
 end
 
 
-
 %% Determine multiplication factor of the network parameters    
 % Data is not normally distributed therefore the median is calculated
 measure = {'ERs per stimp','Indegree','Outdegree','BC'};
@@ -151,10 +150,11 @@ T = table(Mult_factor(:,1),Mult_factor(:,2),Mult_factor(:,3),Mult_factor(:,4), '
 disp(T)                
     for n=1:size(measure,2)
 
-        Mult = sum(Mult_factor(:,n)) / 6;
-        fprintf('Multiplication factor of the %s of the SPES-10 and SPES-2 = %1.1f \n', measure{n}, Mult);
+        Mult = prctile(Mult_factor(:,n),[25 50 75]);
+        fprintf('median multiplication factor of the %s of the SPES-10 and SPES-2 = %1.1f. Range= %1.1f - %1.1f \n', measure{n}, Mult(2),Mult(1),Mult(3));
 
     end
+  
     
 %% Display agreement parameters on brain image
 

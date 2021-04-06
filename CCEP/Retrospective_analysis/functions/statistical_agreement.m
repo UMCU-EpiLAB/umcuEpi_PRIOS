@@ -25,7 +25,7 @@ ER_stimp2 = agreement_parameter.ERs_stimp2;
 p = signrank(ER_stimp10, ER_stimp2) ;           % tests the null hypothesis that data in x and y are samples from continuous distributions with equal medians
 
 if p<0.05
-    fprintf('Test between the number of ERs evoked in 10 and in 2 stims per stimulation pair gives p-value = %1.4f. This means that there is a significant difference between stimulating 10 or 2 times for %s \n', p, SubjectName{1});
+    fprintf('Test between the number of ERs evoked in 10 and in 2 stims per stimulation pair gives p-value = %1.13f. This means that there is a significant difference between stimulating 10 or 2 times for %s \n', p, SubjectName{1});
 else
     fprintf('Test between the number of ERs evoked in 10 and in 2 stims per stimulation pair gives p-value = %1.4f. This means that there is NO significant difference between stimulating 10 or 2 times for %s \n', p, SubjectName{1});
 end
@@ -110,12 +110,9 @@ set(gca, 'YDir', 'reverse');
 ylim([1, max([size(rank.fig_sort_names_stims10,1) size(rank.fig_sort_names_stims2,1)])])
 ylabel('order 2 stims')
 
-% Median number of places shifted on the ranking
-shift_rank = median(rank.unsort_stims10(:,4) - rank.unsort_stims2(:,4));
-
 xlim([1, 2])
 set(gca,'xtick',[])
-str_main = sprintf('%s, \\Delta = %1.1f',SubjectName{1},shift_rank);  
+str_main = sprintf('%s',SubjectName{1});  
 sgtitle(str_main)
 
 % if PVAL_stmp(:) <0.01
@@ -138,12 +135,12 @@ for k = 1:length(rank.fig_sort_names_stims10)
 end
 
 % Save figure
-outlabel=sprintf('sub-%s_ranking.jpg',SubjectName{1});
+outlabel=sprintf('sub-%s_ranking.png',SubjectName{1});
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Ranking/');
 if ~exist(path, 'dir')
     mkdir(path);
 end
-saveas(gcf,[path,outlabel],'jpg')
+saveas(gcf,[path,outlabel],'png')
 
 
 %% Spearman correlation

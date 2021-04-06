@@ -78,7 +78,7 @@ medians_P1(1:2:end) = median_p1_clin;
 medians_P1(2:2:end) = median_p1_prop;
 
 median_clin = prctile(median_p1_clin,[25 50 75]);
-median_prop = prctile(median_p1_prop, [25 50 75]);
+median_prop = prctile(median_p1_prop(2:5), [25 50 75]);
 fprintf('median clin P1 = %1.1f ms, percentile = [%1.1f - %1.1f]\n',median_clin(2),median_clin(1),median_clin(3));
 fprintf('median prop P1 = %1.1f ms, percentile = [%1.1f - %1.1f]\n',median_prop(2),median_prop(1),median_prop(3));
 
@@ -156,6 +156,8 @@ if ~exist(path, 'dir')
     mkdir(path);
 end
 saveas(gcf,[path,outlabel],'jpg') 
+
+
 
 
 

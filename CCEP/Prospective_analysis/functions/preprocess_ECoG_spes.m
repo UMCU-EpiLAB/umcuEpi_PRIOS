@@ -333,7 +333,7 @@ end
         if any(~isnan(cc_epoch_sorted_all(1,:,stimps(1),1))) && any(~isnan(cc_epoch_sorted_all(1,:,stimps(2),1))) % Check whether the stimpair is stimulated in both directions.      
             
             % Average ALL stimuli given to certain stimpair
-            selection = cc_epoch_sorted_all(:,1:avg_stim,IC_avg==ll,:);         
+            selection = cc_epoch_sorted_all(:,:,IC_avg==ll,:);         
             selection_avg =  squeeze(nanmean(selection,2));
             
             while size(size(selection_avg),2) >2

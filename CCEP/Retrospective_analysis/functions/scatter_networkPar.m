@@ -37,7 +37,9 @@ for J = 1:size(mode,2)
         idx_nan = isnan(par10) | isnan(par2);   
         
         subplot(size(dataBase,2),1,i)
-        scatter(par10  , par2 ,'*' )
+%         scatter(par10  , par2 ,'*' )
+        plot(par10(~idx_nan),par2(~idx_nan),'*')                        % This is equal to scatter
+        box off
         
         % Change fontsize
         ax = gca;
@@ -52,6 +54,7 @@ for J = 1:size(mode,2)
             [y_fit, ~] = polyval(P,par10(~idx_nan),S);
             
             plot(par10(~idx_nan),par2(~idx_nan),'*')                        % This is equal to scatter
+            box off
             hold on
             
             % Plot polyfit throught data points
@@ -70,10 +73,10 @@ for J = 1:size(mode,2)
 %             Filled_CI.EdgeAlpha = 0;
 %             title(sprintf('%s, p = %1.3f', dataBase(i).sub_label,pval));
 %             
-            if pval < 0.01
-                title(sprintf('%s, p = <0.01, r_s = %1.3f', dataBase(i).sub_label, rho),'FontSize',12)
-            elseif pval<0.05
-                title(sprintf('%s, p = <0.05, r_s = %1.3f', dataBase(i).sub_label, rho),'FontSize',12)
+            if pval < 0.001
+                title(sprintf('%s, p = <0.001, r_s = %1.3f', dataBase(i).sub_label, rho),'FontSize',12)
+            else 
+                title(sprintf('%s, p = %1.3f, r_s = %1.3f', dataBase(i).sub_label, pval, rho),'FontSize',12)
             end
         
              
@@ -107,12 +110,12 @@ for J = 1:size(mode,2)
     end
     
     % Save figure
-    outlabel=sprintf('All_pat_scatter_%s.jpg',mode{J});
+    outlabel=sprintf('All_pat_scatter_%s.png',mode{J});
     path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Scatter/');
     if ~exist(path, 'dir')
         mkdir(path);
     end
-    saveas(gcf,[path,outlabel],'jpg')
+    saveas(gcf,[path,outlabel],'png')
     
 end
 

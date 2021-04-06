@@ -1,11 +1,12 @@
 
 clear;
-close all;
+ccep_allPat.mode = 'NMM';
+myDataPath = setLocalDataPath(ccep_allPat);
 
 %% Simulation settings
 deltat=0.0001;  % Timestep for ODE solving
 Tend=60;         % End time of the simulation
-Np=5;           % Save every Np-th datapoint
+Np=1;           % Save every Np-th datapoint
 
 %% Stimulation settings
 Tin=3;          % Time before the first stimulation
@@ -14,25 +15,28 @@ Tinterstim=5;   % Time between stimulations
 Tstim=0.005;    % Length of the blockpulse
 Amp=1500;       % Amplitude of the blockpulse
 
-SI_gain = [repmat(15, [1,10]), repmat(15, [1,10])];                     % Slow inhibitory synaptic gain (norm = 7 mV)
-SI_reci = [repmat(5, [1,10]), repmat(3.4, [1,10])]   ;                  % Reciprocal of slow inhibitory time constant (norm = 10 s-1)
+SI_gain = repmat(7.0, [1,31]);                     % Slow inhibitory synaptic gain (norm = 7 mV)
+SI_reci = repmat(4.6, [1,31]);                  % Reciprocal of slow inhibitory time constant (norm = 10 s-1)
 
-FI_gain = [repmat(19, [1,10]), repmat(13, [1,10])]    ;               % Fast inhibitory synaptic gain (norm = 25 mV)
-FI_reci = [repmat(300, [1,10]),repmat(180, [1,10])];                               % Reciprocal of fast inhibitory time constant (norm = 300 s-1)8
+FI_gain = [10 :0.5: 25 ] ;  %17;     repmat(25, [1,11]);     % Fast inhibitory synaptic gain (norm = 25 mV)
+FI_reci = [145:5: 295] ; % 300;    %repmat(300, [1,11])];                               % Reciprocal of fast inhibitory time constant (norm = 300 s-1)
 
+EX_gain = repmat(4.5, [1,31]);       %[3:0.3:5];                                 % Excitatory synaptic gain (norm = 4.5 mV)
+EX_reci = repmat(100, [1,31]);       %[70 :5:100];                      %repmat(100, [1,31]) [60 :5:110]]);   % Excitatory time constant (norm = 100 s-1)
 
 %% Varying the Fast Inhibitory Gain value
 % Simulating the potential of the pyramidal cells of NM1 and NM2
-gcf = figure('Position',[272,203,1220,819]);
+gcf = figure('Position',[272,489,930,533]);
 j = 1;
+n = size(EX_gain,2);
+c = flipud(jet(n));
 
-
-for i = 1:size(SI_gain,2)   
+for i = 1:size(EX_gain,2)   
     
-%     for j = 1:size(SI_reci,2) 
+     for j = 1:size(EX_reci,2) 
         
-        NM(1)=create_NM(4.5,100, SI_gain(i),SI_reci(i),  FI_gain(i),FI_reci(i) , 135,1,0,1,0.7);          % This is NMM 1      create_NM(A,a,B,b,G,g,C,sd,alpha,beta,gamma)
-        NM(2)=create_NM(4.5,100,SI_gain(i),SI_reci(i),FI_gain(i),FI_reci(i),135,1,0,1,0.7);          % This is NMM 2
+        NM(1)=create_NM(4.5,100,7,4.0,11,175,135,1,0,1,0.7);         %EX_gain(i),EX_reci(i),SI_gain(i),SI_reci(i),FI_gain(i),FI_reci(j)  % This is NMM 1      create_NM(A,a,B,b,G,g,C,sd,alpha,beta,gamma)
+        NM(2)=create_NM(4.5,100,7,10,25,300,135,1,0,1,0.7);          % This is NMM 2
 
         %Add stimulation
         NM(1).Ivar=@(t) (mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);    % Stimulation at NM 1
@@ -52,26 +56,30 @@ for i = 1:size(SI_gain,2)
         %% show results
         tvec=0:deltat*Np:Tend;      % Create time vector      
 
-        fs = 120001/60;
+        fs = 600001/60;
         ts = 1/fs;
         tstart = round(2.98 * fs);
         tend = round(3.4 *fs);
 %         
-        if i <11
-            p(i) = plot(tvec(tstart:tend),u2(1,tstart:tend)','LineWidth',1,'Color',[0.6350, 0.0780, 0.1840]); 
-        else %i>=11
-            p(i) = plot(tvec(tstart:tend),u2(1,tstart:tend)','LineWidth',1,'Color',[0, 0.4470, 0.7410]); 
-        end
+%         if i > 10
+            p(i,j) = plot(tvec(tstart:tend),u2(1,tstart:tend)','LineWidth',3,'Color','b'); 
+            hold on
+%         else
+%             p(i) = plot(tvec(tstart:tend),u2(1,tstart:tend)','LineWidth',1,'Color',[0, 0.4470, 0.7410]); 
+%         end
         
 %         xlim([2.98 3.08])
         ylim([-50 10])
         xlabel ('Time (ms)','FontSize',14,'FontWeight','bold')
-        ylabel ('Potential mV','FontSize',14,'FontWeight','bold')
-        
+        ylabel ('Potential (mV)','FontSize',14,'FontWeight','bold')
+        title('Four times more noise')
         ax = gca;                      
 %         ax.XTickLabel = [ax.XTick(1) :0.01: ax.XTick(end)] - 3;
         ax.FontSize = 12;
         hold on
+        
+%         legendCell = cellstr(num2str(EX_reci', 'a=%-d'));
+%         legend(legendCell)
 %        
 
         %% Determine the N1
@@ -180,77 +188,71 @@ for i = 1:size(SI_gain,2)
             xN2(i,j) = NaN;                yN2(i,j) = NaN;            
         end
          
-%     end
+    end
         
 
 end
 
 
-%
-% N1
-xN1C = mean(xN1(1:10));
-yN1C = mean(yN1(1:10));
 
-xN1P = mean(xN1(11:20));
-yN1P = mean(yN1(11:20));
+% Save settings and outcome
+NMM.settings.SI_gain = SI_gain;
+NMM.settings.SI_timeC = SI_reci;
+NMM.settings.FI_gain = FI_gain;
+NMM.settings.FI_timeC = FI_reci;
+NMM.settings.EX_gain = EX_gain;
+NMM.settings.EX_timeC = EX_reci;
 
-%P1
-xP1C = mean(xP1(1:10));
-yP1C = mean(yP1(1:10));
+% Save in ms
+xN1_plot = (xN1-3)*1000;
+xP1_plot = (xP1-3)*1000;
+xN2_plot = (xN2-3)*1000;
 
-xP1P = mean(xP1(11:20));
-yP1P = mean(yP1(11:20));
+NMM.outcome.N1_lat = xN1_plot;
+NMM.outcome.P1_lat = xP1_plot;
+NMM.outcome.N2_lat = xN2_plot;
+  
 
-%N2
-xN2C = mean(xN2(1:10));
-yN2C = mean(yN2(1:10));
+fileName = ['NMM_setting_and_outcome_',datestr(now, 'dd-mmm-yy, HH:MM'),'.mat'];
+save([myDataPath.save_data_loc,fileName], 'NMM');
 
-xN2P = mean(xN2(11:20));
-yN2P = mean(yN2(11:20));
+%% Plot the results of adaptations to the NMM in the colourplot
+% The gain is on the y-axis, the variations of the time-constant are
+% displayed with various colors. 
+% x-axis is the latency (ms)
 
+if exist('NMM','var')      % after the script above is ran
+   colourPlot_latencies(NMM, myDataPath)
 
-hold on
-p(size(SI_gain,2) +1) = plot(xN1C,yN1C,'o','MarkerSize',9,'MarkerEdgeColor',[0.93,0.69,0.13],'MarkerFaceColor',[0.93,0.69,0.13]);
-p(size(SI_gain,2) +2) = plot(xN1P,yN1P,'o','MarkerSize',9,'MarkerEdgeColor',[0.93,0.89,0.13],'MarkerFaceColor',[0.93,0.89,0.13]);
+    
+else % load save data before running colourPlot_latencies
+    
+    files = dir(fullfile(myDataPath.load_data_loc));
+    Loc_NMMFile = find(contains({files(:).name},'NMM'));
+    load(fullfile(files(Loc_NMMFile).folder,files(Loc_NMMFile).name));
+    
+    colourPlot_latencies(NMM, myDataPath)
 
-p(size(SI_gain,2) +3) = plot(xP1C,yP1C,'o','MarkerSize',9,'MarkerEdgeColor',[0.99,0.00,0.99],'MarkerFaceColor',[0.99,0.00,0.99]);
-p(size(SI_gain,2) +4) = plot(xP1P,yP1P,'o','MarkerSize',9,'MarkerEdgeColor',[0.99,0.80,0.99],'MarkerFaceColor',[0.99,0.80,0.99]);
-
-p(size(SI_gain,2) +5) = plot(xN2C,yN2C,'o','MarkerSize',9,'MarkerEdgeColor',[0.47,0.57,0.19],'MarkerFaceColor',[0.47,0.57,0.19]);
-p(size(SI_gain,2) +6) = plot(xN2P,yN2P,'o','MarkerSize',9,'MarkerEdgeColor',[0.47,0.7,0.29],'MarkerFaceColor',[0.47,0.87,0.29]);
-
-
-
-legendInfo{1} = [sprintf('Clin: B = %1.1f, b = %1.1f, G = %1.1f, g = %1.0f',SI_gain(1), SI_reci(1),FI_gain(1),FI_reci(1))]    ;   
-legendInfo{2} = [sprintf('Prop: B = %1.1f, b = %1.1f, G = %1.1f, g = %1.0f',SI_gain(11), SI_reci(11),FI_gain(11),FI_reci(11))]    ;   
-
-legendInfo{3} = sprintf('N1-clin: Lat = %1.0f ms, Amp = %1.1f mV',(xN1C-3)*1000,yN1C);
-legendInfo{4} = sprintf('N1-prop: Lat = %1.0f ms, Amp = %1.1f mV',(xN1P-3)*1000,yN1P);
-
-legendInfo{5} = sprintf('P1-clin: Lat = %1.0f ms, Amp = % 1.1f mV',(xP1C-3)*1000,yP1C);
-legendInfo{6} = sprintf('P1-prop: Lat = %1.0f ms, Amp = %1.1f mV',(xP1P-3)*1000,yP1P);
-
-legendInfo{7} = sprintf('N2-clin: Lat = %1.0f ms, Amp = %1.1f mV',(xN2C-3)*1000,yN2C);
-legendInfo{8} = sprintf('N2-prop: Lat = %1.0f ms, Amp = %1.1f mV',(xN2P-3)*1000,yN2P);
+end
 
 
+%% Plot the contour plot of the latencies
+% Plot the results of the NMM in a contour plot. The time constant on the
+% x-axis, the gain on the y-axis. A logarithmic scale is used to indicate
+% the deviation from the desirec value (i.e. the value found during the in
+% vivo studies).
 
-legend(p([1,11, 21:end]),legendInfo,'Location','Southeast')
-xlim([2.99,3.4])
-% ax.XTickLabel = [-10, 0,10,20,30,40,50,60,70,80,90];
+if exist('NMM','var')      % after the script above is ran
+    
+    contourPlot_latencies(NMM, myDataPath)
+    
+else % load save data before running colourPlot_latencies
+    
+    files = dir(fullfile(myDataPath.load_data_loc));
+    Loc_NMMFile = find(contains({files(:).name},'NMM'));
+    load(fullfile(files(Loc_NMMFile).folder,files(Loc_NMMFile).name));
+    
+    contourPlot_latencies(NMM, myDataPath)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+end
 

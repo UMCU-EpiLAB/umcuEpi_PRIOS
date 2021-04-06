@@ -241,8 +241,8 @@ for subj = 1:size(dataBase,2)
 end
 
 %%%% Remove this (just for the report)
-per_N1_clin = prctile(M_Clin(2:end), [25 50 75])                % not the first since PRIOS01 is not significantly different 
-per_N1_prop= prctile(M_Prop(2:end), [25 50 75])
+per_N1_clin = prctile(M_Clin, [25 50 75])               
+per_N1_prop= prctile(M_Prop, [25 50 75])
 
 
 % Pre-allocation

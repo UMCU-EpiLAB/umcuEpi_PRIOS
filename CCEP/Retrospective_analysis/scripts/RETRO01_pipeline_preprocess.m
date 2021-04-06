@@ -75,9 +75,12 @@ end
 fprintf('...%s has been preprocessed... \n',dataBase(1).sub_label)
 
 %% Do a quick check by visualizing the stimuli of 2 stims and 10 stims.
-chan = 52; stim=23;
+chan = 16; stim=51;
 figure, 
+sgtitle(sprintf('Patient %s, Stimulation pair %s, on %s',dataBase2stim.sub_label, dataBase2stim.stimpnames_avg{stim},dataBase2stim.ch{chan}))
+
 subplot(2,1,1),
+
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
 plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
@@ -85,35 +88,46 @@ hold off
 title('2 signals')
 xlabel('time (s)')
 xlim([-.2 1.0])
+ylim([-300 300])
+xlabel('Time (s)')
+ylabel('Potential (\muV)')
+
            
 subplot(2,1,2),
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color','r','LineWidth',1)
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color','b','LineWidth',1)
+plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
 hold on
 plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
 hold off
 title('All signals')
 xlabel('time (s)')
 xlim([-.2 1.0])
+ylim([-300 300])
 
+xlabel('Time (s)')
+ylabel('Potential (\muV)')
+
+
+%%
 figure('Position',[256,618,677,357])
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,1,:))','Color','b','LineWidth',1)
+plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,1,:))','Color','b','LineWidth',1)
 hold on
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_select_avg(chan,stim,6,:))','Color','r','LineWidth',1)
+plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_select_avg(chan,stim,2,:))','Color','r','LineWidth',1)
 hold on
-plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(3,stim,:)),'k','LineWidth',3)
+plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',3)
 hold off
-% title('All 10 signals and their average')
-title(sprintf('First positive and negative response \n%s, evoked by %s',dataBaseallstim.ch{chan},dataBaseallstim.stimpnames_avg{stim}))
-line([0 0],[-200 350],'LineStyle','--','LineWidth',1.5,'color','k')
+title(sprintf('First positive and negative response \n%s, evoked by %s',dataBase2stim.ch{chan},dataBase2stim.stimpnames_avg{stim}))
+line([0 0],[-1200 350],'LineStyle','--','LineWidth',1.5,'color','k')
 
 xlabel('time (s)')
 xlim([-0.1 1])
 ylim([-1200 350])
 xlabel('Time (s)')
 ylabel('Potential (\muV)')
-legend('Positive direction','Negative direction')
+lgd = legend('Positive direction','Negative direction');
+lgd.FontWeight = 'bold';
+lgd.Location = 'SouthEast';
 
 
 %% Use the automatic N1 detector to detect ccep 

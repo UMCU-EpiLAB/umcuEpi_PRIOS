@@ -118,12 +118,9 @@ ylim([1, max([size(rank.fig_sort_names_SPES_clin,1) size(rank.fig_sort_names_SPE
 ylabel('order SPES-prop')
 
 
-% Median number of places shifted on the ranking
-shift_rank = median(rank.unsort_SPES_clin(:,4) - rank.unsort_SPES_prop(:,4));
-
 xlim([1, 2])
 set(gca,'xtick',[])
-str_main = sprintf('%s, \\Delta = %1.1f',SubjectName{1},shift_rank);  
+str_main = sprintf('%s',SubjectName{1});  
 sgtitle(str_main)
 
 n=1;

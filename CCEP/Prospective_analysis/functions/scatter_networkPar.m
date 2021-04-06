@@ -41,8 +41,9 @@ for J = 1:size(mode,2)
         idx_nan = isnan(clin) | isnan(prop);        
  
         subplot(size(dataBase,2),1,i);
-        scatter(clin(~idx_nan)  , prop(~idx_nan) ,'*' )
-       
+        plot(clin(~idx_nan)  , prop(~idx_nan) ,'*' )
+        box off
+
         % Change fontsize
         ax = gca;
         ax.XAxis.FontSize = 14;    ax.YAxis.FontSize = 14;
@@ -56,7 +57,8 @@ for J = 1:size(mode,2)
             [P,S] = polyfit(clin(~idx_nan),prop(~idx_nan),1);
             [y_fit, ~] = polyval(P,clin(~idx_nan),S);
             
-            plot(clin(~idx_nan),prop(~idx_nan),'*')                        % This is equal to scatter
+            plot(clin(~idx_nan),prop(~idx_nan),'*') 
+            box off
             hold on
             
             % Plot polyfit throught data points
@@ -74,10 +76,10 @@ for J = 1:size(mode,2)
 %             alpha(0.06)                % set patches transparency to 0.
 %             Filled_CI.EdgeAlpha = 0;
             
-            if pval < 0.01
-                title(sprintf('%s, p = <0.01, r_s = %1.3f', dataBase(i).sub_label, rho),'FontSize',12)
-            elseif pval<0.05
-                 title(sprintf('%s, p = <0.05, r_s = %1.3f', dataBase(i).sub_label, rho),'FontSize',12)
+            if pval < 0.001
+                title(sprintf('%s, p = <0.001, r_s = %1.3f', dataBase(i).sub_label, rho),'FontSize',12)
+            else
+                 title(sprintf('%s, p = %1.3f, r_s = %1.3f', dataBase(i).sub_label, pval, rho),'FontSize',12)
             end   
             
 %             legend(sprintf('%s',mode{J}), sprintf('r_s = %1.3f',rho  ),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',11)
@@ -109,12 +111,12 @@ for J = 1:size(mode,2)
 
         
     % Save figure
-    outlabel=sprintf('All_pat_scatter_%s.jpg',mode{J});
+    outlabel=sprintf('All_pat_scatter_%s.png',mode{J});
     path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Scatter/');
     if ~exist(path, 'dir')
         mkdir(path);
     end
-    saveas(gcf,[path,outlabel],'jpg')    
+    saveas(gcf,[path,outlabel],'png')    
 
 end   
 
