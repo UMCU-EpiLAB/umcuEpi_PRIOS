@@ -116,13 +116,13 @@ figure1 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
  end    
     
  % Save figure
-outlabel=sprintf('sub-%s_indegree_ERstimp.jpg',...
+outlabel=sprintf('sub-%s_indegree_ERstimp.png',...
     subj{1});
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Visualise Gridstructure/');
 if ~exist(path, 'dir')
     mkdir(path);
 end
-saveas(gcf,[path,outlabel],'jpg')
+saveas(gcf,[path,outlabel],'png')
 
 %% Plot the outdegree and the BC
 
@@ -207,14 +207,14 @@ for J = 1:size(mode,2)
 %     end
     
     % Save figure
-    outlabel=sprintf('sub-%s_%s.jpg',...
+    outlabel=sprintf('sub-%s_%s.png',...
         subj{1},mode{J});
     path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Visualise Gridstructure/');
     
     if ~exist(path, 'dir')
         mkdir(path);
     end
-    saveas(gcf,[path,outlabel],'jpg')
+    saveas(gcf,[path,outlabel],'png')
     
 end
 
@@ -282,13 +282,13 @@ if strcmp(plot_fig,'y')
         title('\rm ERs responses to specific stimulus, all stims')
         
         % Save figure
-        outlabel=sprintf('sub-%s, stimp %s.jpg',subj{1},ccep_clin.stimpnames_avg{stimp});
+        outlabel=sprintf('sub-%s, stimp %s.png',subj{1},ccep_clin.stimpnames_avg{stimp});
         path = fullfile(myDataPath.CCEPpath,'Grid_diffRes/',subj{1});
         
         if ~exist(path, 'dir')
             mkdir(path);
         end
-        saveas(gcf,[path,outlabel],'jpg')
+        saveas(gcf,[path,outlabel],'png')
         
     end 
         

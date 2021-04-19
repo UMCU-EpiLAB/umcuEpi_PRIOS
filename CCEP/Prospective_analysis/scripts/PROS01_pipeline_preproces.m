@@ -93,7 +93,7 @@ ax = gca; ylimits = ax.YTick;
 patch([0 0.009 0.009 0],[min(ylimits) min(ylimits) max(ylimits) max(ylimits)],[0.6,0.2,0.2], 'EdgeAlpha',0)
 alpha(0.1)                % set patches transparency
 ylim([-600 600])
-xlim([-0.01 0.3])
+xlim([-0.02 0.1])
 
 subplot(2,1,2),
 plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
@@ -107,9 +107,29 @@ ax = gca; ylimits = ax.YTick;
 patch([0 0.009 0.009 0],[min(ylimits) min(ylimits) max(ylimits) max(ylimits)],[0.6,0.2,0.2], 'EdgeAlpha',0)
 alpha(0.1)                % set patches transparency
 ylim([-600 600])
-xlim([-0.02 0.5])
+xlim([-0.02 0.1])
 
 
+%%
+chan =52; stim=4;
+
+figure('Position',[645,484,809,531]); 
+plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color',[0 0 1 0.3],'LineWidth',1)
+hold on
+plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
+plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color',[1 0 0 0.3],'LineWidth',1)
+hold off
+
+title(sprintf('SPES clin, %s, %s, %s',dataBase(1).sub_label, dataBase_clin.stimpnames_avg{stim},  dataBase_clin.ch{chan}))
+xlabel('time (s)'); xlim([-.2 0.5]); ylabel('Potential \muV');
+% Create patch to indicate the 9 ms interval
+ax = gca; ylimits = ax.YTick;
+ax.FontSize = 12;
+ax.FontWeight = 'bold';
+patch([0 0.009 0.009 0],[min(ylimits) min(ylimits) 670 670],[0.6,0.2,0.2], 'EdgeAlpha',0)
+alpha(0.1)                % set patches transparency
+ylim([-650 670])
+xlim([-0.02 0.1])
 
 
 %% Use the automatic N1 detector to detect ccep 

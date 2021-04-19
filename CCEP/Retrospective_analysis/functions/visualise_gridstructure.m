@@ -118,13 +118,13 @@ for J = 1:size(mode,2)
 end
 
 % Save figure
-outlabel=sprintf('sub-%s_indegree_ERstimp.jpg',...
+outlabel=sprintf('sub-%s_indegree_ERstimp.png',...
     subj{1});
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
 if ~exist(path, 'dir')
     mkdir(path);
 end
-saveas(gcf,[path,outlabel],'jpg')
+saveas(gcf,[path,outlabel],'png')
 
 
 
@@ -212,14 +212,14 @@ for J = 1:size(mode,2)
 %     end
     
     % Save figure
-    outlabel=sprintf('sub-%s_%s.jpg',...
+    outlabel=sprintf('sub-%s_%s.png',...
         subj{1},mode{J});
     path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
     
     if ~exist(path, 'dir')
         mkdir(path);
     end
-    saveas(gcf,[path,outlabel],'jpg')
+    saveas(gcf,[path,outlabel],'png')
     
 end
 
@@ -288,13 +288,13 @@ if strcmp(plot_fig,'y')
         title('\rm ERs responses to specific stimulus, all stims')
         
         % Save figure
-        outlabel=sprintf('sub-%s, stimp %s.jpg',subj{1},ccep.stimpnames_avg{stimp});
+        outlabel=sprintf('sub-%s, stimp %s.png',subj{1},ccep.stimpnames_avg{stimp});
         path = fullfile(myDataPath.CCEPpath,'Grid_diffRes/',subj{1});
         
         if ~exist(path, 'dir')
             mkdir(path);
         end
-        saveas(gcf,[path,outlabel],'jpg')
+        saveas(gcf,[path,outlabel],'png')
         
     end
     
@@ -403,13 +403,13 @@ close all
 %
 %
 %          % Save figure
-%         outlabel=sprintf('sub-%s_%s.jpg',subj{1},mode{i});
+%         outlabel=sprintf('sub-%s_%s.png',subj{1},mode{i});
 %         path = [fullfile(myDataPath.CCEPpath,'SOZ/')];
 %
 %         if ~exist(path, 'dir')
 %             mkdir(path);
 %         end
-%         saveas(gcf,[path,outlabel],'jpg')
+%         saveas(gcf,[path,outlabel],'png')
 %     end
 %  end
 

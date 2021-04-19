@@ -25,17 +25,21 @@ for J = 1:size(mode,2)
 
    end
    
-    contourf(xval)
-    hold on
-    % Plot latency value in the plot.
-%     N = size(FI_reci,2);
-%     x = repmat(1:N,N,1);                                          % generate x-coordinates
-%     y = x';                                                       % generate y-coordinates
+   contourf(xval)
+   hold on
+   
+ % Plot latency value in the plot.
+    N = size(NMM.settings.FI_timeC,2);
+    x = repmat(1:N,N,1);                                          % generate x-coordinates
+    y = x';                                                       % generate y-coordinates
 
-%     t = num2cell(round(x_cor));                                   % extact values into cells
-%     t = cellfun(@num2str, t, 'UniformOutput', false);             % convert to string  
-%     text(x(:), y(:), t, 'HorizontalAlignment', 'Center','FontSize',9)
+    x = x(:)+0.3;
+    y = y(:)+0.3;
+    t = num2cell(round(x_cor));                                   % extact values into cells
+    t = cellfun(@num2str, t, 'UniformOutput', false);             % convert to string  
+    text(x(:), y(:), t(:), 'HorizontalAlignment', 'Center','FontSize',8)
 
+     
     colormap(autumn)
     ax = gca;
     set(gca,'YDir','normal','ColorScale','log')
@@ -50,12 +54,12 @@ for J = 1:size(mode,2)
     ylabel('Gain of Fast Inhibitory population','FontSize',12,'FontWeight','bold')
     cbh = colorbar;
 
-    title(sprintf('Simulations %s propofol-SPES (in vivo propofol-SPES = %1.1f ms)',mode{J},lat_peak))
+    t = title(sprintf('Simulations %s propofol-SPES (in vivo propofol-SPES = %1.1f ms)',mode{J},lat_peak),'Position',[16.00001916505033,31.743023255813952,0]);
 
     % Set label for colorbar
     new_bar_label = char();
     for i = 1:size(cbh.Ticks,2)
-        new_bar_label(i,:) = sprintf('%1.2f \x00B1 %1.3f',lat_peak,(cbh.Ticks(i)*lat_peak));
+        new_bar_label(i,:) = sprintf('%1.2f \x00B1 %1.2f',lat_peak,(cbh.Ticks(i)*lat_peak));
     end
 
     set(cbh,'TickLabels', new_bar_label)
@@ -63,7 +67,7 @@ for J = 1:size(mode,2)
 
 
      % Save figures
-    outlabel=sprintf('ContourPlot_%s.png',mode{J});
+    outlabel=sprintf('ContourPlot_metLabel%s.png',mode{J});
     path = fullfile(myDataPath.save_fig_loc);
     
     if ~exist(path, 'dir')

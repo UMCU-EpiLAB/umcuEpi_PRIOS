@@ -65,7 +65,7 @@ for J = 1:size(mode,2)
 
     
      % Save figures
-    outlabel=sprintf('ColourPlot_%s.png',mode{J});
+    outlabel=sprintf('ColourPlot_1%s.png',mode{J});
     path = fullfile(myDataPath.save_fig_loc);
        
     if ~exist(path, 'dir')

@@ -43,15 +43,20 @@ for i = 1:size(dataBase,2)
                  IX = 1:numel(Interpol_period);
                  tf = isnan(Interpol_period);                                                        % Find the NaN's (interval that has to be interpolated)
                  Interpol_period(tf) = interp1(IX(~tf),Interpol_period(~tf),IX(tf));                 % Interpolate between the value -40 and +40 samples around the stimulation artefact
-%                  Interpol_period2(tf) = interp1(IX(~tf),Interpol_period(~tf),IX(tf),'spline');                 % Interpolate between the value -40 and +40 samples around the stimulation artefact
+%                  Interpol_period2(tf) = interp1(IX(~tf),Interpol_period(~tf),IX(tf),'spline');                 
                  % spline might be more interesting for future analysis
                  
                  data(channel, ((stimart_start - interplwindow) : (stimart_stop + interplwindow))) = Interpol_period;
-                  
+                       
+                
             end
+            
          end        
     end
           
+    
+               
+                 
 % Filter every signal
 % Preallocation
 signal = data'; % [samples x channels]

@@ -15,14 +15,14 @@ Tinterstim=5;   % Time between stimulations
 Tstim=0.005;    % Length of the blockpulse
 Amp=1500;       % Amplitude of the blockpulse
 
-SI_gain = repmat(7.0, [1,31]);                     % Slow inhibitory synaptic gain (norm = 7 mV)
-SI_reci = repmat(4.6, [1,31]);                  % Reciprocal of slow inhibitory time constant (norm = 10 s-1)
+SI_gain = repmat(7.0, [1,16]);                     % Slow inhibitory synaptic gain (norm = 7 mV)
+SI_reci = repmat(4.6, [1,16]);                  % Reciprocal of slow inhibitory time constant (norm = 10 s-1)
 
-FI_gain = [10 :0.5: 25 ] ;  %17;     repmat(25, [1,11]);     % Fast inhibitory synaptic gain (norm = 25 mV)
-FI_reci = [145:5: 295] ; % 300;    %repmat(300, [1,11])];                               % Reciprocal of fast inhibitory time constant (norm = 300 s-1)
+FI_gain =  [10:25]; %[10 :0.5: 25 ] ;  %17;     repmat(25, [1,11]);     % Fast inhibitory synaptic gain (norm = 25 mV)
+FI_reci = [130:1.25:148.75]; %[145:5: 295] ; % 300;    %repmat(300, [1,11])];                               % Reciprocal of fast inhibitory time constant (norm = 300 s-1)
 
-EX_gain = repmat(4.5, [1,31]);       %[3:0.3:5];                                 % Excitatory synaptic gain (norm = 4.5 mV)
-EX_reci = repmat(100, [1,31]);       %[70 :5:100];                      %repmat(100, [1,31]) [60 :5:110]]);   % Excitatory time constant (norm = 100 s-1)
+EX_gain = repmat(4.5, [1,16]);       %[3:0.3:5];                                 % Excitatory synaptic gain (norm = 4.5 mV)
+EX_reci = repmat(100, [1,16]);       %[70 :5:100];                      %repmat(100, [1,31]) [60 :5:110]]);   % Excitatory time constant (norm = 100 s-1)
 
 %% Varying the Fast Inhibitory Gain value
 % Simulating the potential of the pyramidal cells of NM1 and NM2
@@ -31,18 +31,18 @@ j = 1;
 n = size(EX_gain,2);
 c = flipud(jet(n));
 
-for i = 1:size(EX_gain,2)   
+for i = 1:size(FI_gain,2)   
     
-     for j = 1:size(EX_reci,2) 
+     for j = 1:size(FI_reci,2) 
         
-        NM(1)=create_NM(4.5,100,7,4.0,11,175,135,1,0,1,0.7);         %EX_gain(i),EX_reci(i),SI_gain(i),SI_reci(i),FI_gain(i),FI_reci(j)  % This is NMM 1      create_NM(A,a,B,b,G,g,C,sd,alpha,beta,gamma)
+        NM(1)=create_NM(4.5,100,7,4.0,FI_gain(i),FI_reci(j),135,1,0,1,0.7);         %EX_gain(i),EX_reci(i),SI_gain(i),SI_reci(i),FI_gain(i),FI_reci(j)  % This is NMM 1      create_NM(A,a,B,b,G,g,C,sd,alpha,beta,gamma)
         NM(2)=create_NM(4.5,100,7,10,25,300,135,1,0,1,0.7);          % This is NMM 2
 
         %Add stimulation
         NM(1).Ivar=@(t) (mod(t,Tinterstim)<Tin+Tstim).*(mod(t,Tinterstim)>=3)*(Amp);    % Stimulation at NM 1
 
         %% Network architecture
-        k=20;           % Connectivity strength
+        k=20;           % Connectivity strength (feedforward inhibition)
         cm=[0 0;1 0];   % Connectivity matrix, cm(i,j) is connection j->i.
 
         NM=NM(:);
@@ -62,17 +62,16 @@ for i = 1:size(EX_gain,2)
         tend = round(3.4 *fs);
 %         
 %         if i > 10
-            p(i,j) = plot(tvec(tstart:tend),u2(1,tstart:tend)','LineWidth',3,'Color','b'); 
+            p(i,j) = plot(tvec(tstart:tend),u2(1,tstart:tend)','LineWidth',3,'Color', c(i,:)); 
             hold on
 %         else
 %             p(i) = plot(tvec(tstart:tend),u2(1,tstart:tend)','LineWidth',1,'Color',[0, 0.4470, 0.7410]); 
 %         end
         
 %         xlim([2.98 3.08])
-        ylim([-50 10])
+        ylim([-30 10])
         xlabel ('Time (ms)','FontSize',14,'FontWeight','bold')
         ylabel ('Potential (mV)','FontSize',14,'FontWeight','bold')
-        title('Four times more noise')
         ax = gca;                      
 %         ax.XTickLabel = [ax.XTick(1) :0.01: ax.XTick(end)] - 3;
         ax.FontSize = 12;
@@ -249,7 +248,7 @@ if exist('NMM','var')      % after the script above is ran
 else % load save data before running colourPlot_latencies
     
     files = dir(fullfile(myDataPath.load_data_loc));
-    Loc_NMMFile = find(contains({files(:).name},'NMM'));
+    Loc_NMMFile = find(contains({files(:).name},'06-Apr'));
     load(fullfile(files(Loc_NMMFile).folder,files(Loc_NMMFile).name));
     
     contourPlot_latencies(NMM, myDataPath)

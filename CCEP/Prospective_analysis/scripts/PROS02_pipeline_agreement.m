@@ -90,6 +90,11 @@ for subj = 1:size(dataBase,2)
     [dataBase(subj).statistics, dataBase(subj).rank] = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep_clin);
 end
 
+for i = 1:size(dataBase,2)
+    medianPA(i,:) = dataBase(i).agreement.agreement_stim.NA
+end
+
+MedianNA = prctile(medianPA,[25 50 75])
 
 %% Visualise the agreement in a scatter plots
 

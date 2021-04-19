@@ -76,7 +76,10 @@ for i = 1:size(mode,2)
                 %%%%%%%% P1 %%%%%%%%%%%%%%%%%%%%
                 % Find highest peak after the N1 (P1)
                 % The interval in wich de P1 is found is [N1 location:500 ms (2*fs+1024 samples = 5120)]
-        
+
+                %%%% should be nice to make this a peak with at least an amplitude of X
+%%%% times bigger than the N1 amplitude.
+
                 [~,xP1] = findpeaks(squeeze(dataBase.cc_epoch_sorted_avg(chan,stim,:)));
 
                 % When multiple peaks are found, select the first peak (x)

@@ -101,7 +101,7 @@ end
  ymax = max(max(new_mat));
  
  for subj=1:size(dataBase,2)
-        if dataBase(subj).ccep_clin.p_n1   < 0.01 
+        if dataBase(subj).ccep_clin.p_n1   < 0.001 
             text(count+0.5,ymax-0.2,'**','FontSize',20,'FontWeight','bold')
             plot(count+0.1:0.1:count+0.9, ymax-0.43*ones(9,1),'k','LineWidth',2)
         
