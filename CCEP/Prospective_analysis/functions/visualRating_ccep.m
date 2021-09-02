@@ -1,4 +1,4 @@
-function dataBase = visualRating_ccep(dataBase)
+function dataBase = visualRating_ccep(dataBase, cfg, endstimp, myDataPath)
 % INSTRUCTIONS
 % select new point: select new point > enter or y
 % correct: y
@@ -7,18 +7,29 @@ function dataBase = visualRating_ccep(dataBase)
 close all
 
 tt = dataBase.tt;
+fs = dataBase.ccep_header.Fs;  
 
 % Load the N1 amplitude and sample number of automatic detection
 n1_peak_amplitude = dataBase.ccep.n1_peak_amplitude;
 n1_peak_sample = dataBase.ccep.n1_peak_sample;
 
-% Preallocation
-n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
-n1_peak_sample_check = NaN(size(n1_peak_sample));
 
-% Check the automatically detected ER for every stimulation-electrode
+if sum(strcmp(fieldnames(dataBase.ccep),'check')) == 1          % if the N1-check has been performed before
+    ccep.n1_peak_amplitude_check = dataBase.ccep.n1_peak_amplitude_check;
+    ccep.n1_peak_sample_check = dataBase.ccep.n1_peak_sample_check;
+else
+    ccep.n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
+    ccep.n1_peak_sample_check = NaN(size(n1_peak_sample));
+end
+
+
+
+%% Check the automatically detected ER for every stimulation-electrode
 % combination in which an N1 is detected.
-for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
+
+% When visual N1-check was started already, then start at the last stim
+% checked (endstimp) +1
+for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
         
     for chan =1 :size(dataBase.cc_epoch_sorted_avg,1)
         
@@ -27,25 +38,44 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             H=figure(1);
             H.Units = 'normalized';
             H.Position = [0.13 0.31 0.77 0.7];
-            this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));                                       
-            this_plot_avg = squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:));
-              
-            subplot(1,2,1)
-            plot(tt,this_plot,':r','linewidth',1);
-            hold on
-            plot(tt,this_plot_avg,'k','linewidth',2);
-            plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',3)
+            
+            subplot(1,2,1)            
+            if strcmp(cfg.reref,'y')
+                plot(tt,squeeze(dataBase.cc_epoch_sorted_select_reref(chan,stimp,:,:)),'r:');                % plot the 10 separate stimulations
+                hold on
+                plot(tt,squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:)),'k-.','linewidth',1);      % plot the not-rereference signal in a dashed line
+                plot(tt,squeeze(dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,:)),'k','linewidth',2);  % plot the rereference signal in a solid line
+                
+            else
+                plot(tt,squeeze(dataBase.cc_epoch_sorted_select(chan,stimp,:,:)),'r:');                % plot the 10 separate stimulations
+                hold on
+                plot(tt,squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:)),'k','linewidth',2);
+                
+            end
+            
+            plot(tt(n1_peak_sample(chan,stimp)), n1_peak_amplitude(chan,stimp),'o','MarkerFaceColor','r','MarkerEdgeColor','r','MarkerSize',4)
             hold off
             xlim([-1 1])
             xlabel('Time(s)')
             ylabel('Potential (\muV)')
             title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},dataBase.stimpnames_avg{stimp}))
             
+                        
+            % Zoom in of the left figure
             subplot(1,2,2)
-            plot(tt,this_plot,':r','linewidth',1);
-            hold on
-            plot(tt,this_plot_avg,'k','linewidth',2);
-            plot(tt(n1_peak_sample(chan,stimp)),this_plot_avg(n1_peak_sample(chan,stimp)),'o','MarkerEdgeColor','b','MarkerFaceColor','b')
+            if strcmp(cfg.reref,'y')
+                p1 = plot(tt,squeeze(dataBase.cc_epoch_sorted_select_reref(chan,stimp,:,:)),'r:');                % plot the 10 separate stimulations
+                hold on
+                p2 = plot(tt,squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:)),'k-.','linewidth',1);      % plot the not-rereference signal in a dashed line
+                p3 = plot(tt,squeeze(dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,:)),'k','linewidth',2);  % plot the rereference signal in a solid line
+
+            else
+                p1 = plot(tt,squeeze(dataBase.cc_epoch_sorted_select(chan,stimp,:,:)),'r:');                % plot the 10 separate stimulations
+                p2 = plot(tt,squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:)),'k','linewidth',2);
+                
+            end
+         
+            p4 = plot(tt(n1_peak_sample(chan,stimp)), n1_peak_amplitude(chan,stimp),'o','MarkerFaceColor','r','MarkerEdgeColor','r','MarkerSize',4);
             hold off
             xlim([-0.05 0.2])
             ylim([-800 750])
@@ -58,8 +88,14 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             patch([0 0.009 0.009 0],[-800 -800 750 750],[0.6,0.2,0.2],'EdgeAlpha',0)
             alpha(0.2)
             
+            if strcmp(cfg.reref,'y')
+                legend([p1(1),p2(1),p3(1),p4(1)],'indiv responses','average','average reref','detected CCEP')    
+            elseif strcmp(cfg.reref,'n')
+                legend([p1(1),p2(1),p4(1)],'indiv responses','average','detected CCEP')
+            end
+            
             currkey = 0;
-            fprintf('N1 [y/n], if incorrect N1, select correct N1 and press enter \n')
+            fprintf('N1 [y/n], if incorrect N1, select correct N1 and press enter. Only enter is equal to not correct \n')
             
             % select new N1 or categorize as good N1 or no N1
             % When incorrect N1 is selected, click on correct N1, a blue
@@ -76,37 +112,76 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
                     [~,sampnum] = min(abs(tt-cp(1,1)));
                     
                     % find nearby peak
-                    [~,locs] = findpeaks(-1*this_plot_avg(sampnum-50:sampnum+50),...
-                        'NPeaks',1,'SortStr','descend');
+                    if strcmp(cfg.reref,'y')
+                        [~,locs] = findpeaks(-1*squeeze(dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,...
+                            sampnum-round(0.01*fs):sampnum+round(0.01*fs))),'NPeaks',1,'SortStr','descend');
+                    else
+                        [~,locs] = findpeaks(-1*squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp, sampnum-round(0.01*fs):sampnum+round(0.01*fs))),...
+                            'NPeaks',1,'SortStr','descend');                        
+                    end
+                    
                     
                     % find x-position of nearby peak
-                    locsamp = sampnum-50+locs-1;
+                    locsamp = sampnum-round(0.01*fs)+locs-1;
                     
                     hold on
-                    plot(tt(locsamp),this_plot_avg(locsamp),'bo','MarkerFaceColor','b','MarkerSize',4); drawnow;
-                    hold off
+                    if strcmp(cfg.reref,'y')
+                        plot(tt(locsamp),dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,locsamp),'o','MarkerFaceColor','b','MarkerEdgeColor','b','MarkerSize',6); drawnow;
+
+                    else
+                        plot(tt(locsamp),dataBase.cc_epoch_sorted_avg(chan,stimp,locsamp),'bo','MarkerFaceColor','b','MarkerSize',4); drawnow;
+
+                    end
+                         
+                    ccep.n1_peak_sample_check(chan,stimp) = locsamp ;
                     
-                    n1_peak_sample_check(chan,stimp) = locsamp ;
-                    n1_peak_amplitude_check(chan,stimp) = this_plot_avg(locsamp) ;
+                    if strcmp(cfg.reref,'y')
+                         ccep.n1_peak_amplitude_check(chan,stimp) = dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,locsamp);
+                    else
+                         ccep.n1_peak_amplitude_check(chan,stimp) = dataBase.cc_epoch_sorted_avg(chan,stimp,locsamp) ;
+                    end
                     
+                   hold off
+                   
                 elseif w == 1
                     currkey = get(gcf,'CurrentCharacter');
                     
                     if strcmp(currkey,'y') && isempty(cp)
-                        n1_peak_amplitude_check(chan,stimp) = n1_peak_amplitude(chan,stimp) ;
-                        n1_peak_sample_check(chan,stimp) = n1_peak_sample(chan,stimp) ;
-                    elseif strcmp(currkey,'n')
-                        n1_peak_amplitude_check(chan,stimp) = NaN ;
-                        n1_peak_sample_check(chan,stimp) = NaN ;
+                        ccep.n1_peak_amplitude_check(chan,stimp) = n1_peak_amplitude(chan,stimp) ;
+                        ccep.n1_peak_sample_check(chan,stimp) = n1_peak_sample(chan,stimp) ;
+                        hold off
+
+                    elseif strcmp(currkey,'n')              
+                        ccep.n1_peak_amplitude_check(chan,stimp) = NaN ;
+                        ccep.n1_peak_sample_check(chan,stimp) = NaN ;
+                        hold off
                     end
+                    
                 end
             end
             
         end
-        
+       hold off
     end
+    
+   % save also till which stimpair visual N1s are checked.
+    ccep.checkUntilStimp = stimp;
+    
+    filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_name,'_N1sChecked.mat'];
+    filefolder = fullfile(myDataPath.CCEPpath, dataBase.sub_label, dataBase.ses_label, dataBase.task_name,'/');
+    if ~exist(filefolder,'dir')
+        mkdir(filefolder)
+    end
+
+    % save file during scoring in case of error
+    save(fullfile(filefolder,filename),'-struct','ccep');
 end
 
-dataBase.ccep.n1_peak_amplitude_check = n1_peak_amplitude_check;
-dataBase.ccep.n1_peak_sample_check = n1_peak_sample_check;
+dataBase.ccep.n1_peak_amplitude_check = ccep.n1_peak_amplitude_check;
+dataBase.ccep.n1_peak_sample_check = ccep.n1_peak_sample_check;
+dataBase.ccep.n1_peak_amplitude = n1_peak_amplitude;
+dataBase.ccep.n1_peak_sample = n1_peak_sample;
+
+
+end
 

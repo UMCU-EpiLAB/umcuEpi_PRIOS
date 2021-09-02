@@ -288,17 +288,17 @@ end
                 if dataBase(subj).tb_events.sample_start(eventnum(n))-round(epoch_prestim*dataBase(subj).ccep_header.Fs)+1< 0
                      % do nothing, because epoch starts before the start of
                      % a file (and gives an error)
-                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact_all)
-                       % do nothing, because part of artefact, therefore
-                       % this event is not used
-                       
-                       % When the concerning electrode is part of a electrode-specified artefact, that is not applicable to the whole electrode-dataset
-                elseif ismember(dataBase.ch{elec}, art_spec_elek) && ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact_elek)
-                    % When eventnum is part of ev_artefact_elek AND the
-                    % specified electrode
-                                                                              
-                    % do nothing, because part of an electrode specified artefact, therefore
-                    % this event is not used
+%                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact_all)
+%                        % do nothing, because part of artefact, therefore
+%                        % this event is not used
+%                        
+%                        % When the concerning electrode is part of a electrode-specified artefact, that is not applicable to the whole electrode-dataset
+%                 elseif ismember(dataBase.ch{elec}, art_spec_elek) && ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact_elek)
+%                     % When eventnum is part of ev_artefact_elek AND the
+%                     % specified electrode
+%                                                                               
+%                     % do nothing, because part of an electrode specified artefact, therefore
+%                     % this event is not used
 
                         
                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),BS_sig)
@@ -341,6 +341,8 @@ end
             end
 
             cc_epoch_sorted_avg(:,ll,:) = selection_avg;
+            % keep all stimulations (during SPESprop, not all stimulations
+            % pairs are stimulated an equal amount
             cc_epoch_sorted_select(:,ll,:,:) = reshape(selection,size(selection,1), size(selection,2)*size(selection,3) ,size(selection,4));          
                       
         end
@@ -397,7 +399,7 @@ end
     dataBase(subj).tt_epoch_sorted = tt_epoch_sorted_all;
     dataBase(subj).tt = tt;
     dataBase(subj).cc_epoch_sorted_avg = cc_epoch_sorted_avg;
-    dataBase(subj).cc_epoch_sorted_select_avg = cc_epoch_sorted_select;    
+    dataBase(subj).cc_epoch_sorted_select = cc_epoch_sorted_select;    
     dataBase(subj).stimpnames = cc_stimpnames_all;
 
     

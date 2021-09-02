@@ -27,6 +27,7 @@ for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
             H=figure(1);
             H.Units = 'normalized';
             H.Position = [0.13 0.31 0.77 0.7];
+            %%% HIER MAAK JE GEBRUIK VAN CC_EPOCH_SORTED_SELECT???
             this_plot = squeeze(dataBase.cc_epoch_sorted_select_avg(chan,stimp,:,:));                                          
             this_plot_avg = squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:));
                

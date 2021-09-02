@@ -1,3 +1,11 @@
+%% detection and visual scoring of ERs
+% author: Dorien van Blooijs, Sifra Blok
+% date: September 2019, April 2020
+% load ECoG data, split into stimulation trials, re-reference the data,
+% detect N1-peaks after stimulation, visual check of detected N1s, save
+% these for further analysis and display
+
+
 clear; 
 clc;
 
@@ -29,15 +37,16 @@ end
 fprintf('Data of subject %s is loaded. \n',cfg.sub_labels{1})
     
     
-%% Filter
-% When this is used, dataBase.data will change into the filtered data
-% DataBase.raw_data will not be changed and will keep the raw data
-dataBase = filter_bedArt(dataBase);
-
-fprintf('Both runs of subject %s are filtered. \n',cfg.sub_labels{1})
+% %% Filter
+% % When this is used, dataBase.data will change into the filtered data
+% % DataBase.raw_data will not be changed and will keep the raw data
+% dataBase = filter_bedArt(dataBase);
+% 
+% fprintf('Both runs of subject %s are filtered. \n',cfg.sub_labels{1})
 
 %% CCEP for SPES-clin stimulations
 % save all stimuli of clinical SPES
+
 
 for i = 1:size(dataBase,2)
     dataBase(i).task_name = dataBase(i).dataName(strfind(dataBase(i).dataName,'task-'):strfind(dataBase(i).dataName,'_run')-1); 
@@ -45,15 +54,16 @@ for i = 1:size(dataBase,2)
     if ismember(dataBase(i).task_name,'task-SPESclin')
        cfg.minstim = 5;
        dataBase_clin(i,:) = preprocess_ECoG_spes(dataBase(i),cfg);       %#ok<SAGROW>
-      
+       fprintf('...%s, %s, has been epoched and averaged... \n',cfg.sub_labels{1}, dataBase(i).task_name)
+
     elseif ismember(dataBase(i).task_name,'task-SPESprop')
         cfg.minstim = 1;
         dataBase_prop(i,:) = preprocess_ECoG_spes(dataBase(i),cfg);      %#ok<SAGROW>
+        fprintf('...%s, %s, has been epoched and averaged... \n',cfg.sub_labels{1}, dataBase(i).task_name)
 
     end
 end
 
-fprintf('...%s has been epoched and averaged... \n',cfg.sub_labels{1})
 
 % Remove empty rows in the dataBase structs, sometimes these are formed
 % when there are multiple runs.
@@ -70,66 +80,38 @@ elseif size(dataBase_prop,1) >1
 end
 
 
+
+%% Re-reference data
+% The reference calculatede below is the median of the signals that have a
+% post- and pre-stim variance that is smaller than the pre-stim variance of
+% the median signal of all signals (CAR). At least 5% of the signals have
+% to be averaged in the reference signal. 
+
+% Lowest variance is used to avoid introducing CCEP's in signals that
+% originally do not have a CCEP.
+
+cfg.reref = input('Do you want to rereference the data with an average of the 10 signals with the lowest variance? [y/n]: ','s'); % ('yes' = re-reference, 'no' = no re-reference)
+
+if strcmp(cfg.reref,'y')
+    tic
+    dataBase_clin = rereference_with_lowest_var(dataBase_clin, cfg);
+    
+    dataBase_prop = rereference_with_lowest_var(dataBase_prop, cfg);
+    
+    toc
+
+    disp('Data is rereferenced and all trials of one stimulus pair are averaged.')
+
+else
+   
+    disp('Data is not re-referenced and all trials of one stimulus pair are averaged.')
+end
+
 %% Check whether SPESclin and SPESprop contain the same stimulation pairs
 % Stimpairs and electrodes which are different in the clinical and propofol
 % SPES are removed.
 [dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop);
 
-
-% Visualise the signal of specified stimpair and channel
-chan =26; stim=7;
-
-tt = dataBase_clin.tt;
-figure('Position',[515,333,1034,707]); 
-subplot(2,1,1),
-plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
-hold on
-plot(tt,squeeze(dataBase_prop.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
-hold off
-title(sprintf('SPES prop, %s, %s, %s',dataBase(1).sub_label, dataBase_prop.stimpnames_avg{stim},  dataBase_prop.ch{chan}))
-xlabel('time (s)'); xlim([-.2 0.5]); ylabel('Potential \muV');            
-% Create patch to indicate the 9 ms interval
-ax = gca; ylimits = ax.YTick;
-patch([0 0.009 0.009 0],[min(ylimits) min(ylimits) max(ylimits) max(ylimits)],[0.6,0.2,0.2], 'EdgeAlpha',0)
-alpha(0.1)                % set patches transparency
-ylim([-600 600])
-xlim([-0.02 0.1])
-
-subplot(2,1,2),
-plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,:,:))','Color',[0.8 0.8 0.8],'LineWidth',1)
-hold on
-plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
-hold off
-title(sprintf('SPES clin, %s, %s, %s',dataBase(1).sub_label, dataBase_clin.stimpnames_avg{stim},  dataBase_clin.ch{chan}))
-xlabel('time (s)'); xlim([-.2 0.5]); ylabel('Potential \muV');
-% Create patch to indicate the 9 ms interval
-ax = gca; ylimits = ax.YTick;
-patch([0 0.009 0.009 0],[min(ylimits) min(ylimits) max(ylimits) max(ylimits)],[0.6,0.2,0.2], 'EdgeAlpha',0)
-alpha(0.1)                % set patches transparency
-ylim([-600 600])
-xlim([-0.02 0.1])
-
-
-%%
-chan =52; stim=4;
-
-figure('Position',[645,484,809,531]); 
-plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,1:5,:))','Color',[0 0 1 0.3],'LineWidth',1)
-hold on
-plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',2)
-plot(tt,squeeze(dataBase_clin.cc_epoch_sorted_select_avg(chan,stim,6:10,:))','Color',[1 0 0 0.3],'LineWidth',1)
-hold off
-
-title(sprintf('SPES clin, %s, %s, %s',dataBase(1).sub_label, dataBase_clin.stimpnames_avg{stim},  dataBase_clin.ch{chan}))
-xlabel('time (s)'); xlim([-.2 0.5]); ylabel('Potential \muV');
-% Create patch to indicate the 9 ms interval
-ax = gca; ylimits = ax.YTick;
-ax.FontSize = 12;
-ax.FontWeight = 'bold';
-patch([0 0.009 0.009 0],[min(ylimits) min(ylimits) 670 670],[0.6,0.2,0.2], 'EdgeAlpha',0)
-alpha(0.1)                % set patches transparency
-ylim([-650 670])
-xlim([-0.02 0.1])
 
 
 %% Use the automatic N1 detector to detect ccep 
@@ -140,12 +122,54 @@ dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);
 disp('Detection of ERs is completed')
 
 %% Visually check detected cceps
+
 % Check the average signal in which an ER was detected
 VisCheck = input('Do you want to visually check the detected CCEPs? [y/n] ','s');
 
+% load checked N1s if visual rating has started earlier
+if exist(fullfile(myDataPath.CCEPpath, dataBase_clin.sub_label, ...
+        dataBase_clin.ses_label, dataBase_clin.task_label,...
+        [dataBase_clin.sub_label, '_', dataBase_clin.ses_label,'_',...
+        dataBase_clin.task_label,'_','_N1sChecked.mat']),'file')
+    
+   dataBase_clin.ccep = load(fullfile(myDataPath.CCEPpath, dataBase_clin.sub_label, ...
+        dataBase_clin.ses_label, dataBase_clin.task_label,...
+        [dataBase_clin.sub_label, '_', dataBase_clin.ses_label,'_',...
+        dataBase_clin.task_label,'_','_N1sChecked.mat']));   
+end
+
+if exist(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
+        dataBase_prop.ses_label, dataBase_prop.task_label,...
+        [dataBase_prop.sub_label, '_', dataBase_prop.ses_label,'_',...
+        dataBase_prop.task_label,'_N1sChecked.mat']),'file')
+    
+   dataBase_prop.ccep = load(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
+        dataBase_prop.ses_label, dataBase_prop.task_label,...
+        [dataBase_prop.sub_label, '_', dataBase_prop.ses_label,'_',...
+        dataBase_prop.task_label,'_N1sChecked.mat']));   
+end
+
+
+
 if strcmp(VisCheck,'y')
-    dataBase_clin = visualRating_ccep(dataBase_clin);
-    dataBase_prop = visualRating_ccep(dataBase_prop);
+   
+    % continue with the stimulation pair after the last saved stimulation pair
+    if sum(strcmp(fieldnames(dataBase_clin.ccep), 'checkUntilStimp')) == 1
+        endstimp_clin = dataBase_clin.ccep.checkUntilStimp;
+    else
+        endstimp_clin = 0;
+    end
+    
+    dataBase_clin = visualRating_ccep(dataBase_clin, cfg, endstimp_clin, myDataPath);
+
+     % continue with the stimulation pair after the last saved stimulation pair
+    if sum(strcmp(fieldnames(dataBase_prop.ccep), 'checkUntilStimp')) == 1
+        endstimp_prop = dataBase_prop.ccep.checkUntilStimp;
+    else
+        endstimp_prop = 0;
+    end
+    
+    dataBase_prop = visualRating_ccep(dataBase_prop, cfg, endstimp_prop, myDataPath);
 end
 
 disp('CCEPs are checked')      
@@ -156,28 +180,33 @@ disp('CCEPs are checked')
 % Can only be performed when ERs are already visually checked and the
 % n1_peak_amplitude_check and n1_peak_sample_check files are saved.
 
-VisCheck_n2 = input('Do you want to visually detect N2s? [y/n] ','s');
+%%% IK HEB DIT NOG NIET GEUPDATE MET DE REREF DATA, AANGEZIEN DE N2 INFO MISSCHIEN NOG WAT MINDER RELEVANT IS NU VOOR HET CONGRES. 
 
-
-if strcmp(VisCheck_n2,'y')
-    dataBase_clin = visualRating_N2(dataBase_clin);
-    dataBase_prop = visualRating_N2(dataBase_prop);
-end
-
-disp('N2 peaks are checked')      
+% VisCheck_n2 = input('Do you want to visually detect N2s? [y/n] ','s');
+% 
+% 
+% if strcmp(VisCheck_n2,'y')
+%     dataBase_clin = visualRating_N2(dataBase_clin);
+%     dataBase_prop = visualRating_N2(dataBase_prop);
+% end
+% 
+% disp('N2 peaks are checked')      
 
 %% Visually check all stimuli of a SPES
 % The ERs detected with the detector are shown with a blue dot.
 % This is very time consuming! only perform when the ER-detector results
 % are not as expected.
-VisCheck_all = input('Do you want to visually check ALL signals? [y/n] ','s');
 
-if strcmp(VisCheck_all,'y')
-    dataBase_clin = visualRating_all_ccep(dataBase_clin);
-    dataBase_prop = visualRating_all_ccep(dataBase_prop);
-end
+%%% IK HEB DIT NOG NIET GEUPDATE MET DE REREF DATA, AANGEZIEN DIT MISSCHIEN NOG WAT MINDER RELEVANT IS NU VOOR HET CONGRES. 
 
-disp('All responses are checked') 
+% VisCheck_all = input('Do you want to visually check ALL signals? [y/n] ','s');
+% 
+% if strcmp(VisCheck_all,'y')
+%     dataBase_clin = visualRating_all_ccep(dataBase_clin);
+%     dataBase_prop = visualRating_all_ccep(dataBase_prop);
+% end
+% 
+% disp('All responses are checked') 
 
 %% save ccep
 savefiles = input('Do you want to save the ccep-structures? [y/n] ','s');
@@ -192,6 +221,39 @@ for i = 1:size(dataBase,2)
     end
 end
 
+
+% Create the folder if it doesn't exist already.
+if ~exist(targetFolder_clin, 'dir')
+    mkdir(targetFolder_clin);
+end
+
+% save Clinical-SPES
+% When N1s are visually checked save with check in the name
+if isfield(dataBase_clin.ccep, 'n1_peak_amplitude_check')
+    fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_reref_check.mat'];           
+    
+else % When N1s are not visually checked.
+    fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_reref.mat'];              
+end
+
+ccep_clin = dataBase_clin.ccep;
+ccep_clin.stimchans_all = dataBase_clin.cc_stimchans_all;
+ccep_clin.stimchans_avg = dataBase_clin.cc_stimchans_avg;
+ccep_clin.stimpnames_all = dataBase_clin.stimpnames_all;
+ccep_clin.stimpnames_avg = dataBase_clin.stimpnames_avg;
+ccep_clin.stimsets_all = dataBase_clin.cc_stimsets_all;
+ccep_clin.stimsets_avg = dataBase_clin.cc_stimsets_avg;
+ccep_clin.dataName = dataBase_clin.dataName;
+ccep_clin.ch = dataBase_clin.ch;
+ccep_clin.tt = dataBase_clin.tt;
+
+if strcmp(savefiles,'y')
+    save([targetFolder_clin,fileName_clin], 'ccep_clin');
+    save([myDataPath.CCEP_allpat,fileName_clin], 'ccep_clin');
+
+end
+
+
 % Create the folder if it doesn't exist already.
 if ~exist(targetFolder_prop, 'dir')
     mkdir(targetFolder_prop);
@@ -204,9 +266,9 @@ end
 % correct name (also ensures that checked file is not overwritten when
 % file is completely run)
 if isfield(dataBase_prop.ccep, 'n1_peak_amplitude_check')
-    fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_filt_check19022021.mat'];      
+    fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_reref_check.mat'];      
 else 
-    fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_Check_21012021.mat'];    
+    fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_reref.mat'];    
 end
 
 ccep_prop = dataBase_prop.ccep;
@@ -226,47 +288,17 @@ if strcmp(savefiles,'y')
 end
 
 
-% Create the folder if it doesn't exist already.
-if ~exist(targetFolder_clin, 'dir')
-    mkdir(targetFolder_clin);
-end
-
-% save Clinical-SPES
-% When N1s are visually checked save with check in the name
-if isfield(dataBase_clin.ccep, 'n1_peak_amplitude_check')
-    fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_filt_check.mat'];           
-    
-else % When N1s are not visually checked.
-    fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_Check_21012021.mat'];              
-end
-
-ccep_clin = dataBase_clin.ccep;
-ccep_clin.stimchans_all = dataBase_clin.cc_stimchans_all;
-ccep_clin.stimchans_avg = dataBase_clin.cc_stimchans_avg;
-ccep_clin.stimpnames_all = dataBase_clin.stimpnames_all;
-ccep_clin.stimpnames_avg = dataBase_clin.stimpnames_avg;
-ccep_clin.stimsets_all = dataBase_clin.cc_stimsets_all;
-ccep_clin.stimsets_avg = dataBase_clin.cc_stimsets_avg;
-ccep_clin.dataName = dataBase_clin.dataName;
-ccep_clin.ch = dataBase_clin.ch;
-ccep_clin.tt = dataBase_clin.tt;
-
-if strcmp(savefiles,'y')
-    save([targetFolder_clin,fileName_clin], 'ccep_clin');
-    save([myDataPath.CCEP_allpat,fileName_clin], 'ccep_clin');
-
-    fprintf('CCEPs are saved for SPESprop en SPESclin for subject %s \n' , dataBase(1).sub_label);
-end
+fprintf('CCEPs are saved for SPESprop en SPESclin for subject %s \n' , dataBase(1).sub_label);
 
 
 %% Plot the average signal of all electrodes per stimulation pair
 % Create figures with a plot per stimulation pair with the averaged response per electrode 
 % Easy compare between clinical-SPES and propofol-SPES
-
-dataBase_clin.save_fig = input('Do you want plot all average signals to the stimulus per stimpair? [y/n] ','s');
-if strcmp(dataBase_clin.save_fig, 'y')
-    plot_all_ccep(dataBase_clin, dataBase_prop, myDataPath)
-end
+% 
+% dataBase_clin.save_fig = input('Do you want plot all average signals to the stimulus per stimpair? [y/n] ','s');
+% if strcmp(dataBase_clin.save_fig, 'y')
+%     plot_all_ccep(dataBase_clin, dataBase_prop, myDataPath)
+% end
 
 
 
@@ -274,28 +306,28 @@ end
 % Necessary to determine the rise and fall times of the N1.
 % Amplitude of the P1 is not correct. Latency is.
 
-P1_latency(dataBase_clin, dataBase_prop,cfg, myDataPath);
-
-disp('P1_latency is saved to be later used in PROS02_pipeline_agreement.') 
+% P1_latency(dataBase_clin, dataBase_prop,cfg, myDataPath);
+% 
+% disp('P1_latency is saved to be later used in PROS02_pipeline_agreement.') 
 
 %% Unique occurence 
 % Determine how often each stimulation pair is stimulated during
 % propofol-SPES and clinical-SPES
-% null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected 
-NorDisClin = lillietest(occ)     ;            
-NorDisProp = lillietest(occ_prop);
-
-XX = dataBase(1).tb_events.electrical_stimulation_site;
-[uniqueXX, ~, J]=unique(XX) ;
-occ = histcounts(J, 1:numel(uniqueXX));
-
-
-mean_occ = median(occ);
-N1_rise_fall(dataBase_clin, dataBase_prop, cfg,myDataPath);
-
-XX_prop = dataBase(2).tb_events.electrical_stimulation_site;
-[uniqueXX_prop, ~, J_prop]=unique(XX_prop) ;
-occ_prop = histcounts(J_prop, 1:numel(uniqueXX_prop));
-
-mean_occ_prop = mean(occ_prop);
-
+% % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected 
+% NorDisClin = lillietest(occ)     ;            
+% NorDisProp = lillietest(occ_prop);
+% 
+% XX = dataBase(1).tb_events.electrical_stimulation_site;
+% [uniqueXX, ~, J]=unique(XX) ;
+% occ = histcounts(J, 1:numel(uniqueXX));
+% 
+% 
+% mean_occ = median(occ);
+% N1_rise_fall(dataBase_clin, dataBase_prop, cfg,myDataPath);
+% 
+% XX_prop = dataBase(2).tb_events.electrical_stimulation_site;
+% [uniqueXX_prop, ~, J_prop]=unique(XX_prop) ;
+% occ_prop = histcounts(J_prop, 1:numel(uniqueXX_prop));
+% 
+% mean_occ_prop = mean(occ_prop);
+% 
