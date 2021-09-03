@@ -166,6 +166,8 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
     
    % save also till which stimpair visual N1s are checked.
     ccep.checkUntilStimp = stimp;
+    ccep.n1_peak_amplitude = dataBase.ccep.n1_peak_amplitude;
+    ccep.n1_peak_sample = dataBase.ccep.n1_peak_sample;
     
     filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_name,'_N1sChecked.mat'];
     filefolder = fullfile(myDataPath.CCEPpath, dataBase.sub_label, dataBase.ses_label, dataBase.task_name,'/');
@@ -181,6 +183,7 @@ dataBase.ccep.n1_peak_amplitude_check = ccep.n1_peak_amplitude_check;
 dataBase.ccep.n1_peak_sample_check = ccep.n1_peak_sample_check;
 dataBase.ccep.n1_peak_amplitude = n1_peak_amplitude;
 dataBase.ccep.n1_peak_sample = n1_peak_sample;
+dataBase.ccep.checkUntilStimp = stimp;
 
 
 end

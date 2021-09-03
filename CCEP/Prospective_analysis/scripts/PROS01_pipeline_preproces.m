@@ -124,31 +124,19 @@ disp('Detection of ERs is completed')
 %% Visually check detected cceps
 
 % Check the average signal in which an ER was detected
-VisCheck = input('Do you want to visually check the detected CCEPs? [y/n] ','s');
+VisCheck = input('Do you want to visually check the detected clinical-SPES CCEPs? [y/n] ','s');
 
 % load checked N1s if visual rating has started earlier
 if exist(fullfile(myDataPath.CCEPpath, dataBase_clin.sub_label, ...
-        dataBase_clin.ses_label, dataBase_clin.task_label,...
+        dataBase_clin.ses_label, dataBase_clin.task_name,...
         [dataBase_clin.sub_label, '_', dataBase_clin.ses_label,'_',...
-        dataBase_clin.task_label,'_','_N1sChecked.mat']),'file')
+        dataBase_clin.task_name,'_N1sChecked.mat']),'file')
     
    dataBase_clin.ccep = load(fullfile(myDataPath.CCEPpath, dataBase_clin.sub_label, ...
-        dataBase_clin.ses_label, dataBase_clin.task_label,...
+        dataBase_clin.ses_label, dataBase_clin.task_name,...
         [dataBase_clin.sub_label, '_', dataBase_clin.ses_label,'_',...
-        dataBase_clin.task_label,'_','_N1sChecked.mat']));   
+        dataBase_clin.task_name,'_N1sChecked.mat']));   
 end
-
-if exist(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
-        dataBase_prop.ses_label, dataBase_prop.task_label,...
-        [dataBase_prop.sub_label, '_', dataBase_prop.ses_label,'_',...
-        dataBase_prop.task_label,'_N1sChecked.mat']),'file')
-    
-   dataBase_prop.ccep = load(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
-        dataBase_prop.ses_label, dataBase_prop.task_label,...
-        [dataBase_prop.sub_label, '_', dataBase_prop.ses_label,'_',...
-        dataBase_prop.task_label,'_N1sChecked.mat']));   
-end
-
 
 
 if strcmp(VisCheck,'y')
@@ -161,7 +149,28 @@ if strcmp(VisCheck,'y')
     end
     
     dataBase_clin = visualRating_ccep(dataBase_clin, cfg, endstimp_clin, myDataPath);
+    
+end
 
+disp('CCEPs are checked')      
+
+
+%% Visual check of propofol-SPES
+VisCheck = input('Do you want to visually check the detected propofol-SPES CCEPs? [y/n] ','s');
+
+if exist(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
+        dataBase_prop.ses_label, dataBase_prop.task_name,...
+        [dataBase_prop.sub_label, '_', dataBase_prop.ses_label,'_',...
+        dataBase_prop.task_name,'_N1sChecked.mat']),'file')
+    
+   dataBase_prop.ccep = load(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
+        dataBase_prop.ses_label, dataBase_prop.task_name,...
+        [dataBase_prop.sub_label, '_', dataBase_prop.ses_label,'_',...
+        dataBase_prop.task_name,'_N1sChecked.mat']));   
+end
+
+if strcmp(VisCheck,'y')
+    
      % continue with the stimulation pair after the last saved stimulation pair
     if sum(strcmp(fieldnames(dataBase_prop.ccep), 'checkUntilStimp')) == 1
         endstimp_prop = dataBase_prop.ccep.checkUntilStimp;
@@ -170,9 +179,10 @@ if strcmp(VisCheck,'y')
     end
     
     dataBase_prop = visualRating_ccep(dataBase_prop, cfg, endstimp_prop, myDataPath);
+    
 end
 
-disp('CCEPs are checked')      
+    
 
 
 %% Visually detect N2's
