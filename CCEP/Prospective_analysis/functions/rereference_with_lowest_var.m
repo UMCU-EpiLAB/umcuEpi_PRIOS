@@ -23,63 +23,74 @@ period_postStim = 4116:4301;                            % [0.01: 0.1] post-stim 
                 data_all = dataBase.cc_epoch_sorted_select;
                 bad_and_stimp = [find(strcmp(dataBase.tb_channels.status_description,'noisy (visual assessment)')); dataBase.cc_stimsets_avg(stimp,:)'];
                 data_all(bad_and_stimp,:,:,:) = NaN;
-                        
+                
+         %%% numstim werkt waarschijnlijk niet voor PRIOS
                 for numstim = 1:size(data_all,3)                                                % for each of the trials of one stimulus pair
 
                     % Determine median of all signals except BAD and stimulated channels (CAR)
                     raw_data_stim = squeeze(data_all(:,stimp,numstim,:));                  
-                    CAR_raw_data = median(raw_data_stim,'omitnan'); 
+                    CAR_raw_data = median(raw_data_stim,'omitnan');
+                   
+                    % During PRIOS SPES there are often varying number of
+                    % stims per stimulation pair. Therefore these are saved
+                    % as NaN's. THese have to be ignored in the analysis.
+                    if ~isnan(sum(CAR_raw_data))
+                     
+                        % Determine variance of CAR signal PRE-stim
+                        var_preStimCAR = var(CAR_raw_data(:, period_preStim),'omitnan');
 
 
-                    % Determine variance of CAR signal PRE-stim
-                    var_preStimCAR = var(CAR_raw_data(:, period_preStim),'omitnan');
+                        % Determine for each separate signal if variance
+                        % POST-stim is lower than variance of CAR signal
+                        % var(x,0 or 1) for normalization (Normalization is a
+                        % good technique to use when you do not know the distribution of your data)
+                        % var(x,1,1) = var for columns, var(x,1,2) = var for rows
+                        var_postStim_signal = var(squeeze(data_all(:,stimp,numstim, period_postStim)),1,2,'omitnan');
 
 
-                    % Determine for each separate signal if variance
-                    % POST-stim is lower than variance of CAR signal
-                    % var(x,0 or 1) for normalization (Normalization is a
-                    % good technique to use when you do not know the distribution of your data)
-                    % var(x,1,1) = var for columns, var(x,1,2) = var for rows
-                    var_postStim_signal = var(squeeze(data_all(:,stimp,numstim, period_postStim)),1,2,'omitnan');
+                        % Determine for each separate signal if variance
+                        % pre-stim is lower than variance of CAR signal
+                        var_preStim_signal = var(squeeze(data_all(:,stimp,numstim, period_preStim )),1,2,'omitnan');
 
 
-                    % Determine for each separate signal if variance
-                    % pre-stim is lower than variance of CAR signal
-                    var_preStim_signal = var(squeeze(data_all(:,stimp,numstim, period_preStim )),1,2,'omitnan');
+                        % Keep the signals that have a variance post- AND pre-stim that is lower than the variance of the CAR signal
+                        % Determine the median --> this is your reference signal 
+                        post_lower = find(var_postStim_signal < var_preStimCAR);
+                        pre_lower = find(var_preStim_signal < var_preStimCAR);
+                        ref_keep = post_lower(ismember(post_lower,pre_lower));
 
+                        ref = median(squeeze(data_all(ref_keep, stimp,numstim, :)));
 
-                    % Keep the signals that have a variance post- AND pre-stim that is lower than the variance of the CAR signal
-                    % Determine the median --> this is your reference signal 
-                    post_lower = find(var_postStim_signal < var_preStimCAR);
-                    pre_lower = find(var_preStim_signal < var_preStimCAR);
-                    ref_keep = post_lower(ismember(post_lower,pre_lower));
+                        % If there are less than 10% of the signals present in the reference.
+                        % Then add signals with lowest variance POST-stim.
+                        if size(ref_keep,1) < ceil(0.1*size(data_all,1))
 
-                    ref = median(squeeze(data_all(ref_keep, stimp,numstim, :)));
+                            [~,idx_var_post] = sort(var_postStim_signal,'ascend');                             % NAN data receives the highest scoring, and are therefore at the bottom of the ranking
+                            nmb_extra_signals = round(0.1*size(raw_data_stim,1))- size(ref_keep,1);            % calculate the number of extra signals to obtain 5% of the signals in the reference
 
-                    % If there are less than 10% of the signals present in the reference.
-                    % Then add signals with lowest variance POST-stim.
-                    if size(ref_keep,1) < ceil(0.1*size(data_all,1))
+                            % If the lowest 10% variance is already in the ref_keep, then take the number of extra required
+                            % signals + the number signals that were already present in the ref_keep
+                            if any(ismember(ref_keep, idx_var_post(1:(size(ref_keep,1)+nmb_extra_signals))))
+                               nmb_extra_signals = nmb_extra_signals + sum(ismember(ref_keep, idx_var_post(1:(size(ref_keep,1)+nmb_extra_signals))));   
+                            end
 
-                        [~,idx_var_post] = sort(var_postStim_signal,'ascend');                              % NAN data receives the highest scoring
-                        nmb_extra_signals = round(0.1*size(raw_data_stim,1))- size(ref_keep,1);            % calculate the number of extra signals to obtain 5% of the signals in the reference
+                            ref_keep2 = unique([ref_keep; idx_var_post(1:nmb_extra_signals)]);
 
-                        % If the lowest 10% variance is already in the ref_keep, then take the number of extra required
-                        % signals + the number signals that were already present in the ref_keep
-                        if any(ismember(ref_keep, idx_var_post(1:(size(ref_keep,1)+nmb_extra_signals))))
-                           nmb_extra_signals = nmb_extra_signals + sum(ismember(ref_keep, idx_var_post(1:(size(ref_keep,1)+nmb_extra_signals))));   
+                            ref = median(squeeze(data_all(ref_keep2, stimp,numstim, :)));
                         end
 
-                        ref_keep2 = unique([ref_keep; idx_var_post(1:nmb_extra_signals)]);
+                        dataBase.ref(:,stimp,numstim,:) = ref;
 
-                        ref = median(squeeze(data_all(ref_keep2, stimp,numstim, :)));
+
+                        % Re-reference the individual trials. Make sure to take the original signal to make
+                        % sure to also rereference the bad channels and stimulated channels
+                        dataBase.cc_epoch_sorted_select_reref(:,stimp,numstim,:) = squeeze(dataBase.cc_epoch_sorted_select(:,stimp,numstim,:)) - ref;
+                    
+                    else
+                        % do nothing because this stimulation pair is not stimulated for this numstim
+                        dataBase.cc_epoch_sorted_select_reref(:,stimp,numstim,:) = squeeze(dataBase.cc_epoch_sorted_select(:,stimp,numstim,:));
                     end
 
-                    dataBase.ref(:,stimp,numstim,:) = ref;
-
-
-                    % Re-reference the individual trials. Make sure to take the original signal to make
-                    % sure to also rereference the bad channels and stimulated channels
-                    dataBase.cc_epoch_sorted_select_reref(:,stimp,numstim,:) = squeeze(dataBase.cc_epoch_sorted_select(:,stimp,numstim,:)) - ref;
                 end
 
             end
