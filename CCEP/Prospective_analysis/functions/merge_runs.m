@@ -2,7 +2,7 @@ function dataBase_merge = merge_runs(dataBase)
 
    dataBase_merge.sub_label = dataBase(1).sub_label;
    dataBase_merge.ses_label = dataBase(1).ses_label;
-   dataBase_merge.task_label = dataBase(1).task_name;
+   dataBase_merge.task_name = dataBase(1).task_name;
    dataBase_merge.run_label = {dataBase(:).run_label};    
    dataBase_merge.dataName = dataBase(1).dataName;
    dataBase_merge.ccep_header = dataBase(1).ccep_header;

@@ -19,7 +19,7 @@ config_CCEP
 %% Load ECOG data
 % Find SPESclin and SPESprop 
 files = dir(fullfile(myDataPath.dataPath,cfg.sub_labels{1}, cfg.ses_label,'ieeg',...
-    [cfg.sub_labels{1} '_' cfg.ses_label '_' cfg.task_label '_*'  '_events.tsv']));
+    [cfg.sub_labels{1} '_' cfg.ses_label '_*'  '_events.tsv']));
 names = {files.name};
 strings = cell(size(names));
 

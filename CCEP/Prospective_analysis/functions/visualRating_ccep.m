@@ -27,6 +27,10 @@ end
 %% Check the automatically detected ER for every stimulation-electrode
 % combination in which an N1 is detected.
 
+% Preallocation
+obs_tab = cell(size(n1_peak_amplitude,1),size(n1_peak_amplitude,2));         % Table is filled with the marker of the observer. to save doubtfull obvervations
+
+
 % When visual N1-check was started already, then start at the last stim
 % checked (endstimp) +1
 for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
@@ -143,20 +147,27 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
                     
                    hold off
                    
+                   %%% Add marking of observer to a table
+                   obs_tab{chan,stimp} = 'c';
+                   
+                   
                 elseif w == 1
                     currkey = get(gcf,'CurrentCharacter');
                     
-                    if strcmp(currkey,'y') && isempty(cp)
+                    if strcmp(currkey,'y') || strcmp(currkey,'d') && isempty(cp)
                         ccep.n1_peak_amplitude_check(chan,stimp) = n1_peak_amplitude(chan,stimp) ;
                         ccep.n1_peak_sample_check(chan,stimp) = n1_peak_sample(chan,stimp) ;
                         hold off
-
+                   
                     elseif strcmp(currkey,'n')              
                         ccep.n1_peak_amplitude_check(chan,stimp) = NaN ;
                         ccep.n1_peak_sample_check(chan,stimp) = NaN ;
                         hold off
                     end
                     
+                     %%% Add marking of observer to a table
+                    obs_tab{chan,stimp} = currkey; 
+                        
                 end
             end
             
