@@ -36,14 +36,6 @@ end
 
 fprintf('Data of subject %s is loaded. \n',cfg.sub_labels{1})
     
-    
-% %% Filter
-% % When this is used, dataBase.data will change into the filtered data
-% % DataBase.raw_data will not be changed and will keep the raw data
-% dataBase = filter_bedArt(dataBase);
-% 
-% fprintf('Both runs of subject %s are filtered. \n',cfg.sub_labels{1})
-
 %% CCEP for SPES-clin stimulations
 % save all stimuli of clinical SPES
 
@@ -183,6 +175,44 @@ if strcmp(VisCheck,'y')
 end
 
     
+disp('CCEPs are checked')      
+
+%% Display doubtfull observations
+% When still the visual check off the N1's was just performed, ccep_prop is still a variable. 
+% When the doubtfull observations are looked at at a later time, then you
+% can load them.
+% if exist('ccep_clin','var')
+%     doubt_clin = ccep_clin.obs_tab;
+% else
+%     saved_ccep_clin = load(fullfile(myDataPath.CCEPpath, dataBase_clin.sub_label, ...
+%         dataBase_clin.ses_label, dataBase_clin.task_name,...
+%         [dataBase_clin.sub_label, '_', dataBase_clin.ses_label,'_',...
+%         dataBase_clin.task_name,'_',dataBase_clin.run_label,'_CCEP_clin_reref_check.mat']));  
+%      
+%     ccep_clin = saved_ccep_clin.ccep_clin;
+%     doubt_clin = ccep_clin.obs_tab;
+% 
+% end
+%    
+% ccep_clin = recheck_doubtfull_cceps(doubt_clin, dataBase_clin, ccep_clin, cfg);
+% 
+% 
+% if exist('ccep_prop','var')
+%     doubt_prop = ccep_prop.obs_tab;
+% else
+%     saved_ccep_prop = load(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
+%         dataBase_prop.ses_label, dataBase_prop.task_name,...
+%         [dataBase_prop.sub_label, '_', dataBase_prop.ses_label,'_',...
+%         dataBase_prop.task_name,'_',dataBase_prop.run_label,'_CCEP_prop_reref_check.mat']));   
+%     
+%     ccep_prop = saved_ccep_prop.ccep_prop;
+%     doubt_prop = ccep_prop.obs_tab;
+%  
+% end
+% 
+% ccep_prop = recheck_doubtfull_cceps(doubt_prop, dataBase_prop, ccep_prop, cfg);
+% 
+% 
 
 
 %% Visually detect N2's

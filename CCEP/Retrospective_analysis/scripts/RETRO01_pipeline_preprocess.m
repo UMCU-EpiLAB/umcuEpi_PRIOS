@@ -76,7 +76,7 @@ fprintf('...%s has been preprocessed... \n',dataBase(1).sub_label)
 
 %% Do a quick check by visualizing the stimuli of 2 stims and 10 stims.
 chan = 16; stim=51;
-figure, 
+figure('Position',[680,579,810,519]) 
 sgtitle(sprintf('Patient %s, Stimulation pair %s, on %s',dataBase2stim.sub_label, dataBase2stim.stimpnames_avg{stim},dataBase2stim.ch{chan}))
 
 subplot(2,1,1),
@@ -87,7 +87,7 @@ plot(tt,squeeze(dataBase2stim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth',
 hold off
 title('2 signals')
 xlabel('time (s)')
-xlim([-.2 1.0])
+xlim([-.1 0.5])
 ylim([-300 300])
 xlabel('Time (s)')
 ylabel('Potential (\muV)')
@@ -102,7 +102,7 @@ plot(tt,squeeze(dataBaseallstim.cc_epoch_sorted_avg(chan,stim,:)),'k','LineWidth
 hold off
 title('All signals')
 xlabel('time (s)')
-xlim([-.2 1.0])
+xlim([-.1 0.5])
 ylim([-300 300])
 
 xlabel('Time (s)')

@@ -1,4 +1,5 @@
-function dataBase = visualRating_ccep(dataBase, cfg, endstimp, myDataPath)
+function ccep = recheck_doubtfull_cceps(doubt_tab,dataBase, ccep, cfg)
+
 % INSTRUCTIONS
 % select new point: select new point > enter or y
 % correct: y
@@ -10,35 +11,20 @@ tt = dataBase.tt;
 fs = dataBase.ccep_header.Fs;  
 
 % Load the N1 amplitude and sample number of automatic detection
-n1_peak_amplitude = dataBase.ccep.n1_peak_amplitude;
-n1_peak_sample = dataBase.ccep.n1_peak_sample;
-
-
-if sum(strcmp(fieldnames(dataBase.ccep),'obs_tab')) == 1          % if the N1-check has been performed before
-    ccep.n1_peak_amplitude_check = dataBase.ccep.n1_peak_amplitude_check;
-    ccep.n1_peak_sample_check = dataBase.ccep.n1_peak_sample_check;
-    obs_tab = dataBase.ccep.obs_tab;         % Table is filled with the marker of the observer. to save doubtfull obvervations
-
-else
-    ccep.n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
-    ccep.n1_peak_sample_check = NaN(size(n1_peak_sample));
-    obs_tab = cell(size(n1_peak_amplitude,1),size(n1_peak_amplitude,2));         % Table is filled with the marker of the observer. to save doubtfull obvervations
-
-end
-
+n1_peak_amplitude = ccep.n1_peak_amplitude_check;
+n1_peak_sample = ccep.n1_peak_sample_check;
 
 
 %% Check the automatically detected ER for every stimulation-electrode
 % combination in which an N1 is detected.
 
-
 % When visual N1-check was started already, then start at the last stim
 % checked (endstimp) +1
-for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
+for stimp = 1:size(dataBase.cc_epoch_sorted_avg,2)
         
     for chan =1 :size(dataBase.cc_epoch_sorted_avg,1)
         
-        if ~isnan(dataBase.ccep.n1_peak_sample(chan,stimp))
+        if isequal(doubt_tab{chan,stimp}, 'd')                                                                     %~isnan(dataBase.ccep.n1_peak_sample(chan,stimp))
             % figure with left the epoch, and right zoomed in
             H=figure(1);
             H.Units = 'normalized';
@@ -61,7 +47,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
             plot(tt(n1_peak_sample(chan,stimp)), n1_peak_amplitude(chan,stimp),'o','MarkerFaceColor','r','MarkerEdgeColor','r','MarkerSize',4)
             hold off
             xlim([-1 1])
-            ylim([-2000 1500])
+            ylim([-1000 1000])
             xlabel('Time(s)')
             ylabel('Potential (\muV)')
             title(sprintf('Electrode %s, stimulating %s',dataBase.ch{chan},dataBase.stimpnames_avg{stimp}))
@@ -72,7 +58,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
             if strcmp(cfg.reref,'y')
                 p1 = plot(tt,squeeze(dataBase.cc_epoch_sorted_select_reref(chan,stimp,:,:)),'r:');                % plot the 10 separate stimulations
                 hold on
-%                 p2 = plot(tt,squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:)),'k-.','linewidth',1);      % plot the not-rereference signal in a dashed line
+                p2 = plot(tt,squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:)),'k-.','linewidth',1);      % plot the not-rereference signal in a dashed line
                 p3 = plot(tt,squeeze(dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,:)),'k','linewidth',2);  % plot the rereference signal in a solid line
 
             else
@@ -84,11 +70,11 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
             p4 = plot(tt(n1_peak_sample(chan,stimp)), n1_peak_amplitude(chan,stimp),'o','MarkerFaceColor','r','MarkerEdgeColor','r','MarkerSize',4);
             hold off
             xlim([-0.05 0.2])
-%             if n1_peak_amplitude(chan,stimp) < -600 
-% %                  ylim([-600 650])
-%             else 
-                ylim([-1000 450])
-%             end
+            if n1_peak_amplitude(chan,stimp) < -600 
+                 ylim([-600 650])
+            else 
+                ylim([n1_peak_amplitude(chan,stimp)-300 450])
+            end
             
             title('Zoomed average signal')
             xlabel('Time (s)')
@@ -100,15 +86,15 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
             alpha(0.2)
             
             if strcmp(cfg.reref,'y')
-                %legend([p1(1),p2(1),p3(1),p4(1)],'indiv responses','average','average reref','detected CCEP')    
-                legend([p1(1),p3(1),p4(1)],'indiv responses','average','average reref','detected CCEP')    
-
+                legend([p1(1),p2(1),p3(1),p4(1)],'indiv responses','average','average reref','detected CCEP')    
             elseif strcmp(cfg.reref,'n')
                 legend([p1(1),p2(1),p4(1)],'indiv responses','average','detected CCEP')
             end
             
+            
+            
             currkey = 0;
-            fprintf('N1 [y/n], if incorrect N1, select correct N1 and press enter. Only enter is equal to not correct. \n')
+            fprintf('N1 [y/n], if incorrect N1, select correct N1 and press enter. Only enter is equal to not correct, press d when doubt. \n')
             
             % select new N1 or categorize as good N1 or no N1
             % When incorrect N1 is selected, click on correct N1, a blue
@@ -157,7 +143,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
                    hold off
                    
                    %%% Add marking of observer to a table
-                   obs_tab{chan,stimp} = 'c';
+%                    obs_tab{chan,stimp} = 'c';
                    
                    
                 elseif w == 1
@@ -175,37 +161,32 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
                     end
                     
                      %%% Add marking of observer to a table
-                    obs_tab{chan,stimp} = currkey; 
+%                     obs_tab{chan,stimp} = currkey; 
                         
                 end
-            end
+        end
             
         end
        hold off
     end
     
-   % save also till which stimpair visual N1s are checked.
-    ccep.checkUntilStimp = stimp;
+%    % save also till which stimpair visual N1s are checked.
     ccep.n1_peak_amplitude = dataBase.ccep.n1_peak_amplitude;
     ccep.n1_peak_sample = dataBase.ccep.n1_peak_sample;
-    ccep.obs_tab = obs_tab; 
     
-    filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_name,'_N1sChecked.mat'];
-    filefolder = fullfile(myDataPath.CCEPpath, dataBase.sub_label, dataBase.ses_label, dataBase.task_name,'/');
-    if ~exist(filefolder,'dir')
-        mkdir(filefolder)
-    end
+%     filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_name,'_N1sChecked_doubts.mat'];
+%     filefolder = fullfile(myDataPath.CCEPpath, dataBase.sub_label, dataBase.ses_label, dataBase.task_name,'/');
+%     if ~exist(filefolder,'dir')
+%         mkdir(filefolder)
+%     end
 
     % save file during scoring in case of error
-    save(fullfile(filefolder,filename),'-struct','ccep');
+%     save(fullfile(filefolder,filename),'-struct','ccep');
 end
 
-dataBase.ccep.n1_peak_amplitude_check = ccep.n1_peak_amplitude_check;
-dataBase.ccep.n1_peak_sample_check = ccep.n1_peak_sample_check;
-dataBase.ccep.n1_peak_amplitude = n1_peak_amplitude;
-dataBase.ccep.n1_peak_sample = n1_peak_sample;
-dataBase.ccep.checkUntilStimp = stimp;
-dataBase.ccep.obs_tab = obs_tab;
+% ccep.n1_peak_amplitude_check = ccep.n1_peak_amplitude_check;
+% ccep.n1_peak_sample_check = ccep.n1_peak_sample_check;
 
 end
+
 
