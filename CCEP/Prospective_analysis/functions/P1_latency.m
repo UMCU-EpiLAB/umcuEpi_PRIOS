@@ -9,7 +9,7 @@ function P1_latency(dataBase_clin, dataBase_prop,cfg, myDataPath)
 fs = dataBase_clin.ccep_header.Fs;
 
 % Load the CCEP_checked files
-filename = dir([myDataPath.CCEP_allpat,dataBase_clin.sub_label,'*_CCEP_clin_filt_check.mat']);
+filename = dir([myDataPath.CCEP_allpat,dataBase_clin.sub_label,'*_CCEP_clin_reref_check.mat']);
 if ~isempty(filename)
    if exist(fullfile(filename.folder,filename.name),'file')
        ER_checked_clin = load(fullfile(filename.folder,filename.name));
@@ -23,7 +23,7 @@ end
 ER_clin = ER_checked_clin.ccep_clin.n1_peak_sample_check;       
          
 % Load the CCEP_checked files
-filename = dir([myDataPath.CCEP_allpat,dataBase_prop.sub_label,'*_CCEP_prop_filt_check.mat']);
+filename = dir([myDataPath.CCEP_allpat,dataBase_prop.sub_label,'*_CCEP_prop_reref_check.mat']);
 if ~isempty(filename)
     if exist(fullfile(filename.folder,filename.name),'file')
         ER_checked_prop = load(fullfile(filename.folder,filename.name));

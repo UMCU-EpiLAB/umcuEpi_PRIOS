@@ -232,22 +232,6 @@ disp('CCEPs are checked')
 % 
 % disp('N2 peaks are checked')      
 
-%% Visually check all stimuli of a SPES
-% The ERs detected with the detector are shown with a blue dot.
-% This is very time consuming! only perform when the ER-detector results
-% are not as expected.
-
-%%% IK HEB DIT NOG NIET GEUPDATE MET DE REREF DATA, AANGEZIEN DIT MISSCHIEN NOG WAT MINDER RELEVANT IS NU VOOR HET CONGRES. 
-
-% VisCheck_all = input('Do you want to visually check ALL signals? [y/n] ','s');
-% 
-% if strcmp(VisCheck_all,'y')
-%     dataBase_clin = visualRating_all_ccep(dataBase_clin);
-%     dataBase_prop = visualRating_all_ccep(dataBase_prop);
-% end
-% 
-% disp('All responses are checked') 
-
 %% save ccep
 savefiles = input('Do you want to save the ccep-structures? [y/n] ','s');
 

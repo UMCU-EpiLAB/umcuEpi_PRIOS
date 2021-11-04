@@ -1,6 +1,6 @@
 % Script PROS01_pipeline_preproces.m should be performed first to obtain the correct documents.
 
-% clear; 
+clear; 
 % %% Choose patient
 ccep_allPat.sub_labels = {'sub-PRIOS01','sub-PRIOS02','sub-PRIOS03','sub-PRIOS04','sub-PRIOS05','sub-PRIOS06'};
 %ccep_allPat.name = {[input('Patient number type (PRIOSXX): ','s')]};
@@ -22,12 +22,12 @@ for i = 1:size(ccep_allPat.sub_labels,2)
   
      % load all both the SPESclin and SPESprop of the patient
     for j=1:size(respLoc,2)                                                      
-       if contains(files(respLoc(j)).name,'clin_filt_check.')               % Change to load the files of interest 
+       if contains(files(respLoc(j)).name,'clin_reref_check.')               % Change to load the files of interest 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep_clin = ccep_clin;
           dataBase(i).filenameClin = files(respLoc(j)).name;
             
-       elseif contains(files(respLoc(j)).name,'prop_filt_check.')           % Change to load the files of interest
+       elseif contains(files(respLoc(j)).name,'prop_reref_check.')           % Change to load the files of interest
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep_prop = ccep_prop;   
           dataBase(i).filenameProp = files(respLoc(j)).name;

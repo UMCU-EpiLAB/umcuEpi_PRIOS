@@ -94,7 +94,7 @@ end
 
 % Replace missing with zero to later transform the cell matrix to double
 % matrix
-mask = cellfun(@ismissing, val_mat);
+mask = cellfun(@(x) any(ismissing(x)), val_mat);
 val_mat(mask) = {0};    
 
 % If sum of row is zero, remove row, same for column (to reduce space)
@@ -146,7 +146,7 @@ end
 
 % Replace missing with zero to later transform the cell matrix to double
 % matrix
-mask = cellfun(@ismissing, val_mat_prop);
+mask = cellfun(@(x) any(ismissing(x)), val_mat_prop);
 val_mat_prop(mask) = {0};    
 
 % If sum of row is zero, remove row, same for column (to reduce space)
