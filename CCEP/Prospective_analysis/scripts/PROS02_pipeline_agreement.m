@@ -35,7 +35,16 @@ for i = 1:size(ccep_allPat.sub_labels,2)
     end
 end
 
-%% determine the agreement between 2 and 10 stims per run
+%% Determine the Cohen's Kappa interobserver variability
+% Determine this with checked files of two raters/observers
+
+% Exclude responses that were scored differently between observers
+
+dataBase = interobserverKappa(dataBase,myDataPath);
+
+% An excel is saved in myDataPath.CCEP_interObVar with the different responces between R1 and R2
+
+%% determine the agreement between runs
 % The determine_agreement function is not only determining the agreement
 % when 2 sessions are compared. It could be possible to compare more, but
 % then the values for truetrue, truefalse and falsefalse should be changed. 
@@ -160,13 +169,7 @@ vis_report(dataBase, myDataPath)
 % Folder Violinplot-Matlab has to be added to the path. 
 boxplot_N1_peak(dataBase, myDataPath)
 
-%% Determine the Cohen's Kappa interobserver variability
-% Determine this with checked files of two raters/observers
-interobserverKappa(myDataPath);
 
-% Function check_interobs.m can be used to visualise the inter-observer
-% agreement. An excel is saved with the different responces between R1 and 
-% R2, this can be loaded in check_interobs.m
 
 %% Rise and Fall times N1 peak
 vis_P1(myDataPath,dataBase);

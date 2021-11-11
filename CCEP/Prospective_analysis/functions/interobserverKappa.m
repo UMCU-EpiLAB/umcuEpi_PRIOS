@@ -1,4 +1,4 @@
-function interobserverKappa(myDataPath)
+function dataBase = interobserverKappa(dataBase, myDataPath)
 % Determine the Cohen's Kappa interobserver variability
 % Determine this with checked files of two raters/observers
 files = dir(fullfile(myDataPath.CCEP_interObVar));
@@ -15,141 +15,110 @@ files = files(all(~cellfun(@isempty,struct2cell(files))));          % Remove all
 
 % Find unique run_labels
 uni_runlabel = unique({files.run_label});
-for run = 1: size(uni_runlabel,2)
-       
-    for i = 1:size(files)
-   
-        % PRIOS study is rater2, REC2Stim is rater1.
-        if contains(files(i).name, uni_runlabel{run}) && contains(files(i).name, 'PRIOS') 
-           rater2(run,:) = load(fullfile(files(i).folder,files(i).name)) ; 
-        elseif contains(files(i).name, uni_runlabel{run}) && contains(files(i).name, 'REC2Stim')
-           rater1(run,:) =load(fullfile(files(i).folder,files(i).name)) ; 
- 
-        end
-    end
-    
-    N1_peak_R1 = rater1(run).ccep.checked  ;                        % Rater 1 already transformed to 1/0
-    N1_peak_R2 = rater2(run).ccep_clin.n1_peak_sample_check;
-    R1_ori = rater1(run).ccep.n1_peak_sample;
-    R2_ori = rater2(run).ccep_clin.n1_peak_sample;
-    
-    % Determine whether the same stimulation pairs are used. 
-    % Stimulation pairs that are 'extra' are not removed from the original
-    % detection matrix in the CCEP struct. 
-    if size(N1_peak_R1,2) > size(N1_peak_R2,2)
-       extra_rater1 = find(~ismember(rater1(run).ccep.cc_stimsets(:,1), rater2(run).ccep_clin.stimsets_avg(:,1))) ;
-       N1_peak_R1(:,extra_rater1) = [];  
-       
-       % Also remove them in the original, because only the responses which
-       % were automatically detected were checked
-       R1_ori(:,extra_rater1) = [];                 
-       rater1(run).ccep.cc_stimsets(extra_rater1,:) = [];
-       
-    elseif size(N1_peak_R2,2) > size(N1_peak_R1,2)
-        extra_rater2 =  find(~ismember(rater2(run).ccep_clin.stimsets_avg(:,1), rater1(run).ccep.cc_stimsets(:,1))) ;
-        N1_peak_R2(:,extra_rater2) = []; 
-        
-        % Also remove them in the original, because only the responses which
-        % were automatically detected were checked
-        R2_ori(:,extra_rater2) = [];
-        rater2(run).ccep_clin.stimsets_avg(extra_rater2,:) = [];
-    end
-         
-    % Convert matrix with sample numbers to binary matrix
-    N1_peak_R2(~isnan(N1_peak_R2)) = 1;     % all non-NaNs are amplitudes, so N1s --> 1
-    N1_peak_R2(isnan(N1_peak_R2)) = 0;      % all NaNs are no N1s --> 0
-   
-    % Convert to zero and one to be able to check equality
-    R1_ori(~isnan(R1_ori)) = 1;                         % all non-NaNs are amplitudes, so N1s --> 1
-    R1_ori(isnan(R1_ori)) = 0; 
-    R2_ori(~isnan(R2_ori)) = 1;
-    R2_ori(isnan(R2_ori)) = 0;
-   
-    % Only the automatically detected ERs are checked
-    % Find the automatically detected ERs
-    if isequaln(R1_ori, R2_ori)
-        auto_ERs = find(R1_ori == 1);                               
-        
-    else
-        diff_autodet = find(R2_ori~=R1_ori);
-        R1_ori(diff_autodet) = NaN;
-        R2_ori(diff_autodet) = NaN;
-        % Test equallity again
-        if isequaln(R1_ori, R2_ori)
-            auto_ERs = find(R1_ori == 1); 
-        else
-             warning('Matrix with automatically detected ERs is not equal')
-        end
-    end
-         
-    % Convert matrix to array
-    N1_peak_R1 = N1_peak_R1(:);
-    N1_peak_R2 = N1_peak_R2(:);
-    
-    % Determine where the detector detected an N1 since these are visually
-    % checked. All signals without automatically detected N1's are not
-    % visually checked and are therefore not part of the inter observer
-    % agreement.
-    R1_auto_ER = N1_peak_R1(auto_ERs);
-    R2_auto_ER = N1_peak_R2(auto_ERs);
-       
-    % Cohens kappa unweighted is used to determine the interobserver
-    % variablity
-    C = confusionmat(R1_auto_ER, R2_auto_ER);    disp(C)            % Convert to confusion matrix
-    n = sum(C(:));                                                  % get total N
-    C = C./n;                                                       % Convert confusion matrix counts to proportion of n
-    r = sum(C,2);                                                   % row sum
-    s = sum(C);                                                     % column sum
-    expected = r*s;                                                 % expected proportion for random agree
-    po = sum(diag(C));                                              % Observed proportion correct
-    pe = sum(diag(expected));                                       % Proportion correct expected
-    kappa = (po-pe)/(1-pe);                                         % Cohen's kappa
+
+%% Load checked ECoG files
   
-    REC2Stim_label = rater1(run).ccep.dataName(strfind(rater1(run).ccep.dataName,'sub-')+4 : strfind(rater1(run).ccep.dataName,'ses-')-2);
-    PRIOS_label = rater2(run).ccep_clin.dataName(strfind(rater2(run).ccep_clin.dataName,'sub-') +4 :strfind(rater2(run).ccep_clin.dataName,'ses-')-2);
-    
-    fprintf('Cohens kappa between Rater1 and Rater2 for %s/%s is k=%1.4f \n ', REC2Stim_label, PRIOS_label, kappa)
-    
-    %% Find where R1 and R2 have differences  
-     
-    % Find where R1 has an one/zero
-    elec_one_R1 = auto_ERs ;
-    elec_one_R1(find(R1_auto_ER == 0)) = [];              %#ok<*FNDSB> % Remain with the electrodes with a one
-        
-    % Find where R2 has an one/zero
-    elec_one_R2 = auto_ERs ;
-    elec_one_R2(find(R2_auto_ER == 0)) = [];              % Remain with the electrodes with a one
-    
-        
-    diff_rating = find(~ismember(elec_one_R1 , elec_one_R2)) ;             % find where R1 and R2 are diffferent
-    R1_only = elec_one_R1(diff_rating);                                    % Determine the electrode location of ERs only present in R1 check
-    
-    
-    num_elec = size(rater1(run).ccep.ch  ,1);                              % New stimpair after the number of electrodes
-    
-    stimp = 1;                                                             % Stimpair_label
-    for i = 1:size(diff_rating,1)
-       if  (R1_only(i)/num_elec)>1                                     % For stimpairs >1
-           stimp = ceil(R1_only(i)/num_elec);
-          
-           diff_rat{i,1} = R1_only(i)-((stimp-1)*num_elec);                          % Electrode number
-           diff_rat(i,2) = rater1(run).ccep.ch(R1_only(i)-((stimp-1)*num_elec));     %#ok<*AGROW> % Electrode name
-           diff_rat(i,3:4) = num2cell(rater2(run).ccep_clin.stimsets_avg(stimp,1:2));    % Stimpair name
+for runs= 1:size(uni_runlabel,2)
 
-       else % for stimpair 1
-           diff_rat{i,1} = R1_only(i);                          % Electrode number
-           diff_rat(i,2) = rater1(run).ccep.ch(R1_only(i));
-           diff_rat(i,3:4) = num2cell(rater2(run).ccep_clin.stimsets_avg(stimp,1:2));
-       end
+    for i = 1:size(files)
+
+        if contains(files(i).name, uni_runlabel{runs}) && contains(files(i).name, '_01')  % change this to observer initials
+          rater1 =  load(fullfile(files(i).folder,files(i).name)); 
+    
+        elseif contains(files(i).name, uni_runlabel{runs}) && contains(files(i).name, '_02')   % change this to observer initials
+           rater2 = load(fullfile(files(i).folder,files(i).name)) ; 
+        end
     end
+        
     
-    varNames = {'nummer','Channel','StimElec1','StimpElec2'};
-    T = table(diff_rat(:,1),diff_rat(:,2),diff_rat(:,3),diff_rat(:,4), 'VariableNames',varNames);
-     
-    targetFolder = [myDataPath.CCEP_interObVar];
-    fileName = ['Different_ratings_',PRIOS_label,'_',REC2Stim_label,'.xlsx'];
-    writetable(T  ,[targetFolder, fileName])
+    %% Convert sample and amplitude value to binary output.
+        rater1.ccep.check_binary = ~isnan(rater1.ccep.n1_peak_sample_check);    % cells with a value are converted to a 1, NaNs are converted to 0      
+        rater2.ccep.check_binary = ~isnan(rater2.ccep.n1_peak_sample_check);
+        
+        % Only the automatically detected ERs are checked
+        % Find the automatically detected ERs
+        if isequal(size(rater1.ccep.n1_peak_sample_check), size(rater2.ccep.n1_peak_sample_check))  % extra check whether the same number of responses is compared
+            auto_det_ERs = find( ~isnan(rater1.ccep.n1_peak_sample) == 1);      % use the non-checked file! determine the difference between the non-checked file and the checked file
+        else
+            error('Matrix with automatically detected ERs is not equal')
+        end
+        
+        % Determine where the detector detected an N1 since these are visually
+        % checked. All signals without automatically detected N1's are not
+        % visually checked and are therefore not part of the inter observer
+        % agreement.
+        R1_obs = rater1.ccep.check_binary(auto_det_ERs);
+        R2_obs = rater2.ccep.check_binary(auto_det_ERs);
+           
+        % Cohens kappa unweighted is used to determine the interobserver
+        % variablity
+        C = confusionmat(R1_obs, R2_obs);    %disp(C);            % Convert to confusion matrix
+        n = sum(C(:));                                                  % get total N
+        C = C./n;                                                       % Convert confusion matrix counts to proportion of n
+        r = sum(C,2);                                                   % row sum
+        s = sum(C);                                                     % column sum
+        expected = r*s;                                                 % expected proportion for random agree
+        po = sum(diag(C));                                              % Observed proportion correct
+        pe = sum(diag(expected));                                       % Proportion correct expected
+        kappa = (po-pe)/(1-pe);                                         % Cohen's kappa
+        
+        PRIOS_label = rater2.ccep.dataName(strfind(rater2.ccep.dataName,'sub-') :strfind(rater2.ccep.dataName,'ses-')-2);
+        SPES_label = rater2.ccep.dataName(strfind(rater2.ccep.dataName,'task-') +5 :strfind(rater2.ccep.dataName,'run-')-2);
+        
+        fprintf('Cohens kappa between Rater1 and Rater2 for %s during %s is k=%1.4f \n ', PRIOS_label, SPES_label, kappa)
+ 
+        %% Check where rater1 and rater 2 have different observationa
+        diff_obs = find((~isnan(rater1.ccep.n1_peak_sample_check) + ~isnan(rater2.ccep.n1_peak_sample_check))==1);
+        
+        % Write to an excel to be able to further analyse when necessary
+        for i = 1: size(diff_obs,1)
+            stimp_diff = ceil(diff_obs(i)/size(rater1.ccep.ch  ,1));
+            diff_rat{i,1} = rater1.ccep.stimpnames_avg{stimp_diff};
+            diff_rat{i,2} = rater1.ccep.ch{diff_obs(i)-((stimp_diff-1)*size(rater1.ccep.ch  ,1))};
+        end
+             
+        if exist('diff_rat','var')              % only save when table exist
+            varNames = {'Stimpair','Electrode'};
+            T = table(diff_rat(:,1),diff_rat(:,2), 'VariableNames',varNames);
+             
+            targetFolder = [myDataPath.CCEP_interObVar];
+            fileName = ['Different_ratings_clinical_',PRIOS_label,'_',SPES_label,'.xlsx'];
+            writetable(T  ,[targetFolder, fileName])
+        end
+        
+        %% Exclude different observations form the analysis
+        % Clinical SPES
+        rater1.ccep.n1_peak_sample_check(diff_obs) = NaN;  % Replace the values with NaN when the observer did not have the same rating
+        rater2.ccep.n1_peak_sample_check(diff_obs) = NaN;
 
-    clearvars -except files myDataPath uni_runlabel
+        rater1.ccep.n1_peak_amplitude_check(diff_obs) = NaN;  % Replace the values with NaN when the observer did not have the same rating
+        rater2.ccep.n1_peak_amplitude_check(diff_obs) = NaN;
+
+        % As a result, the table for Rater 1 and rater 2 should be equal. And
+        % analysis can proceed with either Rater 1 or rater2 
+        if ~isequal(isnan(rater1.ccep.n1_peak_sample_check), isnan(rater2.ccep.n1_peak_sample_check))
+            error('Binary matrices of rater1 and rater 2 are not equal after removal of different observations.')
+        end
+
+        
+        %% Save ccep's to continue with the analysis
+        % I want to save the new N1-peak_check files in the dataBase file
+        % to save and use for further analysis. 
+
+%         PAT_label = rater1.ccep.dataName(strfind(rater1.ccep.dataName,'/ieeg/sub-') +6:strfind(rater1.ccep.dataName,'_ses-1')-1);% Determine patient label of current files
+        loc_pat_in_dataBase = find(ismember({dataBase.sub_label}.' , PRIOS_label));       % Find where in dataBase the same pat_label is used
+
+
+        if isequal(SPES_label,'SPESclin')%  SPES_label is based on the run_label
+            dataBase(loc_pat_in_dataBase).ccep_clin.n1_peak_amplitude_check = rater1.ccep.n1_peak_amplitude_check;  % Does not matter whether rater1 or rater2 is used
+            dataBase(loc_pat_in_dataBase).ccep_clin.n1_peak_sample_check = rater1.ccep.n1_peak_sample_check;        % Does not matter whether rater1 or rater2 is used
+
+        elseif isequal(SPES_label,' SPESprop')
+            dataBase(loc_pat_in_dataBase).ccep_prop.n1_peak_amplitude_check = rater1.ccep.n1_peak_amplitude_check;  % Does not matter whether rater1 or rater2 is used
+            dataBase(loc_pat_in_dataBase).ccep_prop.n1_peak_sample_check = rater1.ccep.n1_peak_sample_check;        % Does not matter whether rater1 or rater2 is used
+
+        end
+
+
 end
 end
