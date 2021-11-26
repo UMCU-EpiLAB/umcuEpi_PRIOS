@@ -34,6 +34,9 @@ for R = 1:size(strings,2)
 end
 
 fprintf('Data of subject %s is loaded. \n',cfg.sub_labels{1})
+
+% housekeeping
+clear R n files strings
     
 %% CCEP for SPES-clin stimulations
 clear dataBase_clin dataBase_prop
@@ -72,7 +75,8 @@ elseif size(dataBase_prop,1) >1
      
 end
 
-
+% housekeeping
+clear i names
 
 %% Re-reference data
 % The reference calculatede below is the median of the signals that have a
@@ -235,80 +239,52 @@ savefiles = input('Do you want to save the ccep-structures? [y/n] ','s');
 
 for i = 1:size(dataBase,2)
     if isequal(dataBase(i).task_label, 'task-SPESclin')
-        targetFolder_clin = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_label),'/'];
-        [~,filename_clin,~] = fileparts(dataBase(i).dataName);
+        targetFolder = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_label),'/'];
+        [~,filename,~] = fileparts(dataBase(i).dataName);
+
+        dataBase_temp = dataBase_clin;
+        modus = 'clin';
+
     elseif isequal(dataBase(i).task_label, 'task-SPESprop')
-        targetFolder_prop = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_label),'/'];
-        [~,filename_prop,~] = fileparts(dataBase(i).dataName);
+        targetFolder = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_label),'/'];
+        [~,filename,~] = fileparts(dataBase(i).dataName);
+
+        dataBase_temp = dataBase_prop;
+        modus = 'prop';
     end
+
+    % Create the folder if it doesn't exist already.
+    if ~exist(targetFolder, 'dir')
+        mkdir(targetFolder);
+    end
+
+    % save SPES
+    % When N1s are visually checked save with check in the name
+    if isfield(dataBase_temp.ccep, 'n1_peak_amplitude_check')
+        fileName=[extractBefore(filename,'_ieeg'),'_CCEP_' modus '_reref_check.mat'];
+
+    else % When N1s are not visually checked.
+        fileName=[extractBefore(filename,'_ieeg'),'_CCEP_' modus '_reref.mat'];
+    end
+
+    ccep = dataBase_temp.ccep;
+    ccep.stimchans_all = dataBase_temp.cc_stimchans_all;
+    ccep.stimchans_avg = dataBase_temp.cc_stimchans_avg;
+    ccep.stimpnames_all = dataBase_temp.stimpnames_all;
+    ccep.stimpnames_avg = dataBase_temp.stimpnames_avg;
+    ccep.stimsets_all = dataBase_temp.cc_stimsets_all;
+    ccep.stimsets_avg = dataBase_temp.cc_stimsets_avg;
+    ccep.dataName = dataBase_temp.dataName;
+    ccep.ch = dataBase_temp.ch;
+    ccep.tt = dataBase_temp.tt;
+
+    if strcmp(savefiles,'y')
+        save([targetFolder,fileName], 'ccep');
+        save([myDataPath.CCEP_allpat,fileName], 'ccep');
+
+    end
+
 end
-
-
-% Create the folder if it doesn't exist already.
-if ~exist(targetFolder_clin, 'dir')
-    mkdir(targetFolder_clin);
-end
-
-% save Clinical-SPES
-% When N1s are visually checked save with check in the name
-if isfield(dataBase_clin.ccep, 'n1_peak_amplitude_check')
-    fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_reref_check.mat'];           
-    
-else % When N1s are not visually checked.
-    fileName_clin=[extractBefore(filename_clin,'_ieeg'),'_CCEP_clin_reref.mat'];              
-end
-
-ccep_clin = dataBase_clin.ccep;
-ccep_clin.stimchans_all = dataBase_clin.cc_stimchans_all;
-ccep_clin.stimchans_avg = dataBase_clin.cc_stimchans_avg;
-ccep_clin.stimpnames_all = dataBase_clin.stimpnames_all;
-ccep_clin.stimpnames_avg = dataBase_clin.stimpnames_avg;
-ccep_clin.stimsets_all = dataBase_clin.cc_stimsets_all;
-ccep_clin.stimsets_avg = dataBase_clin.cc_stimsets_avg;
-ccep_clin.dataName = dataBase_clin.dataName;
-ccep_clin.ch = dataBase_clin.ch;
-ccep_clin.tt = dataBase_clin.tt;
-
-if strcmp(savefiles,'y')
-    save([targetFolder_clin,fileName_clin], 'ccep_clin');
-    save([myDataPath.CCEP_allpat,fileName_clin], 'ccep_clin');
-
-end
-
-
-% Create the folder if it doesn't exist already.
-if ~exist(targetFolder_prop, 'dir')
-    mkdir(targetFolder_prop);
-end
-
-% [~,filename,~] = fileparts(dataBase(1).dataName);
-
-% save propofol SPES
-% When visual check is performed and data is checked, then save with
-% correct name (also ensures that checked file is not overwritten when
-% file is completely run)
-if isfield(dataBase_prop.ccep, 'n1_peak_amplitude_check')
-    fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_reref_check.mat'];      
-else 
-    fileName_prop=[extractBefore(filename_prop,'_ieeg'),'_CCEP_prop_reref.mat'];    
-end
-
-ccep_prop = dataBase_prop.ccep;
-ccep_prop.stimchans_all = dataBase_prop.cc_stimchans_all;
-ccep_prop.stimchans_avg = dataBase_prop.cc_stimchans_avg;
-ccep_prop.stimpnames_all = dataBase_prop.stimpnames_all;
-ccep_prop.stimpnames_avg = dataBase_prop.stimpnames_avg;
-ccep_prop.stimsets_all = dataBase_prop.cc_stimsets_all;
-ccep_prop.stimsets_avg = dataBase_prop.cc_stimsets_avg;
-ccep_prop.dataName = dataBase_prop.dataName;
-ccep_prop.ch = dataBase_prop.ch;
-ccep_prop.tt = dataBase_prop.tt;
-
-if strcmp(savefiles,'y')
-    save([targetFolder_prop,fileName_prop], 'ccep_prop');
-    save([myDataPath.CCEP_allpat,fileName_prop], 'ccep_prop');
-end
-
 
 fprintf('CCEPs are saved for SPESprop en SPESclin for subject %s \n' , dataBase(1).sub_label);
 
