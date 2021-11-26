@@ -5,7 +5,6 @@
 % detect N1-peaks after stimulation, visual check of detected N1s, save
 % these for further analysis and display
 
-
 clear; 
 clc;
 
@@ -31,27 +30,27 @@ end
 % Load data (also possible for multiple runs)
 for R = 1:size(strings,2)
     cfg.run_label = strings(R);
-    dataBase(R) = load_ECoGdata(cfg,myDataPath); %#ok<SAGROW>
+    dataBase(R) = load_ECoGdata(cfg,myDataPath); %#ok<SAGROW> 
 end
 
 fprintf('Data of subject %s is loaded. \n',cfg.sub_labels{1})
     
 %% CCEP for SPES-clin stimulations
-% save all stimuli of clinical SPES
+clear dataBase_clin dataBase_prop
 
-
+% save all stimuli of clinical SPES or propofol SPES
 for i = 1:size(dataBase,2)
     dataBase(i).task_name = dataBase(i).dataName(strfind(dataBase(i).dataName,'task-'):strfind(dataBase(i).dataName,'_run')-1); 
 
     if ismember(dataBase(i).task_name,'task-SPESclin')
        cfg.minstim = 5;
        dataBase_clin(i,:) = preprocess_ECoG_spes(dataBase(i),cfg);       %#ok<SAGROW>
-       fprintf('...%s, %s, has been epoched and averaged... \n',cfg.sub_labels{1}, dataBase(i).task_name)
+        fprintf('...%s, %s, %s, has been epoched and averaged... \n',dataBase(i).sub_label, dataBase(i).run_label, dataBase(i).task_name)
 
     elseif ismember(dataBase(i).task_name,'task-SPESprop')
         cfg.minstim = 1;
         dataBase_prop(i,:) = preprocess_ECoG_spes(dataBase(i),cfg);      %#ok<SAGROW>
-        fprintf('...%s, %s, has been epoched and averaged... \n',cfg.sub_labels{1}, dataBase(i).task_name)
+        fprintf('...%s, %s, %s, has been epoched and averaged... \n',dataBase(i).sub_label, dataBase(i).run_label, dataBase(i).task_name)
 
     end
 end
@@ -62,12 +61,14 @@ end
 dataBase_clin = dataBase_clin(all(~cellfun(@isempty,struct2cell(dataBase_clin))));
 dataBase_prop = dataBase_prop(all(~cellfun(@isempty,struct2cell(dataBase_prop))));
 
-
 % When a SPES is ran in multiple runs, merge them.
 if size(dataBase_clin,1)>1          % When SPES was ran in multiple runs
+    dataBase_clinOrig = dataBase_clin; % enables check of the original databases
      dataBase_clin = merge_runs(dataBase_clin); 
+
 elseif size(dataBase_prop,1) >1 
-     dataBase_prop = merge_runs(dataBase_prop);
+    dataBase_propOrig = dataBase_prop;
+    dataBase_prop = merge_runs(dataBase_prop);
      
 end
 
@@ -92,19 +93,17 @@ if strcmp(cfg.reref,'y')
     
     toc
 
-    disp('Data is rereferenced and all trials of one stimulus pair are averaged.')
+    disp('Data is rereferenced and all trials of each stimulus pair are averaged.')
 
 else
    
-    disp('Data is not re-referenced and all trials of one stimulus pair are averaged.')
+    disp('Data is not re-referenced and all trials of each stimulus pair are averaged.')
 end
 
 %% Check whether SPESclin and SPESprop contain the same stimulation pairs
 % Stimpairs and electrodes which are different in the clinical and propofol
 % SPES are removed.
 [dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop);
-
-
 
 %% Use the automatic N1 detector to detect ccep 
 
@@ -120,18 +119,18 @@ VisCheck = input('Do you want to visually check the detected clinical-SPES CCEPs
 
 % load checked N1s if visual rating has started earlier
 if exist(fullfile(myDataPath.CCEPpath, dataBase_clin.sub_label, ...
-        dataBase_clin.ses_label, dataBase_clin.task_name,...
+        dataBase_clin.ses_label, dataBase_clin.task_label,...
         [dataBase_clin.sub_label, '_', dataBase_clin.ses_label,'_',...
-        dataBase_clin.task_name,'_N1sChecked.mat']),'file')
+        dataBase_clin.task_label,'_N1sChecked.mat']),'file')
     
    dataBase_clin.ccep = load(fullfile(myDataPath.CCEPpath, dataBase_clin.sub_label, ...
-        dataBase_clin.ses_label, dataBase_clin.task_name,...
+        dataBase_clin.ses_label, dataBase_clin.task_label,...
         [dataBase_clin.sub_label, '_', dataBase_clin.ses_label,'_',...
-        dataBase_clin.task_name,'_N1sChecked.mat']));   
+        dataBase_clin.task_label,'_N1sChecked.mat']));   
 end
 
 
-if strcmp(VisCheck,'y')
+if strcmpi(VisCheck,'y')
    
     % continue with the stimulation pair after the last saved stimulation pair
     if sum(strcmp(fieldnames(dataBase_clin.ccep), 'checkUntilStimp')) == 1
@@ -161,7 +160,7 @@ if exist(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
         dataBase_prop.task_name,'_N1sChecked.mat']));   
 end
 
-if strcmp(VisCheck,'y')
+if strcmpi(VisCheck,'y')
     
      % continue with the stimulation pair after the last saved stimulation pair
     if sum(strcmp(fieldnames(dataBase_prop.ccep), 'checkUntilStimp')) == 1
@@ -173,8 +172,7 @@ if strcmp(VisCheck,'y')
     dataBase_prop = visualRating_ccep(dataBase_prop, cfg, endstimp_prop, myDataPath);
     
 end
-
-    
+  
 disp('CCEPs are checked')      
 
 %% Display doubtfull observations
@@ -236,11 +234,11 @@ disp('CCEPs are checked')
 savefiles = input('Do you want to save the ccep-structures? [y/n] ','s');
 
 for i = 1:size(dataBase,2)
-    if isequal(dataBase(i).task_name, 'task-SPESclin')
-        targetFolder_clin = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_name),'/'];
+    if isequal(dataBase(i).task_label, 'task-SPESclin')
+        targetFolder_clin = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_label),'/'];
         [~,filename_clin,~] = fileparts(dataBase(i).dataName);
-    elseif isequal(dataBase(i).task_name, 'task-SPESprop')
-        targetFolder_prop = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_name),'/'];
+    elseif isequal(dataBase(i).task_label, 'task-SPESprop')
+        targetFolder_prop = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_label),'/'];
         [~,filename_prop,~] = fileparts(dataBase(i).dataName);
     end
 end

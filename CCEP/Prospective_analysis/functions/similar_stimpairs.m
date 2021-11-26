@@ -13,7 +13,7 @@ if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)
     names = dataBase_clin.stimpnames_all(x_all);
 
     stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-    sprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
+    fprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
 
     % Remove the stimulation pairs that are only present in SPES-clin
     dataBase_clin.cc_stimsets_all(x_all,:) = [];
@@ -40,7 +40,7 @@ if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)
            
            names = dataBase_prop.stimpnames_all(x_all);
            stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-           sprintf(['Stimpairs only stimulated in SPESprop and not in SPESclin: \n' stringsz '\n'],names{:})
+           fprintf(['Stimpairs only stimulated in SPESprop and not in SPESclin: \n' stringsz '\n'],names{:})
             
            % Remove the stimulation pairs that are only present in SPES-prop
            dataBase_prop.cc_stimsets_all(x_all,:) = [];
@@ -134,6 +134,10 @@ end
     elseif size(dataBase_prop.ch,1) > size(dataBase_clin.ch,1)
         diff_elec = find(~ismember(dataBase_prop.ch, dataBase_clin.ch));
         dataBase_prop.ch(diff_elec,:) = [];
+    else
+        if ~isequal(dataBase_clin.ch, dataBase_prop.ch)
+            warning('Although number of channels are equal in both SPESclin and SPESprop, the channel names are not similar!')
+        end
     end
     
     % When the channels are still unequal, print warning

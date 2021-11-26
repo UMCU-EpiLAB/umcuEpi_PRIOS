@@ -111,7 +111,6 @@ for subj = 1:length(dataBase)
             % this stimulation pair before stimulation, which is the half of the
             % epoch
             tt_preStim = tt>-2 & tt<-.1;                  
-            
  
             % subtract median baseline from signal
             median_preStim = median(signal(ii,jj,tt_preStim),'omitnan');
