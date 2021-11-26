@@ -12,7 +12,7 @@ function dataBase_merge = merge_runs(dataBase)
    
    % Check whether the two tb_channels are the same, since these might be
    % different for different runs because electrodes can turn bad etc.
-   for i = 1:size(dataBase,2)-1
+   for i = 1:size(dataBase,1)-1
        
         if isequal(dataBase(i).tb_channels,dataBase(i+1).tb_channels)
              dataBase_merge.tb_channels = dataBase(1).tb_channels ;           % tb_channels are equal for both SPES sessions

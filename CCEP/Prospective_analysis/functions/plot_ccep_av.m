@@ -1,4 +1,4 @@
-function plot_ccep_av(dataBase,cfg,myDataPath,stimchans)
+function plot_ccep_av(dataBase,cfg,myDataPath)
 %
 % function ccep_plot_av(average_ccep,tt,n1_peak_sample, n1_peak_amplitude,average_ccep_names,...
 %     channel_names,good_channels,myDataPath,bids_sub,bids_ses,bids_task,bids_runs,params)
@@ -53,7 +53,8 @@ for ll = 1:length(elnrs_plot)                   % For the number of electrodes
         end
     end
 
-    xlim([-.2 1.5])
+   
+     xlim([-.2 1.5])
     ylim([-500,(kk+2)*500])
     set(gca,'YTick',500*(1:length(dataBase.stimpnames)),'YTickLabel',dataBase.stimpnames)
     title([dataBase.ch{el_plot}])
@@ -64,7 +65,6 @@ for ll = 1:length(elnrs_plot)                   % For the number of electrodes
     % add amplitude bar
     plot([0.9 0.9],[1000 1500],'k','LineWidth',2)
     text(0.91,1250,['500 ' native2unicode(181,'latin1') 'V'])
-    
     if cfg.save_fig==1
         % create folder to save figures
         if ~ exist(fullfile(myDataPath.CCEPpath,'av_ccep_figures',dataBase.sub_label,dataBase.ses_label,dataBase.run_label),'dir')

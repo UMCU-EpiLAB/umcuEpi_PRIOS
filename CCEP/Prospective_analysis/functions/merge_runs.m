@@ -36,6 +36,6 @@ function dataBase_merge = merge_runs(dataBase)
    dataBase_merge.cc_epoch_sorted = cat(3,dataBase(:).cc_epoch_sorted);     
    dataBase_merge.tt_epoch_sorted = cat(2,dataBase(:).tt_epoch_sorted);         
    dataBase_merge.cc_epoch_sorted_avg = cat(2,dataBase(:).cc_epoch_sorted_avg);         
-   dataBase_merge.cc_epoch_sorted_select_avg = cat(2,dataBase(:).cc_epoch_sorted_select_avg);         
+   dataBase_merge.cc_epoch_sorted_select = cat(2,dataBase(:).cc_epoch_sorted_select);         
    dataBase_merge.stimpnames = cat(2,dataBase(:).stimpnames);  
 end

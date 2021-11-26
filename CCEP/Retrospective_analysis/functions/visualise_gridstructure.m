@@ -45,17 +45,17 @@ topo.y = y;
 
 %% Indegree of electrodes and ERs per stimulation pair, for all stims
 
-mode = {'Indegree & ERs per stimpair, all stimuli','Indegree & ERs per stimpair, 2 stimuli'};
+mode = {'In-degree & ERs per stimpair, all stimuli','In-degree & ERs per stimpair, 2 stimuli'};
 figure1 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
 
 for J = 1:size(mode,2)
     
-    if strcmp(mode{J},'Indegree & ERs per stimpair, all stimuli')
+    if strcmp(mode{J},'In-degree & ERs per stimpair, all stimuli')
         Ind = (agreement_parameter.indegreeN_10)';
         ERs = agreement_parameter.ERs_stimp10;
         axes1 = axes('Parent',figure1,'Position',[0.04,0.5,0.9,0.4]);
         
-    elseif strcmp(mode{J},'Indegree & ERs per stimpair, 2 stimuli')
+    elseif strcmp(mode{J},'In-degree & ERs per stimpair, 2 stimuli')
         Ind = (agreement_parameter.indegreeN_2)';
         ERs = agreement_parameter.ERs_stimp2;
         axes1 = axes('Parent',figure1,'Position',[0.04,0.07,0.9,0.4]);
@@ -103,12 +103,12 @@ for J = 1:size(mode,2)
     colorbar();
     
     % Create the same colormap limits based on the highest protocol with the highest indegree
-    if max(agreement_parameter.indegreeN_10)>max(agreement_parameter.indegreeN_2)
-        caxis([0 max(agreement_parameter.indegreeN_10)]);
-    else
-        caxis([0 max(agreement_parameter.indegreeN_2)]);
-    end
-    
+%     if max(agreement_parameter.indegreeN_10)>max(agreement_parameter.indegreeN_2)
+%         caxis([0 max(agreement_parameter.indegreeN_10)]);
+%     else
+%         caxis([0 max(agreement_parameter.indegreeN_2)]);
+%     end
+%     
     
     hold(axes1,'on')
     str_main = sprintf('sub-%s', subj{1});
@@ -118,31 +118,36 @@ for J = 1:size(mode,2)
 end
 
 % Save figure
-outlabel=sprintf('sub-%s_indegree_ERstimp.jpg',...
+outlabel=sprintf('sub-%s_indegree_ERstimp.png',...
     subj{1});
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
 if ~exist(path, 'dir')
     mkdir(path);
 end
-saveas(gcf,[path,outlabel],'jpg')
+saveas(gcf,[path,outlabel],'png')
 
 
 
 %% Plot the outdegree and the BC
 
-mode = {'outdegree','BC'};
+mode = {'Out-degree','BC','In-degree'};
 
 for J = 1:size(mode,2)
     
     figure2 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
     
-    if strcmp(mode{J},'outdegree')
+    if strcmp(mode{J},'Out-degree')
         par10 = (agreement_parameter.outdegreeN_10)';
         par2 = (agreement_parameter.outdegreeN_2)';
         
     elseif strcmp(mode{J},'BC')
         par10 = (agreement_parameter.BCN_10)';
         par2 = (agreement_parameter.BCN_2)';
+   
+    elseif strcmp(mode{J},'In-degree')
+        par10 = (agreement_parameter.indegreeN_10)';
+        par2 = (agreement_parameter.indegreeN_2)';
+        
     end
     
     axes3 = axes('Parent',figure2,'Position',[0.04,0.5,0.9,0.4]);
@@ -165,13 +170,13 @@ for J = 1:size(mode,2)
     colorbar();
     text(((topo.x)+0.2),topo.y,ccep.ch, 'FontSize',8,'FontWeight','bold')
     
-    % Create the same colormap limits based on the highest protocol with
-    % the highest parameter value
-    if max(par10)>max(par2)
-        caxis([0 max(par10)]);
-    else
-        caxis([0 max(par2)]);
-    end
+%     % Create the same colormap limits based on the highest protocol with
+%     % the highest parameter value
+%     if max(par10)>max(par2)
+%         caxis([0 max(par10)]);
+%     else
+%         caxis([0 max(par2)]);
+%     end
     
     
     % 2 stims
@@ -200,21 +205,21 @@ for J = 1:size(mode,2)
     
     % Create the same colormap limits based on the highest protocol with
     % the highest parameter value
-    if max(par10)>max(par2)
-        caxis([0 max(par10)]);
-    else
-        caxis([0 max(par2)]);
-    end
+%     if max(par10)>max(par2)
+%         caxis([0 max(par10)]);
+%     else
+%         caxis([0 max(par2)]);
+%     end
     
     % Save figure
-    outlabel=sprintf('sub-%s_%s.jpg',...
+    outlabel=sprintf('sub-%s_%s.png',...
         subj{1},mode{J});
     path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
     
     if ~exist(path, 'dir')
         mkdir(path);
     end
-    saveas(gcf,[path,outlabel],'jpg')
+    saveas(gcf,[path,outlabel],'png')
     
 end
 
@@ -283,13 +288,13 @@ if strcmp(plot_fig,'y')
         title('\rm ERs responses to specific stimulus, all stims')
         
         % Save figure
-        outlabel=sprintf('sub-%s, stimp %s.jpg',subj{1},ccep.stimpnames_avg{stimp});
+        outlabel=sprintf('sub-%s, stimp %s.png',subj{1},ccep.stimpnames_avg{stimp});
         path = fullfile(myDataPath.CCEPpath,'Grid_diffRes/',subj{1});
         
         if ~exist(path, 'dir')
             mkdir(path);
         end
-        saveas(gcf,[path,outlabel],'jpg')
+        saveas(gcf,[path,outlabel],'png')
         
     end
     
@@ -398,13 +403,13 @@ close all
 %
 %
 %          % Save figure
-%         outlabel=sprintf('sub-%s_%s.jpg',subj{1},mode{i});
+%         outlabel=sprintf('sub-%s_%s.png',subj{1},mode{i});
 %         path = [fullfile(myDataPath.CCEPpath,'SOZ/')];
 %
 %         if ~exist(path, 'dir')
 %             mkdir(path);
 %         end
-%         saveas(gcf,[path,outlabel],'jpg')
+%         saveas(gcf,[path,outlabel],'png')
 %     end
 %  end
 

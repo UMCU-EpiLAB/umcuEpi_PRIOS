@@ -238,7 +238,7 @@ ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
     
     % preallocation
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
-    cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),avg_stim*sum(IC_avg==1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples
+    cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1), avg_stim*2, size(cc_epoch_sorted_all,4)); % [channels x stimuli x selected trials x samples
     
     for ll = 1:max(IC_avg)                       % Takes every value between 1 and highest unique stimpairnumber, though some numbers are not used therefore the remove_sorted below)
          if sum(IC_avg==ll)>1                    % When ll is not a single stimpair 

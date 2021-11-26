@@ -74,7 +74,8 @@ fvar = deltat*repmat(tvA',1,NTST).*cell2mat(cellfun(@(c) c(deltat:deltat:Ttot),{
 
 %% Stochastic input
 % normal situation independent noise
-fs=sqrt(deltat)*repmat((tvA.*[NM_network.nodes.sd])',1,NTST).*randn(Nnodes,NTST);
+% fs=sqrt(deltat)*repmat((tvA.*[NM_network.nodes.sd])',1,NTST).*randn(Nnodes,NTST);   % original
+fs=sqrt(deltat)*repmat((tvA.*[NM_network.nodes.sd])',1,NTST).*(randn(Nnodes,NTST)*0.001);
 
 % comment or uncomment following lines for same noise on neural masses 2:end
 % disp('Warning: channels 2:end receive same noise and noise is init from seed');

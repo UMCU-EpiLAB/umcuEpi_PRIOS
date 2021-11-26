@@ -1,6 +1,6 @@
 % Script PROS01_pipeline_preproces.m should be performed first to obtain the correct documents.
 
-% clear; 
+clear; 
 % %% Choose patient
 ccep_allPat.sub_labels = {'sub-PRIOS01','sub-PRIOS02','sub-PRIOS03','sub-PRIOS04','sub-PRIOS05','sub-PRIOS06'};
 %ccep_allPat.name = {[input('Patient number type (PRIOSXX): ','s')]};
@@ -22,19 +22,18 @@ for i = 1:size(ccep_allPat.sub_labels,2)
   
      % load all both the SPESclin and SPESprop of the patient
     for j=1:size(respLoc,2)                                                      
-       if contains(files(respLoc(j)).name,'clin_filt_check.')               % Change to load the files of interest 
+       if contains(files(respLoc(j)).name,'clin_reref_check.')               % Change to load the files of interest 
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep_clin = ccep_clin;
           dataBase(i).filenameClin = files(respLoc(j)).name;
             
-       elseif contains(files(respLoc(j)).name,'prop_filt_check.')           % Change to load the files of interest
+       elseif contains(files(respLoc(j)).name,'prop_reref_check.')           % Change to load the files of interest
           load(fullfile(files(respLoc(j)).folder,files(respLoc(j)).name));
           dataBase(i).ccep_prop = ccep_prop;   
           dataBase(i).filenameProp = files(respLoc(j)).name;
        end
     end
 end
-
 
 %% determine the agreement between 2 and 10 stims per run
 % The determine_agreement function is not only determining the agreement
@@ -91,6 +90,11 @@ for subj = 1:size(dataBase,2)
     [dataBase(subj).statistics, dataBase(subj).rank] = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep_clin);
 end
 
+for i = 1:size(dataBase,2)
+    medianPA(i,:) = dataBase(i).agreement.agreement_stim.NA
+end
+
+MedianNA = prctile(medianPA,[25 50 75])
 
 %% Visualise the agreement in a scatter plots
 
@@ -121,7 +125,7 @@ for subj = 1:size(dataBase,2)
         end
     
         
-        Mult_factor(subj,n) = M_Clin/M_Prop;       
+        Mult_factor(subj,n) = M_Prop/M_Clin;       
     end
 end
 
@@ -163,3 +167,9 @@ interobserverKappa(myDataPath);
 % Function check_interobs.m can be used to visualise the inter-observer
 % agreement. An excel is saved with the different responces between R1 and 
 % R2, this can be loaded in check_interobs.m
+
+%% Rise and Fall times N1 peak
+vis_P1(myDataPath,dataBase);
+
+
+

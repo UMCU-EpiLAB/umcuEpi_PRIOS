@@ -80,6 +80,13 @@ epoch_length = cfg.epoch_length;
 
 bad_channels = find(contains(dataBase.tb_channels.status,'bad')==1); 
 
+if strcmp(cfg.reref,'y')
+    signal = dataBase.cc_epoch_sorted_select_reref_avg;
+elseif strcmp(cfg.reref,'n')
+    signal = dataBase.cc_epoch_sorted_avg;
+end
+        
+
 %% Script
 % iterate over all subjects in database
 for subj = 1:length(dataBase)
@@ -103,16 +110,17 @@ for subj = 1:length(dataBase)
             % baseline subtraction: take median of part of the averaged signal for
             % this stimulation pair before stimulation, which is the half of the
             % epoch
-            baseline_tt = tt>-2 & tt<-.1;                  
-            
-            signal_median = median(dataBase(subj).cc_epoch_sorted_avg(ii,jj,baseline_tt),3);
-            
+            tt_preStim = tt>-2 & tt<-.1;                  
+ 
             % subtract median baseline from signal
-            new_signal = squeeze(dataBase(subj).cc_epoch_sorted_avg(ii,jj,:)) - signal_median;
-            % testplot new signal: plot(tt,squeeze(new_signal))
-            
+            median_preStim = median(signal(ii,jj,tt_preStim),'omitnan');
+            new_signal = squeeze(signal(ii,jj,:)) - median_preStim;
+
+            % save the corrected signal again
+            signal(ii,jj,:) = new_signal;
+
             % take area before the stimulation of the new signal and calculate its SD
-            pre_stim_sd = std(new_signal(baseline_tt));
+            pre_stim_sd = std(new_signal(tt_preStim));
             
             % if the pre_stim_sd is smaller that the minimally needed SD,
             % which is validated as 50 uV, use this the minSD as pre_stim_sd
@@ -175,8 +183,9 @@ for subj = 1:length(dataBase)
                     n1_peak_sample = temp_n1_peaks_samp(max_n1_ampl(1));
                     n1_peak_amplitude = temp_n1_peaks_ampl(max_n1_ampl(1));
                     % otherwise give the amplitude the value NaN
-                elseif isempty(temp_n1_peaks_samp)
+                elseif isempty(temp_n1_peaks_samp)          % When nog peaks are found
                     n1_peak_amplitude = NaN;
+                    n1_peak_sample = NaN;
                 end
                 
                 % if N1 exceeds positive threshold, it is deleted
@@ -209,6 +218,14 @@ for subj = 1:length(dataBase)
     % write n1_peak (sample and amplitude) to database
     dataBase(subj).ccep.n1_peak_sample = n1_peak(:,:,1);
     dataBase(subj).ccep.n1_peak_amplitude = n1_peak(:,:,2);
+    
+    % baseline corrected signal
+    if strcmp(cfg.reref,'y')
+        dataBase.cc_epoch_sorted_select_reref_avg = signal;         
+    elseif strcmp(cfg.reref,'n')
+        dataBase.cc_epoch_sorted_avg = signal;
+    end
+        
     dataBase(subj).ccep.amplitude_thresh = amplitude_thresh;
     dataBase(subj).ccep.n1_peak_range = n1_peak_range;
 

@@ -1,8 +1,6 @@
 function interobserverKappa(myDataPath)
 % Determine the Cohen's Kappa interobserver variability
 % Determine this with checked files of two raters/observers
-
-clc;
 files = dir(fullfile(myDataPath.CCEP_interObVar));
 
 % Extract the run_labels to match REC2Stim to PRIOS
@@ -88,6 +86,10 @@ for run = 1: size(uni_runlabel,2)
     N1_peak_R1 = N1_peak_R1(:);
     N1_peak_R2 = N1_peak_R2(:);
     
+    % Determine where the detector detected an N1 since these are visually
+    % checked. All signals without automatically detected N1's are not
+    % visually checked and are therefore not part of the inter observer
+    % agreement.
     R1_auto_ER = N1_peak_R1(auto_ERs);
     R2_auto_ER = N1_peak_R2(auto_ERs);
        

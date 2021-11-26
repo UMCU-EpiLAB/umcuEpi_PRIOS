@@ -13,7 +13,7 @@ if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)
     names = dataBase_clin.stimpnames_all(x_all);
 
     stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-    sprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
+    fprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
 
     % Remove the stimulation pairs that are only present in SPES-clin
     dataBase_clin.cc_stimsets_all(x_all,:) = [];
@@ -23,11 +23,14 @@ if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)
     dataBase_clin.cc_epoch_sorted(:,:,x_all,:) = [];
     dataBase_clin.tt_epoch_sorted(:,x_all,:) = [];
     
+    
     dataBase_clin.cc_stimsets_avg(x_avg,:) = [];
     dataBase_clin.cc_stimchans_avg(x_avg,:) = [];
     dataBase_clin.stimpnames_avg(x_avg) = [];
     dataBase_clin.cc_epoch_sorted_avg(:,x_avg,:) = [];
-    dataBase_clin.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
+    dataBase_clin.cc_epoch_sorted_select_reref(:,x_avg,:,:) = [];
+    dataBase_clin.cc_epoch_sorted_select_reref_avg(:,x_avg,:) = [];
+    dataBase_clin.cc_epoch_sorted_select(:,x_avg,:,:) = [];
     
     % Check again if previous step was enough.
     if length(dataBase_clin.stimpnames_all) ~=  length(dataBase_prop.stimpnames_all) 
@@ -37,7 +40,7 @@ if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)
            
            names = dataBase_prop.stimpnames_all(x_all);
            stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-           sprintf(['Stimpairs only stimulated in SPESprop and not in SPESclin: \n' stringsz '\n'],names{:})
+           fprintf(['Stimpairs only stimulated in SPESprop and not in SPESclin: \n' stringsz '\n'],names{:})
             
            % Remove the stimulation pairs that are only present in SPES-prop
            dataBase_prop.cc_stimsets_all(x_all,:) = [];
@@ -51,7 +54,9 @@ if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)
            dataBase_prop.cc_stimchans_avg(x_avg,:) = [];
            dataBase_prop.stimpnames_avg(x_avg) = [];
            dataBase_prop.cc_epoch_sorted_avg(:,x_avg,:) = [];
-           dataBase_prop.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
+           dataBase_prop.cc_epoch_sorted_select_reref(:,x_avg,:,:) = [];
+           dataBase_prop.cc_epoch_sorted_select_reref_avg(:,x_avg,:) = [];
+           dataBase_prop.cc_epoch_sorted_select(:,x_avg,:,:) = [];
             
         end
     end
@@ -80,7 +85,9 @@ elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_al
    dataBase_prop.cc_stimchans_avg(x_avg,:) = [];
    dataBase_prop.stimpnames_avg(x_avg) = [];
    dataBase_prop.cc_epoch_sorted_avg(:,x_avg,:) = [];
-   dataBase_prop.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
+   dataBase_prop.cc_epoch_sorted_select_reref(:,x_avg,:,:) = [];
+   dataBase_prop.cc_epoch_sorted_select_reref_avg(:,x_avg,:) = [];
+   dataBase_prop.cc_epoch_sorted_select(:,x_avg,:,:) = [];
     
     % Check if the same number of stimpairs are used now.
     if length(dataBase_clin.stimpnames_all) ==  length(dataBase_prop.stimpnames_all) 
@@ -105,7 +112,9 @@ elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_al
             dataBase_clin.cc_stimchans_avg(x_avg,:) = [];
             dataBase_clin.stimpnames_avg(x_avg) = [];
             dataBase_clin.cc_epoch_sorted_avg(:,x_avg,:) = [];
-            dataBase_clin.cc_epoch_sorted_select_avg(:,x_avg,:,:) = [];
+            dataBase_clin.cc_epoch_sorted_select_reref(:,x_avg,:,:) = [];
+            dataBase_clin.cc_epoch_sorted_select_reref_avg(:,x_avg,:) = [];
+            dataBase_clin.cc_epoch_sorted_select(:,x_avg,:,:) = [];
     
         end
     end
@@ -120,11 +129,15 @@ end
     % Check for same channels
     if size(dataBase_clin.ch,1) > size(dataBase_prop.ch,1)                      % If channels in clinical SPES are diff from channels propofol SPES
         diff_elec = find(~ismember(dataBase_clin.ch, dataBase_prop.ch));
-        dataBase_clin.ch(diff_elec,:) = [];      %#ok<FNDSB>
+        dataBase_clin.ch(diff_elec,:) = [];     
         
     elseif size(dataBase_prop.ch,1) > size(dataBase_clin.ch,1)
         diff_elec = find(~ismember(dataBase_prop.ch, dataBase_clin.ch));
-        dataBase_prop.ch(diff_elec,:) = []; %#ok<FNDSB>
+        dataBase_prop.ch(diff_elec,:) = [];
+    else
+        if ~isequal(dataBase_clin.ch, dataBase_prop.ch)
+            warning('Although number of channels are equal in both SPESclin and SPESprop, the channel names are not similar!')
+        end
     end
     
     % When the channels are still unequal, print warning

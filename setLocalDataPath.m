@@ -61,7 +61,10 @@ elseif ~isempty(varargin)
             RepoPath = fileparts(rootPath);
             
             % add path to functions
-            addpath(genpath(RepoPath));
+            addpath(genpath([RepoPath,'/NMM']));
+        
+            localDataPath = personalDataPath_NMM(varargin{1});
+
 
         end
         
