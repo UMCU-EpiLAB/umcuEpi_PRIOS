@@ -261,10 +261,10 @@ for i = 1:size(dataBase,2)
     % save SPES
     % When N1s are visually checked save with check in the name
     if isfield(dataBase_temp.ccep, 'n1_peak_amplitude_check')
-        fileName=[extractBefore(filename,'_ieeg'),'_CCEP_' modus '_reref_check.mat'];
+        fileName=[extractBefore(filename,'_run'),'_N1sChecked.mat'];
 
     else % When N1s are not visually checked.
-        fileName=[extractBefore(filename,'_ieeg'),'_CCEP_' modus '_reref.mat'];
+        fileName=[extractBefore(filename,'_run'),'_N1s.mat'];
     end
 
     ccep = dataBase_temp.ccep;
@@ -277,10 +277,15 @@ for i = 1:size(dataBase,2)
     ccep.dataName = dataBase_temp.dataName;
     ccep.ch = dataBase_temp.ch;
     ccep.tt = dataBase_temp.tt;
+    ccep.dir = cfg.dir;
+    ccep.amp = cfg.amp;
+    ccep.epoch_length = cfg.epoch_length;
+    ccep.epoch_prestim = cfg.epoch_prestim;
+    ccep.reref = cfg.reref;
 
     if strcmp(savefiles,'y')
         save([targetFolder,fileName], 'ccep');
-        save([myDataPath.CCEP_allpat,fileName], 'ccep');
+%         save([myDataPath.CCEP_allpat,fileName], 'ccep');
 
     end
 
