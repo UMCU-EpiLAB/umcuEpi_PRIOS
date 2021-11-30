@@ -238,7 +238,9 @@ end
 
 fprintf('CCEPs are saved for SPESprop en SPESclin for subject %s \n' , dataBase(1).sub_label);
 
-%% Save CCEP's
+%% Save CCEP's figures?
+plot_all_ccep;
+%% Save CC epoch sorted to be later used
 
 
 

@@ -16,80 +16,6 @@ end
 
 for subj = 1:size(dataBase,2)
 
-    % Define artefact period - stimuli during an artefact become NaNs
-    % This must be defined for all electrodes or for specified electrodes.
-
-    % /// DIT STUK KAN ER TOCH HELEMAAL UIT??
-    %     elec_art = find(strcmp(dataBase(subj).tb_events.trial_type,'artefact'));                % Find rows with artefact in them
-    %     elec_art_all = find(strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all'));  % Find the artefacts which concern all electrodes
-    %     elec_art_in_all = find(ismember(elec_art, elec_art_all));                               % done because notes like STIM_on also concern 'all'.
-    %
-    %     % Determine the start- and stop-moment of the artefact concerning all
-    %     % electrodes
-    %     ev_artefact_start = dataBase(subj).tb_events.sample_start(elec_art_in_all,:);
-    %     ev_artefact_stop = dataBase(subj).tb_events.sample_end(elec_art_in_all,:);
-    %
-    %     if iscell(ev_artefact_start)
-    %         ev_artefact_start = str2double(ev_artefact_start);
-    %     end
-    %
-    %     if iscell(ev_artefact_stop)
-    %         ev_artefact_stop = str2double(ev_artefact_stop);
-    %     end
-    %
-    %     ev_artefact_all = zeros(1,100);                                                         % Preallocation with a guess of the size, structs with empty cells are removed.
-    %     % When there are multiple artefacts, then the times samples are concatenaded
-    %     % in the same array. So ev_artefact is not overwritten
-    %     for i=1:size(ev_artefact_start,1)
-    %         ev_artefact_all = [ev_artefact_all, ev_artefact_start(i):ev_artefact_stop(i)];    %#ok<AGROW>
-    %     end
-    %
-    %     dataBase(subj).ev_artefact_all = ev_artefact_all;
-    %
-
-
-    %% When artefact is specified per electrode
-    % row_spec_elek = find(ismember(elec_art, (find(~strcmp(dataBase(subj).tb_events.electrodes_involved_onset,'all')))));     % Electrode contains label artefact, though does not contain label all
-    % art_spec_elek = dataBase(subj).tb_events.electrodes_involved_onset(row_spec_elek);                                       % Find name of electrode involved
-    % art_elek_start = dataBase(subj).tb_events.sample_start(row_spec_elek);
-    % art_elek_stop = dataBase(subj).tb_events.sample_end(row_spec_elek);
-    %
-    % % Find sample start stimulation, because artefacts before stimart are
-    % % ignored
-    % stim_start = find(strcmp(dataBase(subj).tb_events.trial_type,'electrical_stimulation'));
-    % start_stim = dataBase(subj).tb_events.sample_start(stim_start(1));
-
-    % For PRIOS02 there are many artefacts before stimulation start these are
-    % ignored.
-    % for i = 1:size(art_spec_elek,1)
-    %     if art_elek_stop(i) > start_stim
-    %
-    %         if iscell(art_elek_start)
-    %             art_elek_start = str2double(art_elek_start);
-    %         end
-    %
-    %         if iscell(art_elek_stop)
-    %             art_elek_stop = str2double(art_elek_stop);
-    %         end
-    %
-    %         ev_artefact_elek = zeros(1,100);        % Preallocation with a guess of the size, structs with empty cells are removed.
-    %         % When there are multiple artefacts, then the times samples are concatenaded
-    %         % in the same array. So ev_artefact is not overwritten
-    %         ev_artefact_elek = [ev_artefact_elek, art_elek_start(i):art_elek_stop(i)];    %#ok<AGROW>
-    %
-    %         dataBase(subj).ev_artefact_elek = ev_artefact_elek;
-    %
-    %         clear i
-    %
-    %     else
-    %         % Do nothing because the artefact is already over before stimulation
-    %         % started
-    %     end
-    % end
-    %     newStr = extractBetween(art_spec_elek(1,:),',')   ;                 % Split when multiple electrodes are named in one annotaion
-
-
-
     %% Remove Burst suppression periods
     BS_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
     BS_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
@@ -199,8 +125,6 @@ for subj = 1:size(dataBase,2)
         warning('%s: a stimulation pair is probably stimulated more than others, often no problem \n',dataBase(subj).sub_label)
     end
 
-
-
     %% Number of stimulations per stimulus pair
     % find the amount of time most stimulus pairs are stimulated and set
     % that as maximal number of stimulus pairs
@@ -289,19 +213,6 @@ for subj = 1:size(dataBase,2)
                     % do nothing, because epoch starts before the start of
                     % a file (and gives an error)
 
-                    %                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact_all)
-                    %                        % do nothing, because part of artefact, therefore
-                    %                        % this event is not used
-                    %
-                    %                        % When the concerning electrode is part of a electrode-specified artefact, that is not applicable to the whole electrode-dataset
-                    %                 elseif ismember(dataBase.ch{elec}, art_spec_elek) && ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),ev_artefact_elek)
-                    %                     % When eventnum is part of ev_artefact_elek AND the
-                    %                     % specified electrode
-                    %
-                    %                     % do nothing, because part of an electrode specified artefact, therefore
-                    %                     % this event is not used
-
-
                 elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),BS_sig)
                     % do nothing because stimulation is part of burst
                     % suppression period and therefore not thrustworthy
@@ -322,7 +233,6 @@ for subj = 1:size(dataBase,2)
     end
 
     %% Average epochs
-
     % preallocation
     cc_epoch_sorted_avg = NaN(size(cc_epoch_sorted_all,1),size(cc_stimsets_avg,1),size(cc_epoch_sorted_all,4)); % [channels x stimuli x samples]
     cc_epoch_sorted_select = NaN(size(cc_epoch_sorted_all,1), size(cc_stimsets_avg,1), max_stim*2, size(cc_epoch_sorted_all,4));   % avg_stim*sum(IC_avg==2)   Wat nergens op slaat trouwens...

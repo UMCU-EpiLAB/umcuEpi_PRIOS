@@ -43,7 +43,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
             % figure with left the epoch, and right zoomed in
             H=figure(1);
             H.Units = 'normalized';
-            H.Position = [0.13 0.31 0.77 0.7];
+            H.Position = [0.14,0.0625,0.77,0.7];
 
             subplot(1,2,1)
             if strcmp(cfg.reref,'y')
@@ -73,7 +73,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
             if strcmp(cfg.reref,'y')
                 p1 = plot(tt,squeeze(dataBase.cc_epoch_sorted_select_reref(chan,stimp,:,:)),'r:');                % plot the 10 separate stimulations
                 hold on
-%                 p2 = plot(tt,squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:)),'k-.','linewidth',1);      % plot the not-rereference signal in a dashed line
+                p2 = plot(tt,squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:)),'k-.','linewidth',1);      % plot the not-rereference signal in a dashed line
                 p3 = plot(tt,squeeze(dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,:)),'k','linewidth',2);  % plot the rereference signal in a solid line
 
             else
@@ -114,7 +114,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
             % percentage of pictures that you have scored so far
             perc = n/size(n1_peak_amplitude(:),1)*100;
 
-            fprintf('%2.1f %% --- stimpair = %s-%s chan = %s --- Is this an N1 (y/n)? [y/n] \n  If incorrect N1 detection, select correct N1 peak in right figure (zoomed) and press y. \n',...
+            fprintf('%2.1f %% --- stimpair = %s-%s chan = %s --- Is this an N1 (y/n)? [y/n] \n  If incorrect N1 detection, select correct N1 peak in right figure (zoomed) and press enter. \n',...
                     perc,dataBase.cc_stimchans_avg{stimp,:},dataBase.ch{chan});
             currkey = 0;
 
@@ -136,27 +136,30 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
                     if strcmp(cfg.reref,'y')
                         [~,locs] = findpeaks(-1*squeeze(dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,...
                             sampnum-round(0.01*fs):sampnum+round(0.01*fs))),'NPeaks',1,'SortStr','descend');
+
+                         locsamp = sampnum-round(0.01*fs)+locs-1;  % find x-position of nearby peak 
+                        
+                         hold on
+                         plot(tt(locsamp),dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,locsamp),'o','MarkerFaceColor','b','MarkerEdgeColor','b','MarkerSize',6); drawnow;
+                         ccep.n1_peak_amplitude_check(chan,stimp) = dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,locsamp);
+                         ccep.n1_peak_sample_check(chan,stimp) = locsamp ;
+                         fprintf('sample: %1.4f, amplitude: %2.1f \n',tt(locsamp),dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,locsamp))
+
                     else
                         [~,locs] = findpeaks(-1*squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp, sampnum-round(0.01*fs):sampnum+round(0.01*fs))),...
                             'NPeaks',1,'SortStr','descend');
-                    end
-
-                    % find x-position of nearby peak
-                    locsamp = sampnum-round(0.01*fs)+locs-1;
-
-                    hold on
-                    if strcmp(cfg.reref,'y')
-                        plot(tt(locsamp),dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,locsamp),'o','MarkerFaceColor','b','MarkerEdgeColor','b','MarkerSize',6); drawnow;
-                        ccep.n1_peak_amplitude_check(chan,stimp) = dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,locsamp);
-                        fprintf('sample: %1.4f, amplitude: %2.1f \n',tt(locsamp),dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,locsamp))
-                    else
-                        plot(tt(locsamp),dataBase.cc_epoch_sorted_avg(chan,stimp,locsamp),'bo','MarkerFaceColor','b','MarkerSize',4); drawnow;
-                        ccep.n1_peak_amplitude_check(chan,stimp) = dataBase.cc_epoch_sorted_avg(chan,stimp,locsamp) ;
-                        fprintf('sample: %1.4f, amplitude: %2.1f \n',tt(locsamp),dataBase.cc_epoch_sorted_avg(chan,stimp,locsamp))
+                    
+                         locsamp = sampnum-round(0.01*fs)+locs-1;  % find x-position of nearby peak 
+    
+                         hold on
+                         plot(tt(locsamp),dataBase.cc_epoch_sorted_avg(chan,stimp,locsamp),'bo','MarkerFaceColor','b','MarkerSize',4); drawnow;
+                         ccep.n1_peak_amplitude_check(chan,stimp) = dataBase.cc_epoch_sorted_avg(chan,stimp,locsamp) ;
+                         ccep.n1_peak_sample_check(chan,stimp) = locsamp ;
+                         fprintf('sample: %1.4f, amplitude: %2.1f \n',tt(locsamp),dataBase.cc_epoch_sorted_avg(chan,stimp,locsamp))
 
                     end
 
-                    ccep.n1_peak_sample_check(chan,stimp) = locsamp ;
+%                     ccep.n1_peak_sample_check(chan,stimp) = locsamp ;
 
                     hold off
 
@@ -173,12 +176,12 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
                         ccep.n1_peak_sample_check(chan,stimp) = n1_peak_sample(chan,stimp) ;
                         hold off
 
-                    elseif strcmp(currkey,'n') || currkey == char(13)
+                    elseif strcmp(currkey,'n')                  %|| currkey == char(13) JE MOET OP ENTER DRUKKEN NADAT JE DE N1 OPNIEUW HEBT AANGEKLIKT DUS CHAR(13) MOET WEG
                         ccep.n1_peak_amplitude_check(chan,stimp) = NaN ;
                         ccep.n1_peak_sample_check(chan,stimp) = NaN ;
                         hold off
 
-                        currkey = 'n';
+%                         currkey = 'n';
                     end
 
                     %%% Add marking of observer to a table
@@ -186,7 +189,11 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
 
                     if ~strcmp(currkey,{'y','n','d',char(13)})
                         fprintf('---- ANSWER ---- : %s, Select one of the options [y/n/enter]: \n',currkey);
-                    else
+                    
+                    elseif strcmp(currkey,{char(13)})
+                        fprintf('---- ANSWER ---- : new N1 was selected: \n');
+                    
+                    elseif strcmp(currkey,{'y','n','d'})
                         fprintf('---- ANSWER ---- : %s \n \n',currkey);                        
                     end
 
@@ -205,8 +212,13 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
     ccep.n1_peak_amplitude = dataBase.ccep.n1_peak_amplitude;
     ccep.n1_peak_sample = dataBase.ccep.n1_peak_sample;
     ccep.obs_tab = obs_tab;
+    
+    if strcmp(cfg.reref,'y')
+        filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_label,'_N1sChecked.mat'];
+    else
+        filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_label,'_N1sNorerefChecked.mat'];
+    end
 
-    filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_label,'_N1sChecked.mat'];
     filefolder = fullfile(myDataPath.CCEPpath, dataBase.sub_label, dataBase.ses_label, dataBase.task_label,'/');
     if ~exist(filefolder,'dir')
         mkdir(filefolder)
