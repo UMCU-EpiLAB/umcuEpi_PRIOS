@@ -9,7 +9,6 @@ sub_labels = cfg.sub_labels;
 ses_label = cfg.ses_label;
 task_label = cfg.task_label;
 
-
 if isfield(cfg,'run_label')
 
     if size(cfg.run_label{:},2)>4               % if label is more than run-
@@ -20,7 +19,6 @@ if isfield(cfg,'run_label')
 else
     run_label(1:size(sub_labels,2)) = {'run-*'};
 end
-
 
 dataBase = struct([]);
 for i=1:size(run_label,2)
@@ -46,6 +44,11 @@ for i=1:size(run_label,2)
         dataName = fullfile(D(1).folder, D(1).name);
     end
     
+    % use real task label instead of task_SPES*
+    task_temp = extractBetween(dataName,'task-','_');
+    task_label = ['task-',task_temp{1}];
+
+    % load data
     ccep_data = ft_read_data(dataName,'dataformat','brainvision_eeg');
     ccep_header = ft_read_header(dataName);
     
