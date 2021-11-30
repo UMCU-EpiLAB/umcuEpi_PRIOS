@@ -179,62 +179,7 @@ end
   
 disp('CCEPs are checked')      
 
-%% Display doubtfull observations
-% When still the visual check off the N1's was just performed, ccep_prop is still a variable. 
-% When the doubtfull observations are looked at at a later time, then you
-% can load them.
-% if exist('ccep_clin','var')
-%     doubt_clin = ccep_clin.obs_tab;
-% else
-%     saved_ccep_clin = load(fullfile(myDataPath.CCEPpath, dataBase_clin.sub_label, ...
-%         dataBase_clin.ses_label, dataBase_clin.task_name,...
-%         [dataBase_clin.sub_label, '_', dataBase_clin.ses_label,'_',...
-%         dataBase_clin.task_name,'_',dataBase_clin.run_label,'_CCEP_clin_reref_check.mat']));  
-%      
-%     ccep_clin = saved_ccep_clin.ccep_clin;
-%     doubt_clin = ccep_clin.obs_tab;
-% 
-% end
-%    
-% ccep_clin = recheck_doubtfull_cceps(doubt_clin, dataBase_clin, ccep_clin, cfg);
-% 
-% 
-% if exist('ccep_prop','var')
-%     doubt_prop = ccep_prop.obs_tab;
-% else
-%     saved_ccep_prop = load(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
-%         dataBase_prop.ses_label, dataBase_prop.task_name,...
-%         [dataBase_prop.sub_label, '_', dataBase_prop.ses_label,'_',...
-%         dataBase_prop.task_name,'_',dataBase_prop.run_label,'_CCEP_prop_reref_check.mat']));   
-%     
-%     ccep_prop = saved_ccep_prop.ccep_prop;
-%     doubt_prop = ccep_prop.obs_tab;
-%  
-% end
-% 
-% ccep_prop = recheck_doubtfull_cceps(doubt_prop, dataBase_prop, ccep_prop, cfg);
-% 
-% 
-
-
-%% Visually detect N2's
-% Check the signals with a checked N1 if they have an N2.
-% Can only be performed when ERs are already visually checked and the
-% n1_peak_amplitude_check and n1_peak_sample_check files are saved.
-
-%%% IK HEB DIT NOG NIET GEUPDATE MET DE REREF DATA, AANGEZIEN DE N2 INFO MISSCHIEN NOG WAT MINDER RELEVANT IS NU VOOR HET CONGRES. 
-
-% VisCheck_n2 = input('Do you want to visually detect N2s? [y/n] ','s');
-% 
-% 
-% if strcmp(VisCheck_n2,'y')
-%     dataBase_clin = visualRating_N2(dataBase_clin);
-%     dataBase_prop = visualRating_N2(dataBase_prop);
-% end
-% 
-% disp('N2 peaks are checked')      
-
-%% save ccep
+%% Save ccep
 savefiles = input('Do you want to save the ccep-structures? [y/n] ','s');
 
 for i = 1:size(dataBase,2)
@@ -293,44 +238,8 @@ end
 
 fprintf('CCEPs are saved for SPESprop en SPESclin for subject %s \n' , dataBase(1).sub_label);
 
-
-%% Plot the average signal of all electrodes per stimulation pair
-% Create figures with a plot per stimulation pair with the averaged response per electrode 
-% Easy compare between clinical-SPES and propofol-SPES
-% 
-% dataBase_clin.save_fig = input('Do you want plot all average signals to the stimulus per stimpair? [y/n] ','s');
-% if strcmp(dataBase_clin.save_fig, 'y')
-%     plot_all_ccep(dataBase_clin, dataBase_prop, myDataPath)
-% end
+%% Save CCEP's
 
 
 
-%% Determine the amplitude and latency of the P1 and the highest point before N1
-% Necessary to determine the rise and fall times of the N1.
-% Amplitude of the P1 is not correct. Latency is.
 
-% P1_latency(dataBase_clin, dataBase_prop,cfg, myDataPath);
-% 
-% disp('P1_latency is saved to be later used in PROS02_pipeline_agreement.') 
-
-%% Unique occurence 
-% Determine how often each stimulation pair is stimulated during
-% propofol-SPES and clinical-SPES
-% % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected 
-% NorDisClin = lillietest(occ)     ;            
-% NorDisProp = lillietest(occ_prop);
-% 
-% XX = dataBase(1).tb_events.electrical_stimulation_site;
-% [uniqueXX, ~, J]=unique(XX) ;
-% occ = histcounts(J, 1:numel(uniqueXX));
-% 
-% 
-% mean_occ = median(occ);
-% N1_rise_fall(dataBase_clin, dataBase_prop, cfg,myDataPath);
-% 
-% XX_prop = dataBase(2).tb_events.electrical_stimulation_site;
-% [uniqueXX_prop, ~, J_prop]=unique(XX_prop) ;
-% occ_prop = histcounts(J_prop, 1:numel(uniqueXX_prop));
-% 
-% mean_occ_prop = mean(occ_prop);
-% 
