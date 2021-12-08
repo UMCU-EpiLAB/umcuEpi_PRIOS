@@ -9,6 +9,17 @@ ccep_allPat.sub_labels = {'sub-PRIOS01','sub-PRIOS02','sub-PRIOS03','sub-PRIOS04
 ccep_allPat.mode = 'pros';
 myDataPath = setLocalDataPath(ccep_allPat);
 
+%% Compare data dorien en sifra
+
+compare_observers_N1(myDataPath)
+
+%% Determine cohens kappa
+
+%% N1 is alleen N1 als dorien en ik die allebei hebben.
+
+%% Dan dus de nieuwe dataaBase gebruiken voor de rest van dit script
+
+
 %% Load all ccep files in the folder CCEP_files_allPat
 files = dir(fullfile(myDataPath.CCEP_allpat));
 
@@ -40,7 +51,7 @@ end
 
 % Exclude responses that were scored differently between observers
 
-dataBase = interobserverKappa(dataBase,myDataPath);
+dataBase = interobserver_analysis(myDataPath);
 
 % An excel is saved in myDataPath.CCEP_interObVar with the different responces between R1 and R2
 

@@ -1,4 +1,4 @@
-function dataBase = visualRating_ccep(dataBase, cfg, endstimp, myDataPath)
+function visualRating_ccep(dataBase, cfg, endstimp, myDataPath)
 % INSTRUCTIONS
 % select new point: select new point > enter or y
 % correct: y
@@ -17,13 +17,12 @@ n1_peak_sample = dataBase.ccep.n1_peak_sample;
 if sum(strcmp(fieldnames(dataBase.ccep),'obs_tab')) == 1          % if the N1-check has been performed before
     ccep.n1_peak_amplitude_check = dataBase.ccep.n1_peak_amplitude_check;
     ccep.n1_peak_sample_check = dataBase.ccep.n1_peak_sample_check;
-    obs_tab = dataBase.ccep.obs_tab;         % Table is filled with the marker of the observer. to save doubtfull obvervations
+    obs_tab = dataBase.ccep.obs_tab;         % Table is filled with the marker of the observer.
 
 else
     ccep.n1_peak_amplitude_check = NaN(size(n1_peak_amplitude));
     ccep.n1_peak_sample_check = NaN(size(n1_peak_sample));
-    obs_tab = cell(size(n1_peak_amplitude,1),size(n1_peak_amplitude,2));         % Table is filled with the marker of the observer. to save doubtfull obvervations
-
+    obs_tab = cell(size(n1_peak_amplitude,1),size(n1_peak_amplitude,2));         % Table is filled with the marker of the observer. 
 end
 
 
@@ -117,13 +116,14 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
             fprintf('%2.1f %% --- stimpair = %s-%s chan = %s --- Is this an N1 (y/n)? [y/n] \n  If incorrect N1 detection, select correct N1 peak in right figure (zoomed) and press enter. \n',...
                     perc,dataBase.cc_stimchans_avg{stimp,:},dataBase.ch{chan});
             currkey = 0;
+            cp =[];
 
             % select new N1 or categorize as good N1 or no N1
             % When incorrect N1 is selected, click on correct N1, a blue
             % stip will occur, then press enter! The new coordinates will
             % show in n1_peak_amplitude and sample.
-            while ~strcmp(currkey,{'y','n','d',char(13)})
-                cp =[];
+            while ~strcmp(currkey,{'y','n',char(13)})
+                
                 w = waitforbuttonpress; % 0 = mouse, other = key
                 if w == 0 % = mouse
                     % draw correct N1
@@ -171,29 +171,33 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
                 elseif w == 1 % keyboard
                     currkey = get(gcf,'CurrentCharacter');
 
-                    if strcmp(currkey,'y') || strcmp(currkey,'d') && isempty(cp)
+                    if (strcmp(currkey,'y') && isempty(cp) % if nothing is annotated,
                         ccep.n1_peak_amplitude_check(chan,stimp) = n1_peak_amplitude(chan,stimp) ;
                         ccep.n1_peak_sample_check(chan,stimp) = n1_peak_sample(chan,stimp) ;
                         hold off
+                    elseif (strcmp(currkey,'y') && ~isempty(cp) % if something is annotated
+                        % do nothing because it is already saved correctly
+                        % in ccep.n1_peak_sample_check and
+                        % ccep.n1_peak_amplitude_check (line 145, 146 / 157, 158)
 
                     elseif strcmp(currkey,'n')                  %|| currkey == char(13) JE MOET OP ENTER DRUKKEN NADAT JE DE N1 OPNIEUW HEBT AANGEKLIKT DUS CHAR(13) MOET WEG
                         ccep.n1_peak_amplitude_check(chan,stimp) = NaN ;
                         ccep.n1_peak_sample_check(chan,stimp) = NaN ;
                         hold off
 
-%                         currkey = 'n';
+                        currkey = 'n';  % solely pressing enter is interpreted as 'n', and displayed as 'n' in line 196
                     end
 
                     %%% Add marking of observer to a table
                     obs_tab{chan,stimp} = currkey;
 
-                    if ~strcmp(currkey,{'y','n','d',char(13)})
+                    if ~strcmp(currkey,{'y','n',char(13)})
                         fprintf('---- ANSWER ---- : %s, Select one of the options [y/n/enter]: \n',currkey);
                     
                     elseif strcmp(currkey,{char(13)})
                         fprintf('---- ANSWER ---- : new N1 was selected: \n');
                     
-                    elseif strcmp(currkey,{'y','n','d'})
+                    elseif strcmp(currkey,{'y','n'})
                         fprintf('---- ANSWER ---- : %s \n \n',currkey);                        
                     end
 
@@ -212,6 +216,22 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
     ccep.n1_peak_amplitude = dataBase.ccep.n1_peak_amplitude;
     ccep.n1_peak_sample = dataBase.ccep.n1_peak_sample;
     ccep.obs_tab = obs_tab;
+
+    ccep.stimchans_all = dataBase.cc_stimchans_all;
+    ccep.stimchans_avg = dataBase.cc_stimchans_avg;
+    ccep.stimpnames_all = dataBase.stimpnames_all;
+    ccep.stimpnames_avg = dataBase.stimpnames_avg;
+    ccep.stimsets_all = dataBase.cc_stimsets_all;
+    ccep.stimsets_avg = dataBase.cc_stimsets_avg;
+    ccep.dataName = dataBase.dataName;
+    ccep.ch = dataBase.ch;
+    ccep.tt = dataBase.tt;
+    ccep.dir = cfg.dir;
+    ccep.amp = cfg.amp;
+    ccep.epoch_length = cfg.epoch_length;
+    ccep.epoch_prestim = cfg.epoch_prestim;
+    ccep.reref = cfg.reref;
+
     
     if strcmp(cfg.reref,'y')
         filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_label,'_N1sChecked.mat'];
@@ -226,14 +246,9 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
 
     % save file during scoring in case of error
     save(fullfile(filefolder,filename),'-struct','ccep');
+    save([myDataPath.CCEP_allpat,filename], 'ccep');
 end
-
-dataBase.ccep.n1_peak_amplitude_check = ccep.n1_peak_amplitude_check;
-dataBase.ccep.n1_peak_sample_check = ccep.n1_peak_sample_check;
-dataBase.ccep.n1_peak_amplitude = n1_peak_amplitude;
-dataBase.ccep.n1_peak_sample = n1_peak_sample;
-dataBase.ccep.checkUntilStimp = stimp;
-dataBase.ccep.obs_tab = obs_tab;
+fprintf('CCEPs are saved for %s for subject %s \n' , dataBase(1).task_name, dataBase(1).sub_label);
 
 end
 

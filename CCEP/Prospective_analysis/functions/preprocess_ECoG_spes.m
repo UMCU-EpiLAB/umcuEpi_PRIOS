@@ -130,31 +130,23 @@ for subj = 1:size(dataBase,2)
     % that as maximal number of stimulus pairs
     max_stim = max(n);                    %max_stim = max(n);               % The max stim per stimulation pair DIRECTION!
 
-    if strcmp(cfg.dir_avg,'yes')        % dir_avg = 'yes' analyse the average signal of both the positive and negative stimuli
+    sort_cc_stimsets = sort(cc_stimsets_all,2);
+    [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
 
-        sort_cc_stimsets = sort(cc_stimsets_all,2);
-        [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
+    if 2*length(cc_stimsets_avg) ~= length(cc_stimsets_all)                 % When not all stimulation pairs are stimulated in both directions
+        Ncount = find(histcounts(IC_avg,length(cc_stimsets_avg))~=2)';      % stimpairs which are stimulated in one direction
 
-        if 2*length(cc_stimsets_avg) ~= length(cc_stimsets_all)                 % When not all stimulation pairs are stimulated in both directions
-            Ncount = find(histcounts(IC_avg,length(cc_stimsets_avg))~=2)';      % stimpairs which are stimulated in one direction
-
-            % Allocation
-            remove_rows = zeros(length(Ncount),1);
-            for i = 1:length(Ncount)
-                remove_rows(i,:) = find(IC_avg==Ncount(i,:));                    % Row in which the 'single' stimpair is located
-            end
-
-            % Remove rows with 'single' stimpairs
-            cc_stimsets_all(remove_rows,:) = [];
-            sort_cc_stimsets(remove_rows,:) = [];
-            % recalculate IC_avg
-            [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
+        % Allocation
+        remove_rows = zeros(length(Ncount),1);
+        for i = 1:length(Ncount)
+            remove_rows(i,:) = find(IC_avg==Ncount(i,:));                    % Row in which the 'single' stimpair is located
         end
 
-    elseif strcmp(cfg.dir_avg,'no')         % dir_avg = 'no' to analyse all signals separately
-
-        cc_stimsets_avg = cc_stimsets_all;
-        IC_avg = IC_all;
+        % Remove rows with 'single' stimpairs
+        cc_stimsets_all(remove_rows,:) = [];
+        sort_cc_stimsets(remove_rows,:) = [];
+        % recalculate IC_avg
+        [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
     end
 
 
@@ -187,7 +179,6 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).cc_stimchans_avg = cc_stimchans_avg;
     dataBase(subj).stimpnames_all = cc_stimpnames_all;
     dataBase(subj).stimpnames_avg = cc_stimpnames_avg;
-    dataBase(subj).max_stim = max_stim;
 
     %% Select epochs
     t = round(epoch_length*dataBase(subj).ccep_header.Fs);
@@ -254,7 +245,7 @@ for subj = 1:size(dataBase,2)
             cc_epoch_sorted_avg(:,ll,:) = selection_avg;
             % keep all stimulations (during SPESprop, not all stimulations
             % pairs are stimulated an equal amount
-            cc_epoch_sorted_select(:,ll,:,:) = reshape(selection,size(selection,1), size(selection,2)*size(selection,3) ,size(selection,4));
+            cc_epoch_sorted_select(:,ll,:,:) = reshape(selection, size(selection,1), size(selection,2)*size(selection,3), size(selection,4));
 
         end
     end
@@ -299,17 +290,15 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).cc_stimsets_avg = cc_stimsets_avg;
     dataBase(subj).cc_stimchans_all = cc_stimchans_all;
     dataBase(subj).cc_stimchans_avg = cc_stimchans_avg;
-    dataBase(subj).stimpnames_all = cc_stimpnames_all;
     dataBase(subj).stimpnames_avg = cc_stimpnames_avg;
-    dataBase(subj).max_stim = max_stim;
+    dataBase(subj).stimpnames_all = cc_stimpnames_all;
+
 
     dataBase(subj).cc_epoch_sorted = cc_epoch_sorted_all;
     dataBase(subj).tt_epoch_sorted = tt_epoch_sorted_all;
     dataBase(subj).tt = tt;
     dataBase(subj).cc_epoch_sorted_avg = cc_epoch_sorted_avg;
     dataBase(subj).cc_epoch_sorted_select = cc_epoch_sorted_select;
-    dataBase(subj).stimpnames = cc_stimpnames_all;
-
 
 end
 end

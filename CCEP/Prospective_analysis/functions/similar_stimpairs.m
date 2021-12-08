@@ -1,11 +1,26 @@
 function [dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop)
 % This script is used to check whether SPES-clin and SPES-prop have the
 % same electrode-stimulation pair combinations. 
-% First consider SPES-clin to have more stimpairs compared to SPES-prop,
+% First check for equal electrode names 
+% Then consider SPES-clin to have more stimpairs compared to SPES-prop,
 % then consider SPES-prop to have more stimpairs compared to SPES-clin. 
-% Finaly also check for equal electrode names.
 
-% First check whether the number of the stimulation pairs is equal
+%% Check for same channels
+% If arrays are still not equal, check the order of the electrodes
+if ~isequal(dataBase_clin.ch, dataBase_prop.ch) 
+    diff_order = find(~cellfun(@isequal, dataBase_prop.ch, dataBase_clin.ch));
+    diff_clin = dataBase_clin.ch(diff_order);
+    diff_prop = dataBase_prop.ch(diff_order);
+
+    str_diff = [repmat('%s, ',1,size(diff_order,1)-1),'%s'];
+    str_loc = [repmat('%d, ',1,size(diff_order,1)-1),'%d'];
+    
+    error(sprintf(['On row *' str_loc '* in the channels array is a difference between the two runs. \nIn SPESclin it is called ' str_diff, ...
+        '\n' 'In SPESprop it is called ' str_diff], diff_order, diff_clin{:}, diff_prop{:}))
+end
+
+
+%% Check whether the number of the stimulation pairs is equal
 if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)                    
     [x_all,~ ] = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0); % Find the stimulation pairs extra in SPES-clin 
     [x_avg,~] = find(ismember(dataBase_clin.stimpnames_avg' , dataBase_prop.stimpnames_avg' )==0) ;
@@ -125,24 +140,5 @@ elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_al
         end
         
 end
-
-    % Check for same channels
-    if size(dataBase_clin.ch,1) > size(dataBase_prop.ch,1)                      % If channels in clinical SPES are diff from channels propofol SPES
-        diff_elec = find(~ismember(dataBase_clin.ch, dataBase_prop.ch));
-        dataBase_clin.ch(diff_elec,:) = [];     
-        
-    elseif size(dataBase_prop.ch,1) > size(dataBase_clin.ch,1)
-        diff_elec = find(~ismember(dataBase_prop.ch, dataBase_clin.ch));
-        dataBase_prop.ch(diff_elec,:) = [];
-    else
-        if ~isequal(dataBase_clin.ch, dataBase_prop.ch)
-            warning('Although number of channels are equal in both SPESclin and SPESprop, the channel names are not similar!')
-        end
-    end
-    
-    % When the channels are still unequal, print warning
-        if any(~ismember(dataBase_clin.ch, dataBase_prop.ch)) || any(~ismember(dataBase_prop.ch, dataBase_clin.ch))
-            warning('%s still has unequal electrodes \n',dataBase_clin.sub_label)
-        end       
 
 end

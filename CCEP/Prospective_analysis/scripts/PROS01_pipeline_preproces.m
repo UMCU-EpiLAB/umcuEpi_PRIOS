@@ -65,10 +65,10 @@ dataBase_clin = dataBase_clin(all(~cellfun(@isempty,struct2cell(dataBase_clin)))
 dataBase_prop = dataBase_prop(all(~cellfun(@isempty,struct2cell(dataBase_prop))));
 
 % When a SPES is ran in multiple runs, merge them.
-if size(dataBase_clin,1)>1          % When SPES was ran in multiple runs
-    dataBase_clinOrig = dataBase_clin; % enables check of the original databases
-     dataBase_clin = merge_runs(dataBase_clin); 
-
+if size(dataBase_clin,1)>1                                  % When SPES was ran in multiple runs
+    dataBase_clinOrig = dataBase_clin;                      % enables check of the original databases
+    dataBase_clin = merge_runs(dataBase_clin); 
+    
 elseif size(dataBase_prop,1) >1 
     dataBase_propOrig = dataBase_prop;
     dataBase_prop = merge_runs(dataBase_prop);
@@ -126,25 +126,30 @@ if exist(fullfile(myDataPath.CCEPpath, dataBase_clin.sub_label, ...
         dataBase_clin.ses_label, dataBase_clin.task_label,...
         [dataBase_clin.sub_label, '_', dataBase_clin.ses_label,'_',...
         dataBase_clin.task_label,'_N1sChecked.mat']),'file')
-    
-   dataBase_clin.ccep = load(fullfile(myDataPath.CCEPpath, dataBase_clin.sub_label, ...
+
+    load(fullfile(myDataPath.CCEPpath, dataBase_clin.sub_label, ...
         dataBase_clin.ses_label, dataBase_clin.task_label,...
         [dataBase_clin.sub_label, '_', dataBase_clin.ses_label,'_',...
-        dataBase_clin.task_label,'_N1sChecked.mat']));   
+        dataBase_clin.task_label,'_N1sChecked.mat']));
+   dataBase_clin.ccep = ccep; 
 end
 
 
 if strcmpi(VisCheck,'y')
    
     % continue with the stimulation pair after the last saved stimulation pair
-    if sum(strcmp(fieldnames(dataBase_clin.ccep), 'checkUntilStimp')) == 1
-        endstimp_clin = dataBase_clin.ccep.checkUntilStimp;
+    if sum(strcmp(fieldnames(ccep), 'checkUntilStimp')) == 1
+        endstimp = ccep.checkUntilStimp;
     else
-        endstimp_clin = 0;
+        endstimp = 0;
     end
     
-    dataBase_clin = visualRating_ccep(dataBase_clin, cfg, endstimp_clin, myDataPath);
-    
+    visualRating_ccep(dataBase_clin, cfg, endstimp, myDataPath);
+ 
+else %% already save the automatically detected CCEP's
+    fileName=[extractBefore(filename,'_run'),'_N1s.mat'];
+    save([targetFolder,fileName], 'ccep');
+        
 end
 
 disp('CCEPs are checked')      
@@ -158,10 +163,11 @@ if exist(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
         [dataBase_prop.sub_label, '_', dataBase_prop.ses_label,'_',...
         dataBase_prop.task_name,'_N1sChecked.mat']),'file')
     
-   dataBase_prop.ccep = load(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
+   load(fullfile(myDataPath.CCEPpath, dataBase_prop.sub_label, ...
         dataBase_prop.ses_label, dataBase_prop.task_name,...
         [dataBase_prop.sub_label, '_', dataBase_prop.ses_label,'_',...
-        dataBase_prop.task_name,'_N1sChecked.mat']));   
+        dataBase_prop.task_name,'_N1sChecked.mat']));  
+   dataBase_prop.ccep = ccep;
 end
 
 if strcmpi(VisCheck,'y')
@@ -173,75 +179,15 @@ if strcmpi(VisCheck,'y')
         endstimp_prop = 0;
     end
     
-    dataBase_prop = visualRating_ccep(dataBase_prop, cfg, endstimp_prop, myDataPath);
+    visualRating_ccep(dataBase_prop, cfg, endstimp_prop, myDataPath);
     
 end
   
 disp('CCEPs are checked')      
 
-%% Save ccep
-savefiles = input('Do you want to save the ccep-structures? [y/n] ','s');
 
-for i = 1:size(dataBase,2)
-    if isequal(dataBase(i).task_label, 'task-SPESclin')
-        targetFolder = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_label),'/'];
-        [~,filename,~] = fileparts(dataBase(i).dataName);
 
-        dataBase_temp = dataBase_clin;
-        modus = 'clin';
-
-    elseif isequal(dataBase(i).task_label, 'task-SPESprop')
-        targetFolder = [fullfile(myDataPath.CCEPpath, dataBase(i).sub_label,dataBase(i).ses_label,dataBase(i).task_label),'/'];
-        [~,filename,~] = fileparts(dataBase(i).dataName);
-
-        dataBase_temp = dataBase_prop;
-        modus = 'prop';
-    end
-
-    % Create the folder if it doesn't exist already.
-    if ~exist(targetFolder, 'dir')
-        mkdir(targetFolder);
-    end
-
-    % save SPES
-    % When N1s are visually checked save with check in the name
-    if isfield(dataBase_temp.ccep, 'n1_peak_amplitude_check')
-        fileName=[extractBefore(filename,'_run'),'_N1sChecked.mat'];
-
-    else % When N1s are not visually checked.
-        fileName=[extractBefore(filename,'_run'),'_N1s.mat'];
-    end
-
-    ccep = dataBase_temp.ccep;
-    ccep.stimchans_all = dataBase_temp.cc_stimchans_all;
-    ccep.stimchans_avg = dataBase_temp.cc_stimchans_avg;
-    ccep.stimpnames_all = dataBase_temp.stimpnames_all;
-    ccep.stimpnames_avg = dataBase_temp.stimpnames_avg;
-    ccep.stimsets_all = dataBase_temp.cc_stimsets_all;
-    ccep.stimsets_avg = dataBase_temp.cc_stimsets_avg;
-    ccep.dataName = dataBase_temp.dataName;
-    ccep.ch = dataBase_temp.ch;
-    ccep.tt = dataBase_temp.tt;
-    ccep.dir = cfg.dir;
-    ccep.amp = cfg.amp;
-    ccep.epoch_length = cfg.epoch_length;
-    ccep.epoch_prestim = cfg.epoch_prestim;
-    ccep.reref = cfg.reref;
-
-    if strcmp(savefiles,'y')
-        save([targetFolder,fileName], 'ccep');
-%         save([myDataPath.CCEP_allpat,fileName], 'ccep');
-
-    end
-
-end
-
-fprintf('CCEPs are saved for SPESprop en SPESclin for subject %s \n' , dataBase(1).sub_label);
-
-%% Save CCEP's figures?
-plot_all_ccep;
 %% Save CC epoch sorted to be later used
-
-
-
-
+tic;
+save('/home/sifra/Desktop/test_matfile','dataBase_clin','-v7.3');
+toc

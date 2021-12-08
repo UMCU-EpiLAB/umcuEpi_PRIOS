@@ -16,13 +16,19 @@ function dataBase_merge = merge_runs(dataBase)
        
         if isequal(dataBase(i).tb_channels,dataBase(i+1).tb_channels)
              dataBase_merge.tb_channels = dataBase(1).tb_channels ;           % tb_channels are equal for both SPES sessions
-        else
-              diff_chan = setdiff(dataBase(i).tb_channels, dataBase(i+1).tb_channels);
-              warning('These channels are different in tb_channels CHECK the diference %s \n', diff_chan.name{:})
         
-             % The difference is probably little, therefore the tb_channels in
-             % the merge dataBase is set anyway to make sure it is not forgotten
-             dataBase_merge.tb_channels = dataBase(1).tb_channels ;
+        else  % When channels are not equal, take the SPESclin as original               
+              diff_order = find(~cellfun(@isequal, dataBase(i+1).tb_channels{:,1}, dataBase(i).tb_channels{:,1}));
+              diff_clin = dataBase(i).tb_channels{diff_order,1};
+              diff_prop = dataBase(i+1).tb_channels{diff_order,1};
+            
+              str_diff_order = [repmat('%d, ',1,size(diff_order,1)-1),'%d'];
+              str_diff_elec = [repmat('%s, ',1,size(diff_order,1)-1),'%s'];
+
+               
+              error(sprintf(['On row *' str_diff_order '* in tb_channels is a difference between the two runs. \nIn the first it is called ' str_diff_elec, ...
+                  '\n' 'In the second it is called ' str_diff_elec], diff_order, diff_clin{:}, diff_prop{:}))
+
         end
    end
       
