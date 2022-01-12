@@ -117,13 +117,14 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
             fprintf('%2.1f %% --- stimpair = %s-%s chan = %s --- Is this an N1 (y/n)? [y/n] \n  If incorrect N1 detection, select correct N1 peak in right figure (zoomed) and press y. \n',...
                     perc,dataBase.cc_stimchans_avg{stimp,:},dataBase.ch{chan});
             currkey = 0;
+            cp = [];
 
             % select new N1 or categorize as good N1 or no N1
             % When incorrect N1 is selected, click on correct N1, a blue
             % stip will occur, then press enter! The new coordinates will
             % show in n1_peak_amplitude and sample.
             while ~strcmp(currkey,{'y','n','d',char(13)})
-                cp =[];
+                
                 w = waitforbuttonpress; % 0 = mouse, other = key
                 if w == 0 % = mouse
                     % draw correct N1
@@ -168,17 +169,22 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
                 elseif w == 1 % keyboard
                     currkey = get(gcf,'CurrentCharacter');
 
-                    if strcmp(currkey,'y') || strcmp(currkey,'d') && isempty(cp)
+                    if (strcmp(currkey,'y') || strcmp(currkey,'d')) && isempty(cp) % if nothing is annotated,
                         ccep.n1_peak_amplitude_check(chan,stimp) = n1_peak_amplitude(chan,stimp) ;
                         ccep.n1_peak_sample_check(chan,stimp) = n1_peak_sample(chan,stimp) ;
                         hold off
+
+                    elseif (strcmp(currkey,'y') || strcmp(currkey,'d')) && ~isempty(cp) % if something is annotated
+                        % do nothing because it is already saved correctly
+                        % in ccep.n1_peak_sample_check and
+                        % ccep.n1_peak_amplitude_check (line 151,155,160)
 
                     elseif strcmp(currkey,'n') || currkey == char(13)
                         ccep.n1_peak_amplitude_check(chan,stimp) = NaN ;
                         ccep.n1_peak_sample_check(chan,stimp) = NaN ;
                         hold off
 
-                        currkey = 'n';
+                        currkey = 'n'; % enter is interpreted as 'n', and displayed as 'n' in line 196
                     end
 
                     %%% Add marking of observer to a table
