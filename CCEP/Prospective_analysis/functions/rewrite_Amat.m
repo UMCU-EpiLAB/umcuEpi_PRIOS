@@ -9,10 +9,11 @@ stimsets = dataBase.stimsets_avg  ;
 stim1 = stimsets(:,1);                              % First electrode of a stimulation pair
 stim2 = stimsets(:,2);                              % Second electrode of a stimulation pair
 
-% Original adjacency matrix
-ERs_col = Amat';                                                      % Inverse original adjacency matrix to electrodes in columns, stimpairs in rows
+% Inverse original adjacency matrix to electrodes in columns, stimpairs in rows
+ERs_col = Amat';                                    
 
 % Pre-allocation
+% Elec_mat is used to determine the number of responses per electrode. 
 elec_mat = zeros(size(ERs_col,2),size(ERs_col,2));                    % Adjacency matrix with electrodes to electrodes
 
 % First determine how many stimulation pairs an electrode is part of
@@ -27,7 +28,7 @@ for chan = 1:size(ERs_col,2)
     elseif ismember(chan,stim1,'rows')                                       % electrode is only in one stimpair
         
         [~,loc1] =  ismember(chan,stim1,'rows') ;
-        elec_mat(chan,:) = ERs_col(loc1,:);
+        elec_mat(chan,:) = ERs_col(loc1,:);                                  % Fill the elec_mat with an 1 when a ER is detected on this electrode which is in only 1 stimpair
         
     elseif ismember(chan,stim2,'rows')
         

@@ -34,7 +34,6 @@ if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)
     dataBase_clin.cc_stimsets_all(x_all,:) = [];
     dataBase_clin.cc_stimchans_all(x_all,:) = [];
     dataBase_clin.stimpnames_all(:,x_all) = [];
-    dataBase_clin.stimpnames(:,x_all) = [];
     dataBase_clin.cc_epoch_sorted(:,:,x_all,:) = [];
     dataBase_clin.tt_epoch_sorted(:,x_all,:) = [];
     
@@ -61,7 +60,6 @@ if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)
            dataBase_prop.cc_stimsets_all(x_all,:) = [];
            dataBase_prop.cc_stimchans_all(x_all,:) = [];
            dataBase_prop.stimpnames_all(:,x_all) = [];
-           dataBase_prop.stimpnames(:,x_all) = [];
            dataBase_prop.cc_epoch_sorted(:,:,x_all,:) = [];
            dataBase_prop.tt_epoch_sorted(:,x_all,:) = [];
 
@@ -92,7 +90,6 @@ elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_al
    dataBase_prop.cc_stimsets_all(x_all,:) = [];
    dataBase_prop.cc_stimchans_all(x_all,:) = [];
    dataBase_prop.stimpnames_all(:,x_all) = [];
-   dataBase_prop.stimpnames(:,x_all) = [];
    dataBase_prop.cc_epoch_sorted(:,:,x_all,:) = [];
    dataBase_prop.tt_epoch_sorted(:,x_all,:) = [];
    

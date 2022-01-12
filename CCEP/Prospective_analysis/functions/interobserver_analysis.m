@@ -54,9 +54,10 @@ for subj = 1: size(uni_sublabel,2)
             R1_obs = rater1.ccep.check_binary(auto_det_ERs);
             R2_obs = rater2.ccep.check_binary(auto_det_ERs);
                
-            % Cohens kappa unweighted is used to determine the interobserver
+            %% Cohens kappa unweighted is used to determine the interobserver
             % variablity
-            C = confusionmat(R1_obs, R2_obs);    %disp(C);            % Convert to confusion matrix
+%             kappa = [];
+            C = confusionmat(R1_obs, R2_obs);          disp(C);             % Convert to confusion matrix
             n = sum(C(:));                                                  % get total N
             C = C./n;                                                       % Convert confusion matrix counts to proportion of n
             r = sum(C,2);                                                   % row sum
@@ -64,34 +65,32 @@ for subj = 1: size(uni_sublabel,2)
             expected = r*s;                                                 % expected proportion for random agree
             po = sum(diag(C));                                              % Observed proportion correct
             pe = sum(diag(expected));                                       % Proportion correct expected
-            kappa = (po-pe)/(1-pe);                                         % Cohen's kappa
-            
-%             PRIOS_label = rater2.ccep.dataName(strfind(rater2.ccep.dataName,'sub-') :strfind(rater2.ccep.dataName,'ses-')-2);
-%             SPES_label = rater2.ccep.dataName(strfind(rater2.ccep.dataName,'task-') +5 :strfind(rater2.ccep.dataName,'run-')-2);
-            
-            fprintf('Cohens kappa between Rater1 and Rater2 for %s during %s is k=%1.4f \n ', uni_sublabel{subj}, uni_tasklabel{task}, kappa)
+            kappa(subj,task) = (po-pe)/(1-pe);                                 % Cohen's kappa
+                    
+            fprintf('Cohens kappa between Rater1 and Rater2 for %s during %s is k=%1.4f \n ', uni_sublabel{subj}, uni_tasklabel{task}, kappa(subj,task))
      
             %% Check where rater1 and rater 2 have different observationa
             diff_obs = find((~isnan(rater1.ccep.n1_peak_sample_check) + ~isnan(rater2.ccep.n1_peak_sample_check))==1);
-            
+
             % Write to an excel to be able to further analyse when necessary
-            for i = 1: size(diff_obs,1)
-                stimp_diff = ceil(diff_obs(i)/size(rater1.ccep.ch  ,1));
-                diff_rat{i,1} = rater1.ccep.stimpnames_avg{stimp_diff};
-                diff_rat{i,2} = rater1.ccep.ch{diff_obs(i)-((stimp_diff-1)*size(rater1.ccep.ch  ,1))};
-            end
-                 
-            if exist('diff_rat','var')              % only save when table exist
+            if size(diff_obs,1) > 0
+                idx_loc_diff = zeros(size(diff_obs,1),2);
+                
+                for i = 1:size(diff_obs,1)
+                    idx_loc_diff(i,1) = ceil(diff_obs(i)/size(rater1.ccep.n1_peak_amplitude,1)); % determine stimulation pair number 
+                    idx_loc_diff(i,2) = diff_obs(i) - ((idx_loc_diff(i,1)-1) * size(rater1.ccep.n1_peak_amplitude,1)); % determine electrode number
+                end
+
                 varNames = {'Stimpair','Electrode'};
-                T = table(diff_rat(:,1),diff_rat(:,2), 'VariableNames',varNames);
+                T = table(idx_loc_diff(:,1),idx_loc_diff(:,2), 'VariableNames',varNames);
                  
                 targetFolder = [myDataPath.CCEP_interObVar, 'Excels_diff_obs' ,'/'];
                 
-                if ~exist(filefolder,'dir')
-                    mkdir(filefolder)
+                if ~exist(targetFolder,'dir')
+                    mkdir(targetFolder)
                 end
 
-                fileName = ['Different_ratings_clinical_',uni_sublabel{subj},'_',uni_tasklabel{task},'.xlsx'];
+                fileName = ['diff_obs_',uni_sublabel{subj},'_',uni_tasklabel{task},'.xlsx'];
                 writetable(T  ,[targetFolder, fileName])
             end
             
@@ -113,26 +112,46 @@ for subj = 1: size(uni_sublabel,2)
             %% Save ccep's to continue with the analysis
             % I want to save the new N1-peak_check files in the dataBase file
             % to save and use for further analysis. 
-    
-%             loc_pat_in_dataBase = find(ismember({dataBase.sub_label}.' , uni_sublabel{subj}));       % Find where in dataBase the same pat_label is used
-    
+      
     
             if isequal(uni_tasklabel{task},'SPESclin')      
-                dataBase(subj).ccep_clin.n1_peak_amplitude_obs = rater1.ccep.n1_peak_amplitude_check;  % Does not matter whether rater1 or rater2 is used
-                dataBase(subj).ccep_clin.n1_peak_sample_obs = rater1.ccep.n1_peak_sample_check;        % Does not matter whether rater1 or rater2 is used
+                dataBase(subj).ccep_clin.n1_peak_amplitude = rater1.ccep.n1_peak_amplitude_check;  % Does not matter whether rater1 or rater2 is used
+                dataBase(subj).ccep_clin.n1_peak_sample = rater1.ccep.n1_peak_sample_check;        % Does not matter whether rater1 or rater2 is used
                 dataBase(subj).ccep_clin.Ckappa = kappa;
+                dataBase(subj).ccep_clin.sub_label = uni_sublabel{subj};
+                dataBase(subj).ccep_clin.task_label= uni_tasklabel{task};
+                dataBase(subj).ccep_clin.stimsets_avg = rater1.ccep.stimsets_avg;
+                dataBase(subj).ccep_clin.stimpnames_avg = rater1.ccep.stimpnames_avg;
+                dataBase(subj).ccep_clin.ch = rater1.ccep.ch;
 
             elseif isequal(uni_tasklabel{task},'SPESprop')
-                dataBase(subj).ccep_prop.n1_peak_amplitude_obs = rater1.ccep.n1_peak_amplitude_check;  % Does not matter whether rater1 or rater2 is used
-                dataBase(subj).ccep_prop.n1_peak_sample_obs = rater1.ccep.n1_peak_sample_check;        % Does not matter whether rater1 or rater2 is used
+                dataBase(subj).ccep_prop.n1_peak_amplitude = rater1.ccep.n1_peak_amplitude_check;  % Does not matter whether rater1 or rater2 is used
+                dataBase(subj).ccep_prop.n1_peak_sample = rater1.ccep.n1_peak_sample_check;        % Does not matter whether rater1 or rater2 is used
                 dataBase(subj).ccep_prop.Ckappa = kappa;
+                dataBase(subj).ccep_prop.sub_label = uni_sublabel{subj};
+                dataBase(subj).ccep_prop.task_label= uni_tasklabel{task};
+                dataBase(subj).ccep_prop.stimsets_avg = rater1.ccep.stimsets_avg;
+                dataBase(subj).ccep_clin.stimpnames_avg = rater1.ccep.stimpnames_avg;
+                dataBase(subj).ccep_prop.ch = rater1.ccep.ch;
+
             end
     
-            
-
-
     end
 
 end
+
+
+% Save kappa in Fridge
+varNames = {'SPESclin','SPESprop'};
+T_kappa = table(kappa(:,1),kappa(:,2), 'VariableNames',varNames);
+ 
+targetFolder = [myDataPath.CCEP_interObVar];
+
+if ~exist(targetFolder,'dir')
+    mkdir(targetFolder)
+end
+
+fileName = ['kappa_scores.xlsx'];
+writetable(T_kappa  ,[targetFolder, fileName])
 
 end

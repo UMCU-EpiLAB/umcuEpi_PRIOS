@@ -15,8 +15,8 @@ if sum(contains(fieldnames(cfg),'dir_avg'))<1
 end
 
 for subj = 1:size(dataBase,2)
-
-    %% Remove Burst suppression periods
+    
+    %% Determine Burst suppression periods to be later removed
     BS_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
     BS_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
 
@@ -34,7 +34,7 @@ for subj = 1:size(dataBase,2)
 
     dataBase(subj).Burstsup = BS_sig;
 
-    %% Remove seizure periods
+    %% Determine seizure periods to be later removed
     % This is yet no electrode specific
     SZ_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'seizure'));
     SZ_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'seizure'));
@@ -185,16 +185,16 @@ for subj = 1:size(dataBase,2)
     tt = (1:epoch_length*dataBase(subj).ccep_header.Fs)/dataBase(subj).ccep_header.Fs - epoch_prestim;
 
     % allocation
-    cc_epoch_sorted_all = NaN(size(dataBase(subj).data,1),dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t);
-    tt_epoch_sorted_all = NaN(dataBase(subj).max_stim,size(dataBase(subj).cc_stimsets_all,1),t);
+    cc_epoch_sorted_all = NaN(size(dataBase(subj).data,1), max_stim, size(dataBase(subj).cc_stimsets_all,1), t);
+    tt_epoch_sorted_all = NaN(max_stim, size(dataBase(subj).cc_stimsets_all,1), t);
 
     for elec = 1:size(dataBase(subj).data,1)                    % for all channels
         for ll = 1:size(dataBase(subj).cc_stimsets_all,1)       % for all epochs with > minimum number of stimuli (minstim)
 
             eventnum = find(strcmp(dataBase(subj).tb_events.electrical_stimulation_site,[dataBase(subj).cc_stimchans_all{ll,1}, '-',dataBase(subj).cc_stimchans_all{ll,2}]));
 
-            if size(eventnum,1) > dataBase(subj).max_stim
-                events = dataBase(subj).max_stim;
+            if size(eventnum,1) > max_stim
+                events = max_stim;
             else
                 events = size(eventnum,1);
             end

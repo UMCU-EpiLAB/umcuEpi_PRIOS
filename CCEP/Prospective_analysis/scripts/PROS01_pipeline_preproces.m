@@ -116,6 +116,26 @@ dataBase_prop = detect_n1peak_ECoG_ccep(dataBase_prop,cfg);
 
 disp('Detection of ERs is completed')
 
+
+
+%% Save CC epoch sorted to be later used
+% Saving the CCEP file takes approx 5 minutes
+
+filename_clin = [dataBase_clin.sub_label,'_',dataBase_clin.task_label,'_CCEP.mat'];
+filename_prop = [dataBase_prop.sub_label,'_',dataBase_prop.task_label,'_CCEP.mat'];
+
+filefolder = fullfile(myDataPath.dataPath, 'derivatives', '/', 'CCEPs' ,'/');
+if ~exist(filefolder,'dir')
+    mkdir(filefolder)
+end
+
+% Save CCEPs for later analysis
+save(fullfile(filefolder,filename_clin),'dataBase_clin','-v7.3');
+save(fullfile(filefolder,filename_prop),'dataBase_prop','-v7.3');
+
+
+
+
 %% Visually check detected cceps
 
 % Check the average signal in which an ER was detected
@@ -186,8 +206,3 @@ end
 disp('CCEPs are checked')      
 
 
-
-%% Save CC epoch sorted to be later used
-tic;
-save('/home/sifra/Desktop/test_matfile','dataBase_clin','-v7.3');
-toc

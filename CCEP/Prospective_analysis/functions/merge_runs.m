@@ -7,7 +7,6 @@ function dataBase_merge = merge_runs(dataBase)
    dataBase_merge.dataName = dataBase(1).dataName;
    dataBase_merge.ccep_header = dataBase(1).ccep_header;
    dataBase_merge.ch = dataBase(1).ch;
-   dataBase_merge.max_stim = dataBase(1).max_stim;
    dataBase_merge.tt = dataBase(1).tt;
    
    % Check whether the two tb_channels are the same, since these might be
@@ -43,5 +42,4 @@ function dataBase_merge = merge_runs(dataBase)
    dataBase_merge.tt_epoch_sorted = cat(2,dataBase(:).tt_epoch_sorted);         
    dataBase_merge.cc_epoch_sorted_avg = cat(2,dataBase(:).cc_epoch_sorted_avg);         
    dataBase_merge.cc_epoch_sorted_select = cat(2,dataBase(:).cc_epoch_sorted_select);         
-   dataBase_merge.stimpnames = cat(2,dataBase(:).stimpnames);  
 end
