@@ -15,12 +15,6 @@ cfg.amp = 'no';
 % yes, if you want to take stimulation current into account, 
 % no if you want to use all stimuli in C1-C2 4mA and C1-C2 8 mA and make no difference between those two
 
-cfg.dir_avg = 'yes';
-% yes, if you take negative/positive stimulation into account, but you do want
-% to average some of both for detection of cceps
-% no, if you use all stimuli in C1-C2 and C2-C1 separately, but want to
-% average both separately for detection of cceps
-% if cfg.dir = 'no', cfg.dir_avg is not used in the script
 
 % epoch length
 cfg.epoch_length = 4; % in seconds

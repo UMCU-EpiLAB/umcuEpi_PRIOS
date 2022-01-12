@@ -55,15 +55,10 @@ function [dataBase] = detect_n1peak_ECoG_ccep(dataBase, cfg)
 % For a conservative algorithm (high specificity of at least 95%), the following
 % parameters are advised: (see validation matrices for performances with
 % other parameters e.g. if you want a very sensitive algorithm)
-%<<<<<<< HEAD
+
 % - amplitude threshold of 140 uV (minSD * threshold = 50 uV * 2.8)
 %   recommended
 % - N1 peak range of (10 to) 70 ms is recommended
-%=======
-% - amplitude threshold of 170 uV (minSD * threshold = 50 uV * 3.4)
-%   recommended
-% - N1 peak range of (10 to) 90 ms is recommended
-%>>>>>>> upstream/master
 
 % FIXED PARAMETERS (that are validated by both van Blooijs & van der Aar):
 % - sel = 20, which is how many samples around peak not considered as another peak

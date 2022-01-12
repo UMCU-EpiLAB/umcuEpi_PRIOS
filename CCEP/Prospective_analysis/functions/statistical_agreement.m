@@ -1,40 +1,18 @@
-function [statistics, rank] = statistical_agreement(myDataPath, agreement_parameter,ccep_clin)
+function [statistics, rank] = statistical_agreement(myDataPath, agreement_parameter, ccep)
 %% Wilcoxon signed rank non parametric test for two paired groups
-% For the number of ERs detected in the 2 stimuli and the 10 stimuli
+% For the number of ERs detected in the SPESclin and SPESprop
 % null hypothesis is that the two means are the same
-SubjectName = extractBetween(ccep_clin.dataName,'ieeg/sub-','_ses-1_');
-
-ER_stimpClin = agreement_parameter.ERs_stimpClin;
-ER_stimpProp = agreement_parameter.ERs_stimpProp;
  
-% % Test the distribution
-% % null hypothesis that x is normally distributed, results in 1 when the null hypothesis is rejected 
-% NorDisClin = lillietest(ER_stimpClin);                  
-% NorDisProp = lillietest(ER_stimpProp);
-
-% % Check for normal distribution
-% % Normal distributed data contains data along the reference line
-% figure(1)
-% subplot(2,1,1)
-% normplot(ER_stimpClin)                                
-% subplot(2,1,2)
-% normplot(ER_stimpProp) 
-
-% % Check for monotonic relation
-% figure(2)
-% scatter(ER_stimpClin,ER_stimpProp)
-% refline
-
 % Use the Wilcoxon Signed rank test for all patients when the larger part
 % of the population is not normally distributed.
 % Wilcoxon tests the null hypothesis that data in x and y are samples from continuous distributions with equal medians
 % So significant value indicates a significant difference between 2 parameters
-p = signrank(ER_stimpClin, ER_stimpProp) ;           
+p = signrank(agreement_parameter.ERs_stimpClin, agreement_parameter.ERs_stimpProp) ;           
 
 if p<0.05
-    fprintf('Wilcoxon signed rank test for the number of ERs evoked gives p-value = %1.4f. There is a significant difference for %s \n', p, SubjectName{1});
+    fprintf('Wilcoxon signed rank test for the number of ERs evoked per stim-pair gives p-value = %1.4f. There is a significant difference for %s \n', p, ccep.sub_label);
 else
-    fprintf('Wilcoxon signed rank test between the number of ERs evoked gives p-value = %1.4f. There is NO significant difference for %s \n', p, SubjectName{1});
+    fprintf('Wilcoxon signed rank test for the number of ERs evoked per stim-pair gives p-value = %1.4f. There is NO significant difference for %s \n', p, ccep.sub_label);
 end
      
 %% Spearman test for ranking of stimpairs
@@ -46,18 +24,18 @@ rank = struct;
 for i = 1:size(mode,2)
     
      if strcmp(mode{i},'SPES_clin')
-        ERs = ER_stimpClin;
-    elseif strcmp(mode{i},'SPES_prop')
-        ERs = ER_stimpProp;
+        ERs = agreement_parameter.ERs_stimpClin;
+     elseif strcmp(mode{i},'SPES_prop')
+        ERs = agreement_parameter.ERs_stimpProp;
      end
 
-    rank.(mode{i})(:,1:2) = ccep_clin.stimsets_avg;
+    rank.(mode{i})(:,1:2) = ccep.stimsets_avg;
     rank.(mode{i})(:,3) = ERs;
-    [~, order] = sort(rank.(mode{i})(:,3), 'descend','MissingPlacement','last');          % most ER evoking stimpairs first, place NaN's at the end of the ranking
+    % Rank the number of ERs per stimulation pair from the moest to the lease with NaN's at the end of the ranking
+    [~, order] = sort(rank.(mode{i})(:,3), 'descend','MissingPlacement','last');          
     rank.(['sort_' mode{i}]) = rank.(mode{i})(order, :);
-    
-    
-     % If the next stimpair has the same number of ERs, give it the same order number
+        
+    % If the next stimpair has the same number of ERs, give it the same order number
     rank.(['sort_' mode{i}])(1,4) = 1;
     for j = 2:size(rank.(['sort_' mode{i}]),1)
         if rank.(['sort_' mode{i}])(j,3) == rank.(['sort_' mode{i}])(j-1,3)          
@@ -67,7 +45,7 @@ for i = 1:size(mode,2)
         end
     end
     
-    rank.(['sort_names_' mode{i}]) = ccep_clin.stimpnames_avg(order);
+    rank.(['sort_names_' mode{i}]) = ccep.stimpnames_avg(order);
 end
 
 %% Create with lines drawn between the positions of the stimpairs in the two rankings.
@@ -99,7 +77,7 @@ end
 % When p <0.05, an rho is close to (-)1, approval of the hypothesis that
 % there is (negative) correlation between the two columns 
 [RHO_stmp,PVAL_stmp] = corr(rank.unsort_SPES_clin(:,3) , rank.unsort_SPES_prop(:,3) ,'Type','Spearman');            % Test the hypothesis that there is a correlation
-fprintf('Spearman Corr between stimpair ranking of SPES-clin and SPES-prop gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, SubjectName{1});
+fprintf('Spearman Corr between stimpair ranking of SPES-clin and SPES-prop gives, p-value = %1.4f, rho = %1.3f, for %s \n', PVAL_stmp, RHO_stmp, ccep.sub_label);
 
 figure('Position',[1074,4,519,1052]);
 cm = colormap(parula(max(rank.sort_SPES_clin(:,4))));
@@ -120,7 +98,7 @@ ylabel('order SPES-prop')
 
 xlim([1, 2])
 set(gca,'xtick',[])
-str_main = sprintf('%s',SubjectName{1});  
+str_main = sprintf('%s',ccep.sub_label);  
 sgtitle(str_main)
 
 n=1;
@@ -135,21 +113,22 @@ end
 
 
 % Save figure
-outlabel=sprintf('sub-%s_ranking.jpg',SubjectName{1});
+outlabel=sprintf('sub-%s_ranking.jpg',ccep.sub_label);
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Ranking/');
 if ~exist(path, 'dir')
     mkdir(path);
 end
 saveas(gcf,[path,outlabel],'jpg')
 
+close all
 
 %% Spearman correlation
 % For the indegree, outdegree and betweenness centrality per electrode
 measure = {'indegree','outdegree','BC'};
 
-for n=1:size(measure,2)
+for n = 1:size(measure,2)
     
-    for i=1:size(mode,2)
+    for i = 1:size(mode,2)
         
         if strcmp(mode{i},'SPES_clin')
             ERs = agreement_parameter.([measure{n} 'N_Clin']);
@@ -157,7 +136,7 @@ for n=1:size(measure,2)
             ERs = agreement_parameter.([measure{n} 'N_Prop']);
         end
 
-        rank.([measure{n}, mode{i}])(:,1) = 1:size(ccep_clin.ch,1);
+        rank.([measure{n}, mode{i}])(:,1) = 1:size(ccep.n1_peak_amplitude,1);
         rank.([measure{n}, mode{i}])(:,2) = ERs;
         [~, order] = sort(rank.([measure{n} mode{i}])(:,2), 'descend','MissingPlacement','last');       % Use 'MissingPlacement','last', to place NaN's at the end of the ranking
         rank.(['sort_' measure{n} mode{i}]) = rank.([measure{n} mode{i}])(order, :);
@@ -172,7 +151,7 @@ for n=1:size(measure,2)
             end
         end
         
-        rank.(['sort_names_' measure{n} mode{i}]) = ccep_clin.ch(order);
+        rank.(['sort_names_' measure{n} mode{i}]) = ccep.ch(order);
         
          % Sorted matrix based on stimpair number, so ranking is unsorted 
         [~,order3] = sort(rank.(['sort_' measure{n} mode{i}])(:,1),'MissingPlacement','last');
@@ -182,7 +161,7 @@ for n=1:size(measure,2)
     % To determine the significance for the ranking
     % Use Spearman 'rows','pairwise' to ensure that row's with NaN's in both columns are not considered in the analysis.
     [RHO.(measure{n}), PVAL.(measure{n})] = corr(rank.(['unsort_' measure{n} mode{1}])(:,2), rank.(['unsort_', measure{n} mode{2}])(:,2),'Type','Spearman','rows','pairwise');
-    fprintf('Spearman Corr (ranking) between %s per electrode of SPES-clin and SPES-prop gives, p-value = %1.4f, rho = %1.3f, for %s \n', measure{n}, PVAL.(measure{n}), RHO.(measure{n}), SubjectName{1});
+    fprintf('Spearman Corr (ranking) between %s per electrode of SPES-clin and SPES-prop gives, p-value = %1.4f, rho = %1.3f, for %s \n', measure{n}, PVAL.(measure{n}), RHO.(measure{n}), ccep.sub_label);
 
 end
 

@@ -48,7 +48,7 @@ for J = 1:size(mode,2)
         ax = gca;
         ax.XAxis.FontSize = 14;    ax.YAxis.FontSize = 14;
            
-        title(sprintf('%s, p =  %1.3f', dataBase(i).sub_label, pval),'FontSize',12)
+        title(sprintf('%s, p =  %1.3f', dataBase(i).ccep_clin.sub_label, pval),'FontSize',12)
         xmin = min(clin(~idx_nan));
         xmax = max(clin(~idx_nan));
              
@@ -67,19 +67,11 @@ for J = 1:size(mode,2)
             % Change fontsize
             ax = gca;
             ax.XAxis.FontSize = 14;    ax.YAxis.FontSize = 14;
-
-            % Plot conficence interval as a line
-%             plot(clin, y_fit-2*delta, 'm--', clin, y_fit+2*delta,'--','color',[0.6,0.1,0.2,0.8])
-            
-            % Plot confidence interval as a patch
-%             Filled_CI = patch([min(clin),max(clin),max(clin),min(clin)], [min(y_fit-2*delta),max(y_fit-2*delta),max(y_fit+2*delta), min(y_fit+2*delta)],[0.1,0.2,0.2]);
-%             alpha(0.06)                % set patches transparency to 0.
-%             Filled_CI.EdgeAlpha = 0;
             
             if pval < 0.001
-                title(sprintf('%s, p = <0.001, r_s = %1.3f', dataBase(i).sub_label, rho),'FontSize',12)
+                title(sprintf('%s, p = <0.001, r_s = %1.3f', dataBase(i).ccep_clin.sub_label, rho),'FontSize',12)
             else
-                 title(sprintf('%s, p = %1.3f, r_s = %1.3f', dataBase(i).sub_label, pval, rho),'FontSize',12)
+                 title(sprintf('%s, p = %1.3f, r_s = %1.3f', dataBase(i).ccep_clin.sub_label, pval, rho),'FontSize',12)
             end   
             
 %             legend(sprintf('%s',mode{J}), sprintf('r_s = %1.3f',rho  ),'Location','EastOutside','Orientation','vertical','Box','off','FontSize',11)
@@ -119,6 +111,6 @@ for J = 1:size(mode,2)
     saveas(gcf,[path,outlabel],'png')    
 
 end   
-
+close all
 end
          

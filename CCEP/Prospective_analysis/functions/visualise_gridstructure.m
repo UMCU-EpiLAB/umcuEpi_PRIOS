@@ -2,12 +2,12 @@ function visualise_gridstructure(myDataPath, ccep_clin, agreement_parameter)
 % Display the values of the network parameters/characterisitcs on the
 % patients grid-structure from the matlabsjabloon sheet in an excel file
 
-subj = extractBetween(ccep_clin.dataName,'sub-','/ses');
+subj = ccep_clin.sub_label;
 
-if exist(fullfile(myDataPath.elec_input,[subj{1},'_ses-1_elektroden.xlsx']),'file')
-    elec = readcell(fullfile(myDataPath.elec_input,[subj{1},'_ses-1_elektroden.xlsx']),'Sheet','matlabsjabloon');
-elseif exist(fullfile(myDataPath.elec_input,[subj{1},'_ses-1_elektroden.xls']),'file')
-    elec = readcell(fullfile(myDataPath.elec_input,[subj{1},'_ses-1_elektroden.xls']),'Sheet','matlabsjabloon');
+if exist(fullfile(myDataPath.elec_input,[subj,'_ses-1_elektroden.xlsx']),'file')
+    elec = readcell(fullfile(myDataPath.elec_input,[subj,'_ses-1_elektroden.xlsx']),'Sheet','matlabsjabloon');
+elseif exist(fullfile(myDataPath.elec_input,[subj,'_ses-1_elektroden.xls']),'file')
+    elec = readcell(fullfile(myDataPath.elec_input,[subj,'_ses-1_elektroden.xls']),'Sheet','matlabsjabloon');
 end
 
 % localize electrodes in grid
@@ -45,7 +45,7 @@ topo.y = y;
 %% Indegree of electrodes and ERs per stimulation pair, for all stims
 close all;
 mode = {'Indegree & ERs per stimpair, Clinical SPES','Indegree & ERs per stimpair, Propofol SPES'};
-figure1 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
+figure1 = figure('Name',subj,'Position',[284,4,1309,1052]);
     
  for J = 1:size(mode,2)
     
@@ -77,7 +77,7 @@ figure1 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
     lineWidth_set = linspace(min(ERs), max(ERs),6);                 % devide the number of ERs to fit the lineWidth
     bins_lineWidth = discretize(ERs,lineWidth_set);
     
-    for i = 1:length(ccep_clin.stimchans_avg)
+    for i = 1:length(ccep_clin.stimsets_avg)
         elec1 = ccep_clin.stimsets_avg(i,1);                         % Find the electrodes in the stimpair
         elec2 = ccep_clin.stimsets_avg(i,2);
         if ERs(i) > 0                                           % Stimpairs with 0 ERs do not get a line.
@@ -109,7 +109,7 @@ figure1 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
 %     end
 %     
     hold(axes1,'on')
-    str_main = sprintf('sub-%s', subj{1});
+    str_main = sprintf('sub-%s', subj);
     sgtitle(str_main)
     text(((topo.x)+0.2),topo.y,ccep_clin.ch, 'FontSize',8,'FontWeight','bold')
     
@@ -117,7 +117,7 @@ figure1 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
     
  % Save figure
 outlabel=sprintf('sub-%s_indegree_ERstimp.png',...
-    subj{1});
+    subj);
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Visualise Gridstructure/');
 if ~exist(path, 'dir')
     mkdir(path);
@@ -130,7 +130,7 @@ mode = {'Outdegree','BC','Indegree'};
 
 for J = 1:size(mode,2) 
     
-    figure2 = figure('Name',subj{:},'Position',[284,4,1309,1052]);
+    figure2 = figure('Name',subj,'Position',[284,4,1309,1052]);
     
     if strcmp(mode{J},'Outdegree')
         parclin = (agreement_parameter.outdegreeN_Clin)';
@@ -185,7 +185,7 @@ for J = 1:size(mode,2)
     axes4.XTick = [];
     axes4.XColor = 'none';
     axes4.YColor = 'none';
-    str_main = sprintf('sub-%s', subj{1});
+    str_main = sprintf('sub-%s', subj);
     sgtitle(str_main)
     title(sprintf('%s, Propofol SPES',mode{J}))
     
@@ -208,7 +208,7 @@ for J = 1:size(mode,2)
     
     % Save figure
     outlabel=sprintf('sub-%s_%s.png',...
-        subj{1},mode{J});
+        subj,mode{J});
     path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/Visualise Gridstructure/');
     
     if ~exist(path, 'dir')
@@ -253,8 +253,8 @@ if strcmp(plot_fig,'y')
         
         
         % Plot ERs in grey
-        for elek = 1:length(ccep.ch)
-            if ~isnan(ccep.n1_peak_sample(elek,stimp))
+        for elek = 1:length(ccep_clin.ch)
+            if ~isnan(ccep_clin.n1_peak_sample(elek,stimp))
                 indicator(2,:) =  plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
                     'MarkerFaceColor', [0.75 0.75 0.75],'MarkerEdgeColor','k');
             end
@@ -262,8 +262,8 @@ if strcmp(plot_fig,'y')
         end
         
         % In blue the ERs in Prop and not in clin
-        for elek = 1:length(ccep.ch)
-            if isnan(ccep.n1_peak_sample(elek,stimp)) && ~isnan(ccep2.n1_peak_sample(elek,stimp))
+        for elek = 1:length(ccep_clin.ch)
+            if isnan(ccep_clin.n1_peak_sample(elek,stimp)) && ~isnan(ccep_prop.n1_peak_sample(elek,stimp))
                 indicator(3,:) = plot(topo.x(elek),topo.y(elek),'o','MarkerSize',15,...
                     'MarkerFaceColor',[0 0.7 1],'MarkerEdgeColor','k');
             end
@@ -277,13 +277,13 @@ if strcmp(plot_fig,'y')
             end
         end
         
-        str_main = sprintf('sub-%s', subj{1});
+        str_main = sprintf('sub-%s', subj);
         sgtitle(str_main)
         title('\rm ERs responses to specific stimulus, all stims')
         
         % Save figure
-        outlabel=sprintf('sub-%s, stimp %s.png',subj{1},ccep_clin.stimpnames_avg{stimp});
-        path = fullfile(myDataPath.CCEPpath,'Grid_diffRes/',subj{1});
+        outlabel=sprintf('sub-%s, stimp %s.png',subj,ccep_clin.stimpnames_avg{stimp});
+        path = fullfile(myDataPath.CCEPpath,'Grid_diffRes/',subj);
         
         if ~exist(path, 'dir')
             mkdir(path);

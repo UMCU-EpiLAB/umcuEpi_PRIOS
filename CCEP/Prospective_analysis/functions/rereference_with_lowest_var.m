@@ -109,39 +109,3 @@ fprintf('%s %s has been re-referenced. \n',dataBase.sub_label, dataBase.task_lab
 
 end
 
-%% Old script to visualise result in figure
-
-% Espcially visualise the stims with artefact periods.
-% 
-% 
-% tt = (1:cfg.epoch_length  *2048)/2048 - cfg.epoch_prestim;
-% 
-% chan = 42;
-% stimp = 35;
-% numstim = 1;
-% 
-% figure()
-% plot(tt,squeeze(dataBase.cc_epoch_sorted_select(chan,stimp,numstim,:))'-300,'color',[1,0,0,0.3])
-% hold on
-% plot(tt,squeeze(dataBase.cc_epoch_sorted_select_reref(chan,stimp,numstim,:))'-300,'color',[0.58,0.5,0.99])
-% 
-% plot(tt,squeeze(dataBase.cc_epoch_sorted_select(chan,stimp,numstim,:))'+200,'color',[1,0,0,0.3])
-% plot(tt, (squeeze(dataBase.cc_epoch_sorted_select(chan,stimp,numstim,:))'- median(squeeze(data_all(:,stimp,numstim,:)),'omitnan')) +200,'color','m')
-% 
-% plot(tt, squeeze(dataBase.ref(:,stimp,numstim,:))' + 600)
-% plot(tt, median(squeeze(data_all(:,stimp,numstim,:)),'omitnan') + 800)
-% xlim([-0.5, 1.5])
-% ylim([-800 1100])
-% title(sprintf('Electrode %s, stimulating %s-%s',...
-% dataBase.ch{chan},...
-% dataBase.cc_stimchans_avg{stimp,1},...
-% dataBase.cc_stimchans_avg{stimp,2}))
-% xlabel('time (sec)')
-% 
-% 
-% % Create a patch for the -1/5:9 ms interval in which no
-% % physiological activity can be measured.
-% patch([0 0.009 0.009 0],[-1000 -1000 size(gcf,1)*1000-1 size(gcf,1)*1000-1],[0.6,0.2,0.2],'EdgeAlpha',0)
-% alpha(0.2)
-% 
-% legend('original','rereferenced with ref','original','rereferenced with CAR','ref','CAR')
