@@ -57,7 +57,7 @@ for subj = 1: size(uni_sublabel,2)
             %% Cohens kappa unweighted is used to determine the interobserver
             % variablity
 %             kappa = [];
-            C = confusionmat(R1_obs, R2_obs);          disp(C);             % Convert to confusion matrix
+            C = confusionmat(R1_obs, R2_obs);          %disp(C);             % Convert to confusion matrix
             n = sum(C(:));                                                  % get total N
             C = C./n;                                                       % Convert confusion matrix counts to proportion of n
             r = sum(C,2);                                                   % row sum

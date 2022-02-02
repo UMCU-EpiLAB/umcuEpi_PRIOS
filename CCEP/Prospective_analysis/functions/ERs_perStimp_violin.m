@@ -56,7 +56,7 @@ end
     ax.XAxis.FontWeight = 'bold';
     ax.YAxis.FontWeight = 'bold';
     ax.XTick = 1.5:2:size(new_mat,2);
-    ax.XTickLabel = extractAfter({dataBase(:).sub_label},'sub-');
+    ax.XTickLabel = [dataBase(1).ccep_clin.sub_label; dataBase(2).ccep_clin.sub_label; dataBase(3).ccep_clin.sub_label; dataBase(4).ccep_clin.sub_label; dataBase(5).ccep_clin.sub_label; dataBase(6).ccep_clin.sub_label];
 
     title(sprintf('ERs evoked per stimulation pair'),'FontSize', 15, 'FontWeight', 'bold')
     ylabel('ERs evoked per stimulation pair','FontSize', 15, 'FontWeight', 'bold')

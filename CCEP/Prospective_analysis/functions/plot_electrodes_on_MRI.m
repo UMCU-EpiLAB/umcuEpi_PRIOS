@@ -1,4 +1,4 @@
-function plot_electrodes_on_MRI(myDataPath)
+function plot_electrodes_on_MRI(myDataPath, table_latency, dataBase, av_lat_elec)
 
 % This script can be used to create an MNI cortex (inflated) with
 % electrodes in different colors for different locations for all patients
@@ -13,6 +13,7 @@ clc
 % get a list of datasets
 % theseSubs = ccep_getSubFilenameInfo(myDataPath);
 participants_tsv = read_tsv(fullfile(myDataPath.dataPath,'participants.tsv'));
+participants_tsv(7:end,:) = [];
 
 %% Get standardized electrodes through surface based registration or linear
 % convert electrodes from patient's individual MRI to MNI305 space
@@ -22,7 +23,7 @@ FSsubjectsdir = fullfile(myDataPath.dataPath,'derivatives','freesurfer');
 
 elec_coords = struct();
 
-for kk = 1:size(participants_tsv,1) 
+for kk = 1:size(participants_tsv,1)
     disp(['subj ' int2str(kk) ' of ' int2str(size(participants_tsv,1))])
     
     % subject freesurfer dir
@@ -198,19 +199,97 @@ a_offset = .1*max(abs(allmni_coords(:,1)))*[cosd(v_d(1)-90)*cosd(v_d(2)) sind(v_
 els = allmni_coords+repmat(a_offset,size(allmni_coords,1),1);      
 % els = allmni_coords;
 
-ieeg_elAdd(els(ismember(all_hemi,'L') & ~ismember(allmni_labels,[roi_temporal roi_frontal roi_central roi_parietal]),:),'k',10)
-% set(tH,'FaceAlpha',.5) % make transparent
-ieeg_elAdd(els(ismember(all_hemi,'L') & ismember(allmni_labels,roi_temporal),:),[0 0 .8],15)
-ieeg_elAdd(els(ismember(all_hemi,'L') & ismember(allmni_labels,roi_frontal),:),[1 .8 0],15)
-ieeg_elAdd(els(ismember(all_hemi,'L') & ismember(allmni_labels,roi_central),:),[.8 .3 0],15)
-ieeg_elAdd(els(ismember(all_hemi,'L') & ismember(allmni_labels,roi_parietal),:),[0 .5 0],15)
-ieeg_viewLight(v_d(1),v_d(2))
+%% Plot all electrodes
+% Els heeft dus de coordinaten van alle patienten horizontaal
+% concatenated. 
+new_els = els(~isnan(els(:,1)),:);
+all_hemi = all_hemi(~isnan(els(:,1)));
+start_row = zeros(size(dataBase,2)+1,1);
 
-figureName = fullfile(myDataPath.CCEPpath,'render','leftMNIpial');
+mode = {'SPESclin','SPESprop'};
+
+for pat = 1:size(dataBase,2)
+    % els is nu nog een lange kolom met alle patienten, die moet gesplitst
+    % worden
+    if pat == 1
+        start_row(pat,:) = 1;
+    else
+        start_row(pat,:) = size(dataBase(pat-1).agreement_parameter.ERs_elecClin,2) + start_row(pat-1,:);
+    end
+end
+start_row(end,:) = size(new_els,1);
+
+for m = 1:size(mode,2)
+for pat = 1:size(dataBase,2)
+    
+    if isequal(mode{m},'SPESclin')
+        ERs_elec = dataBase(pat).agreement_parameter.ERs_elecClin';
+    elseif isequal(mode{m},'SPESprop')
+        ERs_elec = dataBase(pat).agreement_parameter.ERs_elecProp';
+    end
+
+    if all(ismember(all_hemi(start_row(pat):start_row(pat+1),:),'L'))      
+        % make table with number of N1's and coordinates of all electrodes
+        pat_elec_in_els = start_row(pat,:) : start_row(pat,:)+size(dataBase(pat).agreement_parameter.ERs_elecClin,2)-1 ;
+        els_with_N1 = [new_els(pat_elec_in_els,:) ,ERs_elec];
+        [~,idx] = sort(els_with_N1(:,4),'descend');       % Rank/sort based on the 4th column, high to low
+        els_ranked = els_with_N1(idx,:);                               % Rank coordinates as well based on number of ERs      
+        
+        
+        % Color the electrodes --> the more N1's the darker the color
+        % Electrodes with the same number of N1's have the same color
+        
+        %%% can't really use a color bar that is applicable for all
+        %%% patients. Now the darkest color indicates the highest number of
+        %%% N1's for each patient. Since you cannot compare the number of
+        %%% N1's between patients. Highest for each patient is black.
+%         cbh = colorbar();
+        cm = colormap(flipud(hot(size(unique(els_ranked(:,4)),1)+1)));
+  
+        unique_color = 1;
+        for elec = 1:size(els_ranked,1)
+        
+            if elec == 1                        % Only the first elec has to start with a unique color
+                ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
+                if els_ranked(elec,4) == els_ranked(elec+1,4)
+                    % do nothing, unique_color should remain the same
+                elseif els_ranked(elec,4) ~= els_ranked(elec+1,4)
+                    unique_color = unique_color + 1; 
+                end
+        
+            else
+                if els_ranked(elec,4) == els_ranked(elec-1,4) % if the next stimpair has the same number of N1's as the previous, then give the same color
+                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
+                
+                else
+                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
+                    unique_color = unique_color + 1;        % if the the number of N1's is different from the previous elec, then go to next color
+                end
+            end
+
+            hold on
+        
+        end
+    
+    else 
+        % Do nothing because electrodes of this patient are on the right
+        % hemisphere
+    end
+ 
+end    
+
+ieeg_viewLight(v_d(1),v_d(2))
+ 
+if isequal(mode{m},'SPESclin')
+    figureName = fullfile(myDataPath.CCEPpath,'render','number_of_N1_left_CLIN'); 
+elseif isequal(mode{m},'SPESprop')
+    figureName = fullfile(myDataPath.CCEPpath,'render','number_of_N1_left_PROP'); 
+end
 
 set(gcf,'PaperPositionMode','auto')
 print('-dpng','-r300',figureName)
 
+end
 
 %% Plot figure with right pial with electrodes in mni space
 v_d = [96 6];
@@ -225,17 +304,196 @@ tH = ieeg_RenderGifti(gr); %#ok<NASGU>
 a_offset = .5*max(abs(allmni_coords(:,1)))*[cosd(v_d(1)-90)*cosd(v_d(2)) sind(v_d(1)-90)*cosd(v_d(2)) sind(v_d(2))];
 els = allmni_coords+repmat(a_offset,size(allmni_coords,1),1);      
 
-ieeg_elAdd(els(ismember(all_hemi,'R') & ~ismember(allmni_labels,[roi_temporal roi_frontal roi_central roi_parietal]),:),'k',10)
-% set(tH,'FaceAlpha',.5) % make transparent
-ieeg_elAdd(els(ismember(all_hemi,'R') & ismember(allmni_labels,roi_temporal),:),[0 0 .8],15)
-ieeg_elAdd(els(ismember(all_hemi,'R') & ismember(allmni_labels,roi_frontal),:),[1 .8 0],15)
-ieeg_elAdd(els(ismember(all_hemi,'R') & ismember(allmni_labels,roi_central),:),[.8 .3 0],15)
-ieeg_elAdd(els(ismember(all_hemi,'R') & ismember(allmni_labels,roi_parietal),:),[0 .5 0],15)
-ieeg_viewLight(v_d(1),v_d(2))
+new_els = els(~isnan(els(:,1)),:);
+mode = {'SPESclin','SPESprop'};
+for m = 1:size(mode,2)
+for pat = 1:size(dataBase,2)
+    
+    if isequal(mode{m},'SPESclin')
+        ERs_elec = dataBase(pat).agreement_parameter.ERs_elecClin';
+    elseif isequal(mode{m},'SPESprop')
+        ERs_elec = dataBase(pat).agreement_parameter.ERs_elecProp';
+    end
 
-figureName = fullfile(myDataPath.CCEPpath,'render','rightMNIpial'); 
+    if all(ismember(all_hemi(start_row(pat):start_row(pat+1),:),'R'))
+
+        %%% table maken met elektroden coordinaten en kolom met aantal N1's,
+        %%% die tabel moet je dan sorteren van hoog naar laag
+        %%% met dan elektroden met veel N1's een heldere kleur dan weinig N1's
+        
+        % make table with number of N1's and coordinates of all electrodes
+        pat_elec_in_els = start_row(pat,:) : start_row(pat,:)+size(dataBase(pat).agreement_parameter.ERs_elecClin,2)-1 ;
+        els_with_N1 = [new_els(pat_elec_in_els,:) ,ERs_elec];
+        [~,idx] = sort(els_with_N1(:,4),'descend');       % Rank/sort based on the 4th column, high to low
+        els_ranked = els_with_N1(idx,:);                               % Rank coordinates as well based on number of ERs      
+        
+        
+        % Color the electrodes --> the more N1's the darker the color
+        % Electrodes with the same number of N1's have the same color
+%         cbh = colorbar();
+        cm = colormap(flipud(hot(size(unique(els_ranked(:,4)),1)+1)));
+    %     colororder({'k','k'})
+        
+        
+        unique_color = 1;
+        for elec = 1:size(els_ranked,1)        
+            if elec == 1                        % Only the first elec has to start with a unique color
+                ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
+                if els_ranked(elec,4) == els_ranked(elec+1,4)
+                    % do nothing, unique_color should remain the same
+                elseif els_ranked(elec,4) ~= els_ranked(elec+1,4)
+                    unique_color = unique_color + 1; 
+                end
+        
+        
+            else
+                if els_ranked(elec,4) == els_ranked(elec-1,4) % if the next stimpair has the same number of N1's as the previous, then give the same color
+                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
+                
+                else
+                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
+                    unique_color = unique_color + 1;        % if the the number of N1's is different from the previous elec, then go to next color
+                end
+            end
+            
+        
+            hold on
+        
+        end
+    
+    else 
+        % Do nothing because electrodes of this patient are on the left
+        % hemisphere
+    end
+ 
+end 
+
+ieeg_viewLight(v_d(1),v_d(2))
+ 
+if isequal(mode{m},'SPESclin')
+    figureName = fullfile(myDataPath.CCEPpath,'render','number_of_N1_right_CLIN'); 
+elseif isequal(mode{m},'SPESprop')
+    figureName = fullfile(myDataPath.CCEPpath,'render','number_of_N1_right_PROP'); 
+end
 
 set(gcf,'PaperPositionMode','auto')
 print('-dpng','-r300',figureName)
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+%% Electrodes on brein with N1-latency per electrode
+%% LEFT
+% make table with electrodes and the average latency for that electrode
+x = av_lat_elec
+
+v_d = [270 0];
+
+figure
+gl.faces = Lmnipial_face+1;
+gl.vertices = Lmnipial_vert;
+gl = gifti(gl);
+tH = ieeg_RenderGifti(gl); %#ok<NASGU>
+
+% make sure electrodes pop out
+a_offset = .1*max(abs(allmni_coords(:,1)))*[cosd(v_d(1)-90)*cosd(v_d(2)) sind(v_d(1)-90)*cosd(v_d(2)) sind(v_d(2))];
+els = allmni_coords+repmat(a_offset,size(allmni_coords,1),1);      
+% els = allmni_coords;
+
+%% Plot all electrodes
+% Els heeft dus de coordinaten van alle patienten horizontaal
+% concatenated. 
+new_els = els(~isnan(els(:,1)),:);
+
+for m = 1:size(mode,2)
+for pat = 1:size(dataBase,2)
+    
+    clin_colm = 2*pat-1;                      
+    prop_colm = 2*pat; 
+
+    if isequal(mode{m},'SPESclin')
+        ERs_elec = av_lat_elec(:,clin_colm);
+    elseif isequal(mode{m},'SPESprop')
+        ERs_elec = av_lat_elec(:,prop_colm);
+    end
+
+    if all(ismember(all_hemi(start_row(pat):start_row(pat+1),:),'L'))      
+        % make table with number of N1's and coordinates of all electrodes
+        pat_elec_in_els = start_row(pat,:) : start_row(pat,:)+size(dataBase(pat).agreement_parameter.ERs_elecClin,2)-1 ;
+        els_with_N1 = [new_els(pat_elec_in_els,:) ,ERs_elec(1:size(dataBase(pat).agreement_parameter.ERs_elecClin,2),:)];
+        [~,idx] = sort(els_with_N1(:,4),'descend');       % Rank/sort based on the 4th column, high to low
+        els_ranked = els_with_N1(idx,:);                               % Rank coordinates as well based on number of ERs      
+        
+        
+        % Color the electrodes --> the more N1's the darker the color
+        % Electrodes with the same number of N1's have the same color
+        
+        %%% can't really use a color bar that is applicable for all
+        %%% patients. Now the darkest color indicates the highest number of
+        %%% N1's for each patient. Since you cannot compare the number of
+        %%% N1's between patients. Highest for each patient is black.
+%         cbh = colorbar();
+        cm = colormap(flipud(hot(size(unique(els_ranked(:,4)),1)+1)));
+  
+        unique_color = 1;
+        for elec = 1:size(els_ranked,1)
+        
+            if elec == 1                        % Only the first elec has to start with a unique color
+                ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
+                if els_ranked(elec,4) == els_ranked(elec+1,4)
+                    % do nothing, unique_color should remain the same
+                elseif els_ranked(elec,4) ~= els_ranked(elec+1,4)
+                    unique_color = unique_color + 1; 
+                end
+        
+            else
+                if els_ranked(elec,4) == els_ranked(elec-1,4) % if the next stimpair has the same number of N1's as the previous, then give the same color
+                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
+                
+                else
+                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
+                    unique_color = unique_color + 1;        % if the the number of N1's is different from the previous elec, then go to next color
+                end
+            end
+
+            hold on
+        
+        end
+    
+    else 
+        % Do nothing because electrodes of this patient are on the right
+        % hemisphere
+    end
+ 
+end    
+
+ieeg_viewLight(v_d(1),v_d(2))
+ 
+if isequal(mode{m},'SPESclin')
+    figureName = fullfile(myDataPath.CCEPpath,'render','N1_latency_left_CLIN'); 
+elseif isequal(mode{m},'SPESprop')
+    figureName = fullfile(myDataPath.CCEPpath,'render','N1_latency_left_PROP'); 
+end
+
+set(gcf,'PaperPositionMode','auto')
+print('-dpng','-r300',figureName)
+
+hold off
+end
+
+
+
+
+
 
 end

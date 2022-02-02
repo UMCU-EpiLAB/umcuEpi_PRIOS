@@ -171,11 +171,11 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
                 elseif w == 1 % keyboard
                     currkey = get(gcf,'CurrentCharacter');
 
-                    if (strcmp(currkey,'y') && isempty(cp) % if nothing is annotated,
+                    if strcmp(currkey,'y') && isempty(cp) % if nothing is annotated,
                         ccep.n1_peak_amplitude_check(chan,stimp) = n1_peak_amplitude(chan,stimp) ;
                         ccep.n1_peak_sample_check(chan,stimp) = n1_peak_sample(chan,stimp) ;
                         hold off
-                    elseif (strcmp(currkey,'y') && ~isempty(cp) % if something is annotated
+                    elseif strcmp(currkey,'y') && ~isempty(cp) % if something is annotated
                         % do nothing because it is already saved correctly
                         % in ccep.n1_peak_sample_check and
                         % ccep.n1_peak_amplitude_check (line 145, 146 / 157, 158)
@@ -245,7 +245,8 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
     end
 
     % save file during scoring in case of error
-    save(fullfile(filefolder,filename),'-struct','ccep');
+%     save(fullfile(filefolder,filename),'-struct','ccep');
+    save(fullfile(filefolder,filename),'ccep');
     save([myDataPath.CCEP_allpat,filename], 'ccep');
 end
 fprintf('CCEPs are saved for %s for subject %s \n' , dataBase(1).task_name, dataBase(1).sub_label);

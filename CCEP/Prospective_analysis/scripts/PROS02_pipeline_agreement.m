@@ -22,14 +22,6 @@ dataBase = interobserver_analysis(myDataPath);
 % hiervoor moet dus wel ccep opgeslagen worden.
 
 
-
-%% Plot electrodes position on brain with N1-latency information
-% Determine N1-latency per brain part
-
-% plot_N1_on_brain(dataBase, myDataPath)
-
-plot_electrodes_on_MRI(myDataPath)
-
 %% Determine the distance between electrodes to determine correlation between N1-latency and electrode distance
 
 
@@ -146,12 +138,17 @@ vis_report(dataBase, myDataPath)
 
 %% Make boxplots of the latency of the N1 peaks.
 % Folder Violinplot-Matlab has to be added to the path. 
-boxplot_N1_peak(dataBase, myDataPath)
+[table_latency, av_lat_elec] = boxplot_N1_peak(dataBase, myDataPath);
 
 
 
 %% Rise and Fall times N1 peak
-vis_P1(myDataPath,dataBase);
+% vis_P1(myDataPath,dataBase);
 
 
+
+%% Plot electrodes position on brain with N1-latency information
+% Determine N1-latency per brain part
+
+plot_electrodes_on_MRI(myDataPath, table_latency, dataBase, av_lat_elec)
 

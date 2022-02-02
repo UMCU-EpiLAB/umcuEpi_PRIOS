@@ -6,12 +6,12 @@ function heat_map_grid(myDataPath, ccep_clin, agreement_parameter)
 
 % Heatmaps can be smooth or with hard lines, uncomment the wanted method.
 
-subj = extractBetween(ccep_clin.dataName,'sub-','/ses');
+subj = ccep_clin.sub_label;
 
-if exist(fullfile(myDataPath.elec_input,[subj{1},'_ses-1_elektroden.xlsx']),'file')
-    elec = readcell(fullfile(myDataPath.elec_input,[subj{1},'_ses-1_elektroden.xlsx']),'Sheet','matlabsjabloon');
-elseif exist(fullfile(myDataPath.elec_input,[subj{1},'_ses-1_elektroden.xls']),'file')
-    elec = readcell(fullfile(myDataPath.elec_input,[subj{1},'_ses-1_elektroden.xls']),'Sheet','matlabsjabloon');
+if exist(fullfile(myDataPath.elec_input,[subj,'_ses-1_elektroden.xlsx']),'file')
+    elec = readcell(fullfile(myDataPath.elec_input,[subj,'_ses-1_elektroden.xlsx']),'Sheet','matlabsjabloon');
+elseif exist(fullfile(myDataPath.elec_input,[subj,'_ses-1_elektroden.xls']),'file')
+    elec = readcell(fullfile(myDataPath.elec_input,[subj,'_ses-1_elektroden.xls']),'Sheet','matlabsjabloon');
 end
 
 % localize electrodes in grid
@@ -125,7 +125,7 @@ axes1.YTick = [];                                               % Remove numbers
 axes1.XTick = [];                                               % Remove numbers on x-axis
 axes1.XColor = 'none';                                          % Remove line indicating the x-axis
 axes1.YColor = 'none';                                          % Remove line indicating the y-axis
-title(sprintf('Clinical-SPES, %s, %s',mode{J},subj{:}))
+title(sprintf('Clinical-SPES, %s, %s',mode{J},subj))
 
 %%%%%%%%%%%%%%%%% Propofol SPES %%%%%%%%%%%%%%%%%%%%%%%%
 val_mat_prop = elec;
@@ -178,11 +178,11 @@ axes2.YTick = [];                                               % Remove numbers
 axes2.XTick = [];                                               % Remove numbers on x-axis
 axes2.XColor = 'none';                                          % Remove line indicating the x-axis
 axes2.YColor = 'none';                                          % Remove line indicating the y-axis
-title(sprintf('Propofol-SPES, %s, %s',mode{J},subj{:}))
+title(sprintf('Propofol-SPES, %s, %s',mode{J},subj))
 
 % Save figure
 outlabel=sprintf('sub-%s_%s.jpg',...
-    subj{1},mode{J});
+    subj,mode{J});
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/HeatMap_grid/');
 if ~exist(path, 'dir')
     mkdir(path);

@@ -59,7 +59,7 @@ for i = 1:size(dataBase,2)
 end
 
 
-% Remove empty rows in the dataBase structs, sometimes these are formed
+%% Remove empty rows in the dataBase structs, sometimes these are formed
 % when there are multiple runs.
 dataBase_clin = dataBase_clin(all(~cellfun(@isempty,struct2cell(dataBase_clin))));
 dataBase_prop = dataBase_prop(all(~cellfun(@isempty,struct2cell(dataBase_prop))));
@@ -158,7 +158,7 @@ end
 if strcmpi(VisCheck,'y')
    
     % continue with the stimulation pair after the last saved stimulation pair
-    if sum(strcmp(fieldnames(ccep), 'checkUntilStimp')) == 1
+    if sum(strcmp(fieldnames(dataBase_clin.ccep), 'checkUntilStimp')) == 1
         endstimp = ccep.checkUntilStimp;
     else
         endstimp = 0;
