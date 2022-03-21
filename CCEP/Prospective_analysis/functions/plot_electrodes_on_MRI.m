@@ -1,101 +1,101 @@
 function plot_electrodes_on_MRI(myDataPath, table_latency, dataBase, av_lat_elec)
 
-% This script can be used to create an MNI cortex (inflated) with
-% electrodes in different colors for different locations for all patients
-% used in this study. 
-%
-% Jaap van der Aar, Giulio Castegnaro, Dora Hermes, Dorien van Blooijs, 2019
-%
-
-%% Set paths
-clc
-
-% get a list of datasets
-% theseSubs = ccep_getSubFilenameInfo(myDataPath);
-participants_tsv = read_tsv(fullfile(myDataPath.dataPath,'participants.tsv'));
-participants_tsv(7:end,:) = [];
-
-%% Get standardized electrodes through surface based registration or linear
-% convert electrodes from patient's individual MRI to MNI305 space
-
-% Freesurfer subjects directory
-FSsubjectsdir = fullfile(myDataPath.dataPath,'derivatives','freesurfer');
-
-elec_coords = struct();
-
-for kk = 1:size(participants_tsv,1)
-    disp(['subj ' int2str(kk) ' of ' int2str(size(participants_tsv,1))])
-    
-    % subject freesurfer dir
-    FSdir = fullfile(myDataPath.dataPath,'derivatives','freesurfer',participants_tsv.participant_id{kk},'ses-1',...
-        [participants_tsv.participant_id{kk},'_ses-1','_T1w']);
-    
-    % get electrodes info
-    elec_coords(kk).elecs_tsv = readtable(fullfile(myDataPath.dataPath,participants_tsv.participant_id{kk},'ses-1','ieeg',...
-        [participants_tsv.participant_id{kk},'_ses-1_electrodes.tsv']),'FileType','text','Delimiter','\t');
-    if iscell(elec_coords(kk).elecs_tsv.x)
-        elecmatrix = NaN(size(elec_coords(kk).elecs_tsv,1),3);
-        for ll = 1:size(elec_coords(kk).elecs_tsv,1)
-            if ~isequal(elec_coords(kk).elecs_tsv.x{ll},'n/a')
-                elecmatrix(ll,:) = [str2double(elec_coords(kk).elecs_tsv.x{ll}) str2double(elec_coords(kk).elecs_tsv.y{ll}) str2double(elec_coords(kk).elecs_tsv.z{ll})];
-            end
-        end
-    else
-        elecmatrix = [elec_coords(kk).elecs_tsv.x elec_coords(kk).elecs_tsv.y elec_coords(kk).elecs_tsv.z];
-    end
-    nElec = size(elecmatrix,1);
-    
-    % get hemisphere for each electrode
-    these_json = dir(fullfile(myDataPath.dataPath, participants_tsv.participant_id{kk}, 'ses-1','ieeg',[participants_tsv.participant_id{kk},'_ses-1_task-SPESclin*_ieeg.json']));
-    ieeg_json = jsonread(fullfile(these_json(1).folder,these_json(1).name));
-    if isequal(ieeg_json.iEEGPlacementScheme,'left') || isequal(ieeg_json.iEEGPlacementScheme,'left;')
-        hemi = num2cell(repmat('L',nElec,1));
-    elseif isequal(ieeg_json.iEEGPlacementScheme,'right')|| isequal(ieeg_json.iEEGPlacementScheme,'right;')
-        hemi = num2cell(repmat('R',nElec,1));
-    elseif contains(ieeg_json.iEEGPlacementScheme,{'left','right'}) % check with kk=17
-        hemi = cell(nElec,1);
-        [hemi{:}] = deal('n/a');
-        
-        schemesplit = strsplit(ieeg_json.iEEGPlacementScheme,';');
-        rightcell = find(contains(schemesplit,'right'));
-        leftcell = find(contains(schemesplit,'left'));
-        
-        if rightcell < leftcell
-            leftcells = extractAfter(ieeg_json.iEEGPlacementScheme,'left');
-            rightcells = extractBetween(ieeg_json.iEEGPlacementScheme,'right','left');
-            rightcells = rightcells{:};
-        else
-            rightcells = extractAfter(ieeg_json.iEEGPlacementScheme,'right');
-            leftcells = extractBetween(ieeg_json.iEEGPlacementScheme,'left','right');
-            leftcells = leftcells{:};
-        end
-        
-        leftelec = strsplit(leftcells,';');
-        leftelec =  leftelec(~cellfun('isempty',leftelec));
-        rightelec = strsplit(rightcells,';');
-        rightelec = rightelec(~cellfun('isempty',rightelec));
-        
-        for elec=1:size(leftelec,2)
-           C = strsplit(leftelec{elec},{'[',']'});
-           elecInd = find(contains(elec_coords(kk).elecs_tsv.name,C{1}));
-           [hemi{elecInd}] = deal('L');
-        end
-        
-        for elec=1:size(rightelec,2)
-           C = strsplit(rightelec{elec},{'[',']'});
-           elecInd = find(contains(elec_coords(kk).elecs_tsv.name,C{1}));
-           [hemi{elecInd}] = deal('R');
-        end
-    end
-    elec_coords(kk).hemi = hemi;
-    % convert to MNI using surface
-    elec_coords(kk).mni_coords = ccep_mni305ThroughFsSphere(elecmatrix,hemi,FSdir,FSsubjectsdir);
-    % convert to MNI using linear transformations
-    % elec_coords(kk).mni_coords = ccep_mni305linear(elecmatrix,FSdir);
-    
-end
-
-save(fullfile(myDataPath.CCEPpath,'elec_coordinatesMNI305.mat'),'elec_coords')
+% % This script can be used to create an MNI cortex (inflated) with
+% % electrodes in different colors for different locations for all patients
+% % used in this study. 
+% %
+% % Jaap van der Aar, Giulio Castegnaro, Dora Hermes, Dorien van Blooijs, 2019
+% %
+% 
+% %% Set paths
+% % clc
+% 
+% % get a list of datasets
+% % theseSubs = ccep_getSubFilenameInfo(myDataPath);
+% participants_tsv = read_tsv(fullfile(myDataPath.dataPath,'participants.tsv'));
+% % participants_tsv(8:end,:) = [];
+% 
+% %% Get standardized electrodes through surface based registration or linear
+% % convert electrodes from patient's individual MRI to MNI305 space
+% 
+% % Freesurfer subjects directory
+% FSsubjectsdir = fullfile(myDataPath.dataPath,'derivatives','freesurfer');
+% 
+% elec_coords = struct();
+% 
+% for kk = 1:size(participants_tsv,1)
+%     disp(['subj ' int2str(kk) ' of ' int2str(size(participants_tsv,1))])
+%     
+%     % subject freesurfer dir
+%     FSdir = fullfile(myDataPath.dataPath,'derivatives','freesurfer',participants_tsv.participant_id{kk},'ses-1',...
+%         [participants_tsv.participant_id{kk},'_ses-1','_T1w']);
+%     
+%     % get electrodes info
+%     elec_coords(kk).elecs_tsv = readtable(fullfile(myDataPath.dataPath,participants_tsv.participant_id{kk},'ses-1','ieeg',...
+%         [participants_tsv.participant_id{kk},'_ses-1_electrodes.tsv']),'FileType','text','Delimiter','\t');
+%     if iscell(elec_coords(kk).elecs_tsv.x)
+%         elecmatrix = NaN(size(elec_coords(kk).elecs_tsv,1),3);
+%         for ll = 1:size(elec_coords(kk).elecs_tsv,1)
+%             if ~isequal(elec_coords(kk).elecs_tsv.x{ll},'n/a')
+%                 elecmatrix(ll,:) = [str2double(elec_coords(kk).elecs_tsv.x{ll}) str2double(elec_coords(kk).elecs_tsv.y{ll}) str2double(elec_coords(kk).elecs_tsv.z{ll})];
+%             end
+%         end
+%     else
+%         elecmatrix = [elec_coords(kk).elecs_tsv.x elec_coords(kk).elecs_tsv.y elec_coords(kk).elecs_tsv.z];
+%     end
+%     nElec = size(elecmatrix,1);
+%     
+%     % get hemisphere for each electrode
+%     these_json = dir(fullfile(myDataPath.dataPath, participants_tsv.participant_id{kk}, 'ses-1','ieeg',[participants_tsv.participant_id{kk},'_ses-1_task-SPESclin*_ieeg.json']));
+%     ieeg_json = jsonread(fullfile(these_json(1).folder,these_json(1).name));
+%     if isequal(ieeg_json.iEEGPlacementScheme,'left') || isequal(ieeg_json.iEEGPlacementScheme,'left;')
+%         hemi = num2cell(repmat('L',nElec,1));
+%     elseif isequal(ieeg_json.iEEGPlacementScheme,'right')|| isequal(ieeg_json.iEEGPlacementScheme,'right;')
+%         hemi = num2cell(repmat('R',nElec,1));
+%     elseif contains(ieeg_json.iEEGPlacementScheme,{'left','right'}) % check with kk=17
+%         hemi = cell(nElec,1);
+%         [hemi{:}] = deal('n/a');
+%         
+%         schemesplit = strsplit(ieeg_json.iEEGPlacementScheme,';');
+%         rightcell = find(contains(schemesplit,'right'));
+%         leftcell = find(contains(schemesplit,'left'));
+%         
+%         if rightcell < leftcell
+%             leftcells = extractAfter(ieeg_json.iEEGPlacementScheme,'left');
+%             rightcells = extractBetween(ieeg_json.iEEGPlacementScheme,'right','left');
+%             rightcells = rightcells{:};
+%         else
+%             rightcells = extractAfter(ieeg_json.iEEGPlacementScheme,'right');
+%             leftcells = extractBetween(ieeg_json.iEEGPlacementScheme,'left','right');
+%             leftcells = leftcells{:};
+%         end
+%         
+%         leftelec = strsplit(leftcells,';');
+%         leftelec =  leftelec(~cellfun('isempty',leftelec));
+%         rightelec = strsplit(rightcells,';');
+%         rightelec = rightelec(~cellfun('isempty',rightelec));
+%         
+%         for elec=1:size(leftelec,2)
+%            C = strsplit(leftelec{elec},{'[',']'});
+%            elecInd = find(contains(elec_coords(kk).elecs_tsv.name,C{1}));
+%            [hemi{elecInd}] = deal('L');
+%         end
+%         
+%         for elec=1:size(rightelec,2)
+%            C = strsplit(rightelec{elec},{'[',']'});
+%            elecInd = find(contains(elec_coords(kk).elecs_tsv.name,C{1}));
+%            [hemi{elecInd}] = deal('R');
+%         end
+%     end
+%     elec_coords(kk).hemi = hemi;
+%     % convert to MNI using surface
+%     elec_coords(kk).mni_coords = ccep_mni305ThroughFsSphere(elecmatrix,hemi,FSdir,FSsubjectsdir);
+%     % convert to MNI using linear transformations
+%     % elec_coords(kk).mni_coords = ccep_mni305linear(elecmatrix,FSdir);
+%     
+% end
+% 
+% save(fullfile(myDataPath.CCEPpath,'elec_coordinatesMNI305.mat'),'elec_coords')
 
 %% Start here to make figures
 % load MNI electrode positions (saved in previous section), MNI sphere, pial,
@@ -139,6 +139,8 @@ allmni_coords_infl = [];
 
 allmni_labels = [];
 all_hemi = [];
+Destrieux_label_pat = NaN(150,size(elec_coords,2)); % 150 is an extimation
+
 for kk = 1:length(elec_coords)
     Destrieux_label = elec_coords(kk).elecs_tsv.Destrieux_label;
     if iscell(Destrieux_label)
@@ -157,6 +159,10 @@ for kk = 1:length(elec_coords)
     allmni_coords = [allmni_coords; elec_coords(kk).mni_coords]; %#ok<AGROW>
     allmni_labels = [allmni_labels; Destrieux_label]; %#ok<AGROW>
     all_hemi = [all_hemi; elec_coords(kk).hemi]; %#ok<AGROW>
+
+    % Save all destrieux labes per patient
+    % Required to determine median per lobe and min and max per patient
+    Destrieux_label_pat(1:size(Destrieux_label,1),kk) = Destrieux_label;
     
     % run through all coordinates and find the inflated points
     temp_inflated = NaN(size(elec_coords(kk).mni_coords));
@@ -184,315 +190,213 @@ lroi_label(ismember(lroi_label,roi_central+1)) = 300;
 lroi_label(lroi_label<100) = 0;
 lroi_label = lroi_label/100;
 
+%% plot electrodes on brain that have response in prop and not in clin
+
+% prop_resp_MRI(dataBase, myDataPath)
+
+
 %% Plot figure with left pial with electrodes in mni space
 
-v_d = [270 0];
+number_N1_MRI(Lmnipial_vert, Rmnipial_vert, Lmnipial_face, Rmnipial_face, allmni_coords, all_hemi, dataBase, myDataPath)
 
-figure
-gl.faces = Lmnipial_face+1;
-gl.vertices = Lmnipial_vert;
-gl = gifti(gl);
-tH = ieeg_RenderGifti(gl); %#ok<NASGU>
 
-% make sure electrodes pop out
-a_offset = .1*max(abs(allmni_coords(:,1)))*[cosd(v_d(1)-90)*cosd(v_d(2)) sind(v_d(1)-90)*cosd(v_d(2)) sind(v_d(2))];
-els = allmni_coords+repmat(a_offset,size(allmni_coords,1),1);      
-% els = allmni_coords;
+%% Electrodes on brain with N1-latency per electrode
 
-%% Plot all electrodes
-% Els heeft dus de coordinaten van alle patienten horizontaal
-% concatenated. 
-new_els = els(~isnan(els(:,1)),:);
-all_hemi = all_hemi(~isnan(els(:,1)));
-start_row = zeros(size(dataBase,2)+1,1);
+latency_N1_MRI(av_lat_elec, Lmnipial_vert, Rmnipial_vert, Lmnipial_face, Rmnipial_face, allmni_coords, all_hemi, dataBase, myDataPath)
 
-mode = {'SPESclin','SPESprop'};
 
+
+%% Number of ERs per lobe
+% Preallocation (NaN's are later removed)
+ERs_per_lobe_clin = NaN(100,size(dataBase,2));
+ERs_per_lobe_prop = NaN(100,size(dataBase,2));
+
+% Create matrix with the nmber of ERs per electrode of all patients
 for pat = 1:size(dataBase,2)
-    % els is nu nog een lange kolom met alle patienten, die moet gesplitst
-    % worden
-    if pat == 1
-        start_row(pat,:) = 1;
+    ERs_per_lobe_clin(1:size(dataBase(pat).agreement_parameter.ERs_elecClin,2),pat) = dataBase(pat).agreement_parameter.ERs_elecClin' ; % number of ERs per electrode
+    ERs_per_lobe_prop(1:size(dataBase(pat).agreement_parameter.ERs_elecProp,2),pat) = dataBase(pat).agreement_parameter.ERs_elecProp' ; % number of ERs per electrode
+
+end
+
+% Concatenate to one array
+ERs_per_lobe_clin = ERs_per_lobe_clin(:);
+ERs_per_lobe_prop = ERs_per_lobe_prop(:);
+
+% Remove NaN's
+ERs_per_lobe_clin(isnan(ERs_per_lobe_clin)) = [];
+ERs_per_lobe_prop(isnan(ERs_per_lobe_prop)) = [];
+
+
+%% Average N1 latency per lobe
+% Determine for clincal-SPES and propofol-SPES
+
+allmni_labels = allmni_labels(~isnan(allmni_labels)); %destrieux labels per electrode
+
+% make one array with averaged latencies of all electrodes of all patients
+% For clinical SPES
+pat = 1;
+for c = 1:2:size(av_lat_elec,2)
+    N1_latency_clin{c} = av_lat_elec(1:size(dataBase(pat).ccep_clin.ch,1), c);
+    pat = pat+1;
+end
+
+n1_lat_clin = vertcat(N1_latency_clin{:});
+
+% For propofol SPES
+pat = 1;
+for c = 2:2:size(av_lat_elec,2)
+    N1_latency_prop{c} = av_lat_elec(1:size(dataBase(pat).ccep_prop.ch,1), c);
+    pat = pat+1;
+end
+
+n1_lat_prop = vertcat(N1_latency_prop{:});
+
+mode = {'Temporal','Frontal','Parietal','Central'};
+N1_lobe_clin = nan(100,size(mode,2)); % 100 is an estimation
+N1_lobe_prop = nan(100,size(mode,2)); % 100 is an estimation
+
+for m = 1:size(mode,2)
+
+    if isequal(mode{m},'Temporal')
+        region = roi_temporal;
+
+    elseif isequal(mode{m},'Frontal')
+         region = roi_frontal;
+         
+    elseif isequal(mode{m},'Parietal')
+         region = roi_parietal;
+           
+    elseif isequal(mode{m},'Central')
+         region = roi_central;
+
+    end
+
+    idx_lobe = ismember(allmni_labels, region);
+    
+    % N1 latency per lobe
+    N1_lobe_clin(1:sum(idx_lobe),m) = n1_lat_clin(idx_lobe);
+    N1_lobe_prop(1:sum(idx_lobe),m) = n1_lat_prop(idx_lobe);
+
+    % Number of ERs per lobe
+    sum_ERs_per_lobe_clin(m) = sum(ERs_per_lobe_clin(idx_lobe));
+    median(ERs_per_lobe_clin(idx_lobe))
+
+    min_ERs_clin = min(ERs_per_lobe_clin(idx_lobe));
+    max_ERs_clin = max(ERs_per_lobe_clin(idx_lobe));
+    
+    sum_ERs_per_lobe_prop(m) = sum(ERs_per_lobe_prop(idx_lobe));
+    median(ERs_per_lobe_prop(idx_lobe))
+    min_ERs_prop = min(ERs_per_lobe_prop(idx_lobe));
+    max_ERs_prop = max(ERs_per_lobe_prop(idx_lobe));
+
+    fprintf('Clinical-SPES: Median latency in %s lobe = %1.1f ms, contained %1.0f electrodes \n', mode{m}, median(n1_lat_clin(idx_lobe),'omitnan'), sum(idx_lobe));
+    fprintf('Propofol-SPES: Median latency in %s lobe = %1.1f ms, \n', mode{m}, median(n1_lat_prop(idx_lobe),'omitnan'));
+    
+    fprintf('Clinical-SPES: Total ERs in %s lobe = %1.0f, min = %1.0f, max = %1.0f, \n', mode{m}, sum_ERs_per_lobe_clin(m), min_ERs_clin, max_ERs_clin);
+    fprintf('Propofol-SPES: Total ERs in %s lobe = %1.0f, min = %1.0f, max = %1.0f, \n', mode{m}, sum_ERs_per_lobe_prop(m), min_ERs_prop, max_ERs_prop);
+
+
+    % Significance
+    p(m) = signrank(n1_lat_clin(idx_lobe), n1_lat_prop(idx_lobe)) ; 
+    if p(m) < 0.05 
+        fprintf('The p-value between clin and prop for %s lobe = %1.4f. This means a significant difference \n', mode{m},p(m));
     else
-        start_row(pat,:) = size(dataBase(pat-1).agreement_parameter.ERs_elecClin,2) + start_row(pat-1,:);
+        fprintf('The p-value between clin and prop for %s lobe = %1.4f. This means NO significant difference \n',mode{m}, p(m));
     end
+
+
+    % Number of electrodes brain lobe
+    % Determine median number of electrodes per lobe and min and max per patient
+    total_lobe = sum(sum(ismember(Destrieux_label_pat, region)));
+    med_lobe = mean(sum(ismember(Destrieux_label_pat, region)));
+    min_lobe = min(sum(ismember(Destrieux_label_pat, region)));
+    max_lobe = max(sum(ismember(Destrieux_label_pat, region)));
+
+    fprintf('%s lobe Total electrodes = %1.0f, mean = %1.1f, min/max = %1.0f/%1.0f \n', mode{m}, total_lobe, med_lobe, min_lobe, max_lobe);
+
+    fprintf('****************** next lobe******************\n')
+
 end
-start_row(end,:) = size(new_els,1);
 
-for m = 1:size(mode,2)
-for pat = 1:size(dataBase,2)
-    
-    if isequal(mode{m},'SPESclin')
-        ERs_elec = dataBase(pat).agreement_parameter.ERs_elecClin';
-    elseif isequal(mode{m},'SPESprop')
-        ERs_elec = dataBase(pat).agreement_parameter.ERs_elecProp';
-    end
 
-    if all(ismember(all_hemi(start_row(pat):start_row(pat+1),:),'L'))      
-        % make table with number of N1's and coordinates of all electrodes
-        pat_elec_in_els = start_row(pat,:) : start_row(pat,:)+size(dataBase(pat).agreement_parameter.ERs_elecClin,2)-1 ;
-        els_with_N1 = [new_els(pat_elec_in_els,:) ,ERs_elec];
-        [~,idx] = sort(els_with_N1(:,4),'descend');       % Rank/sort based on the 4th column, high to low
-        els_ranked = els_with_N1(idx,:);                               % Rank coordinates as well based on number of ERs      
+%% Display the latency per lobe in a violin plot
+figure('Position',[205,424,1530,638]);
+N1_lobe_combined = zeros(100,size(mode,2)*2);
+N1_lobe_combined(:,1:2:size(N1_lobe_combined,2)) = N1_lobe_clin;
+N1_lobe_combined(:,2:2:size(N1_lobe_combined,2)) = N1_lobe_prop;
+
+
+violins = violinplot(N1_lobe_combined) ;
+for i = 1:2:size(mode,2)*2
+%     violins(1,i*2).ViolinColor = violins(1,i*2-1).ViolinColor ;
+    violins(1,i).ViolinColor = [1 0 0];
+    violins(1,i+1).ViolinColor = [0 0 1];
+
+end
+
+count = 1;
+ymax = max(max(N1_lobe_combined));
+ 
+for m=1:size(mode,2)
+        if p(m)   < 0.001 
+            text(count+0.5,ymax-0.2,'**','FontSize',20,'FontWeight','bold')
+            plot(count+0.1:0.1:count+0.9, ymax-0.43*ones(9,1),'k','LineWidth',2)
         
-        
-        % Color the electrodes --> the more N1's the darker the color
-        % Electrodes with the same number of N1's have the same color
-        
-        %%% can't really use a color bar that is applicable for all
-        %%% patients. Now the darkest color indicates the highest number of
-        %%% N1's for each patient. Since you cannot compare the number of
-        %%% N1's between patients. Highest for each patient is black.
-%         cbh = colorbar();
-        cm = colormap(flipud(hot(size(unique(els_ranked(:,4)),1)+1)));
-  
-        unique_color = 1;
-        for elec = 1:size(els_ranked,1)
-        
-            if elec == 1                        % Only the first elec has to start with a unique color
-                ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
-                if els_ranked(elec,4) == els_ranked(elec+1,4)
-                    % do nothing, unique_color should remain the same
-                elseif els_ranked(elec,4) ~= els_ranked(elec+1,4)
-                    unique_color = unique_color + 1; 
-                end
-        
-            else
-                if els_ranked(elec,4) == els_ranked(elec-1,4) % if the next stimpair has the same number of N1's as the previous, then give the same color
-                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
+        elseif p(m)  < 0.05 
+            text(count+0.5,ymax-0.2,'*','FontSize',20,'FontWeight','bold')
+            plot(count+0.1:0.1:count+0.9, ymax-0.43*ones(9,1),'k','LineWidth',2)
                 
-                else
-                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
-                    unique_color = unique_color + 1;        % if the the number of N1's is different from the previous elec, then go to next color
-                end
-            end
-
-            hold on
-        
         end
-    
-    else 
-        % Do nothing because electrodes of this patient are on the right
-        % hemisphere
+        count = count+2;
+end
+
+ax = gca;
+ax.XAxis.FontSize = 12;
+ax.YAxis.FontSize = 12;
+ax.XAxis.FontWeight = 'bold';
+ax.YAxis.FontWeight = 'bold';
+
+% Set double xlabel
+ax.XTick = 1.5:2:size(N1_lobe_combined,2);
+ax.XTickLabel  = mode'; 
+
+% Display medians on second row beneath the figure
+medians = median(N1_lobe_combined,'omitnan');
+
+ymin = min(ylim);
+y_range = diff(ylim);
+x_as = 1:size(N1_lobe_combined,2);
+size_pat = size(N1_lobe_combined,2); 
+second_row_txt = cellstr(strsplit(num2str(medians,'%.1f '),' '));
+text([(x_as(1)-x_as(2))*0.5 x_as], ones(1,size_pat+1)*ymin-0.08*y_range, ['Median' second_row_txt],'HorizontalAlignment','center','FontSize', 12)
+
+sum_ERs_text = [sum_ERs_per_lobe_clin(:) sum_ERs_per_lobe_prop(:)]';
+sum_ERs_text = sum_ERs_text(:)';
+third_row_txt = cellstr(strsplit(num2str(sum_ERs_text,'%1.0f '),' '));
+text([(x_as(1)-x_as(2))*0.5 x_as], ones(1,size_pat+1)*ymin-0.12*y_range, ['Total ERs' third_row_txt],'HorizontalAlignment','center','FontSize', 12)
+
+
+% Draw lines between patients 
+ymax = max(ylim); 
+for i = 1:2:size(x_as,2)
+    x1 = x_as(i)-0.5; 
+    if x1 > 0.5
+        hold on
+        line([x1,x1],[ymin,ymax],'color',[0.8 0.8 0.8]);
     end
- 
-end    
-
-ieeg_viewLight(v_d(1),v_d(2))
- 
-if isequal(mode{m},'SPESclin')
-    figureName = fullfile(myDataPath.CCEPpath,'render','number_of_N1_left_CLIN'); 
-elseif isequal(mode{m},'SPESprop')
-    figureName = fullfile(myDataPath.CCEPpath,'render','number_of_N1_left_PROP'); 
 end
 
-set(gcf,'PaperPositionMode','auto')
-print('-dpng','-r300',figureName)
+title(sprintf('N1 Latency per lobe'),'FontSize', 15, 'FontWeight', 'bold')
+ylabel('Latency (milliseconds)','FontSize', 15, 'FontWeight', 'bold')
+legend([violins(1).ViolinPlot,violins(2).ViolinPlot], 'Clinical SPES','Propofol SPES','FontSize', 12, 'FontWeight', 'bold','Position',[0.78,0.80,0.12,0.07])
 
+% Save figure
+outlabel=sprintf('Latency_violin_perLobe.png');
+path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/N1_compare/');
+if ~exist(path, 'dir')
+    mkdir(path);
 end
-
-%% Plot figure with right pial with electrodes in mni space
-v_d = [96 6];
-
-figure
-gr.faces = Rmnipial_face+1;
-gr.vertices = Rmnipial_vert;
-gr = gifti(gr);
-tH = ieeg_RenderGifti(gr); %#ok<NASGU>
-
-% make sure electrodes pop out
-a_offset = .5*max(abs(allmni_coords(:,1)))*[cosd(v_d(1)-90)*cosd(v_d(2)) sind(v_d(1)-90)*cosd(v_d(2)) sind(v_d(2))];
-els = allmni_coords+repmat(a_offset,size(allmni_coords,1),1);      
-
-new_els = els(~isnan(els(:,1)),:);
-mode = {'SPESclin','SPESprop'};
-for m = 1:size(mode,2)
-for pat = 1:size(dataBase,2)
-    
-    if isequal(mode{m},'SPESclin')
-        ERs_elec = dataBase(pat).agreement_parameter.ERs_elecClin';
-    elseif isequal(mode{m},'SPESprop')
-        ERs_elec = dataBase(pat).agreement_parameter.ERs_elecProp';
-    end
-
-    if all(ismember(all_hemi(start_row(pat):start_row(pat+1),:),'R'))
-
-        %%% table maken met elektroden coordinaten en kolom met aantal N1's,
-        %%% die tabel moet je dan sorteren van hoog naar laag
-        %%% met dan elektroden met veel N1's een heldere kleur dan weinig N1's
-        
-        % make table with number of N1's and coordinates of all electrodes
-        pat_elec_in_els = start_row(pat,:) : start_row(pat,:)+size(dataBase(pat).agreement_parameter.ERs_elecClin,2)-1 ;
-        els_with_N1 = [new_els(pat_elec_in_els,:) ,ERs_elec];
-        [~,idx] = sort(els_with_N1(:,4),'descend');       % Rank/sort based on the 4th column, high to low
-        els_ranked = els_with_N1(idx,:);                               % Rank coordinates as well based on number of ERs      
-        
-        
-        % Color the electrodes --> the more N1's the darker the color
-        % Electrodes with the same number of N1's have the same color
-%         cbh = colorbar();
-        cm = colormap(flipud(hot(size(unique(els_ranked(:,4)),1)+1)));
-    %     colororder({'k','k'})
-        
-        
-        unique_color = 1;
-        for elec = 1:size(els_ranked,1)        
-            if elec == 1                        % Only the first elec has to start with a unique color
-                ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
-                if els_ranked(elec,4) == els_ranked(elec+1,4)
-                    % do nothing, unique_color should remain the same
-                elseif els_ranked(elec,4) ~= els_ranked(elec+1,4)
-                    unique_color = unique_color + 1; 
-                end
-        
-        
-            else
-                if els_ranked(elec,4) == els_ranked(elec-1,4) % if the next stimpair has the same number of N1's as the previous, then give the same color
-                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
-                
-                else
-                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
-                    unique_color = unique_color + 1;        % if the the number of N1's is different from the previous elec, then go to next color
-                end
-            end
-            
-        
-            hold on
-        
-        end
-    
-    else 
-        % Do nothing because electrodes of this patient are on the left
-        % hemisphere
-    end
- 
-end 
-
-ieeg_viewLight(v_d(1),v_d(2))
- 
-if isequal(mode{m},'SPESclin')
-    figureName = fullfile(myDataPath.CCEPpath,'render','number_of_N1_right_CLIN'); 
-elseif isequal(mode{m},'SPESprop')
-    figureName = fullfile(myDataPath.CCEPpath,'render','number_of_N1_right_PROP'); 
-end
-
-set(gcf,'PaperPositionMode','auto')
-print('-dpng','-r300',figureName)
-
-end
-
-
-
-
-
-
-
-
-
-
-
-
-%% Electrodes on brein with N1-latency per electrode
-%% LEFT
-% make table with electrodes and the average latency for that electrode
-x = av_lat_elec
-
-v_d = [270 0];
-
-figure
-gl.faces = Lmnipial_face+1;
-gl.vertices = Lmnipial_vert;
-gl = gifti(gl);
-tH = ieeg_RenderGifti(gl); %#ok<NASGU>
-
-% make sure electrodes pop out
-a_offset = .1*max(abs(allmni_coords(:,1)))*[cosd(v_d(1)-90)*cosd(v_d(2)) sind(v_d(1)-90)*cosd(v_d(2)) sind(v_d(2))];
-els = allmni_coords+repmat(a_offset,size(allmni_coords,1),1);      
-% els = allmni_coords;
-
-%% Plot all electrodes
-% Els heeft dus de coordinaten van alle patienten horizontaal
-% concatenated. 
-new_els = els(~isnan(els(:,1)),:);
-
-for m = 1:size(mode,2)
-for pat = 1:size(dataBase,2)
-    
-    clin_colm = 2*pat-1;                      
-    prop_colm = 2*pat; 
-
-    if isequal(mode{m},'SPESclin')
-        ERs_elec = av_lat_elec(:,clin_colm);
-    elseif isequal(mode{m},'SPESprop')
-        ERs_elec = av_lat_elec(:,prop_colm);
-    end
-
-    if all(ismember(all_hemi(start_row(pat):start_row(pat+1),:),'L'))      
-        % make table with number of N1's and coordinates of all electrodes
-        pat_elec_in_els = start_row(pat,:) : start_row(pat,:)+size(dataBase(pat).agreement_parameter.ERs_elecClin,2)-1 ;
-        els_with_N1 = [new_els(pat_elec_in_els,:) ,ERs_elec(1:size(dataBase(pat).agreement_parameter.ERs_elecClin,2),:)];
-        [~,idx] = sort(els_with_N1(:,4),'descend');       % Rank/sort based on the 4th column, high to low
-        els_ranked = els_with_N1(idx,:);                               % Rank coordinates as well based on number of ERs      
-        
-        
-        % Color the electrodes --> the more N1's the darker the color
-        % Electrodes with the same number of N1's have the same color
-        
-        %%% can't really use a color bar that is applicable for all
-        %%% patients. Now the darkest color indicates the highest number of
-        %%% N1's for each patient. Since you cannot compare the number of
-        %%% N1's between patients. Highest for each patient is black.
-%         cbh = colorbar();
-        cm = colormap(flipud(hot(size(unique(els_ranked(:,4)),1)+1)));
-  
-        unique_color = 1;
-        for elec = 1:size(els_ranked,1)
-        
-            if elec == 1                        % Only the first elec has to start with a unique color
-                ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
-                if els_ranked(elec,4) == els_ranked(elec+1,4)
-                    % do nothing, unique_color should remain the same
-                elseif els_ranked(elec,4) ~= els_ranked(elec+1,4)
-                    unique_color = unique_color + 1; 
-                end
-        
-            else
-                if els_ranked(elec,4) == els_ranked(elec-1,4) % if the next stimpair has the same number of N1's as the previous, then give the same color
-                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
-                
-                else
-                    ieeg_elAdd(els_ranked(elec,1:3), cm(unique_color,:),12)
-                    unique_color = unique_color + 1;        % if the the number of N1's is different from the previous elec, then go to next color
-                end
-            end
-
-            hold on
-        
-        end
-    
-    else 
-        % Do nothing because electrodes of this patient are on the right
-        % hemisphere
-    end
- 
-end    
-
-ieeg_viewLight(v_d(1),v_d(2))
- 
-if isequal(mode{m},'SPESclin')
-    figureName = fullfile(myDataPath.CCEPpath,'render','N1_latency_left_CLIN'); 
-elseif isequal(mode{m},'SPESprop')
-    figureName = fullfile(myDataPath.CCEPpath,'render','N1_latency_left_PROP'); 
-end
-
-set(gcf,'PaperPositionMode','auto')
-print('-dpng','-r300',figureName)
-
-hold off
-end
-
-
-
+saveas(gcf,[path,outlabel],'png')
 
 
 

@@ -60,9 +60,9 @@ Outdegree_Prop = centrality(G_Prop,'outdegree');
 % pairs an electrode is part of in each electrode, as suggested van Blooijs (2018)
 
 % Total number of electrodes
-elec_tot = size(dataBase_clin.n1_peak_amplitude,1);
+elec_tot = size(dataBase_clin.n1_peak_sample,1);
 % Total number of stimpairs
-stimp_tot = size(dataBase_clin.n1_peak_amplitude,2);
+stimp_tot = size(dataBase_clin.n1_peak_sample,2);
 
 % Number of times an electrode is part of a stimulation pair  
 times_elec_in_stimp = zeros(1,elec_tot);

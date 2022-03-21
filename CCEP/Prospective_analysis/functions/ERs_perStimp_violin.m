@@ -4,6 +4,7 @@ function ERs_perStimp_violin(dataBase,myDataPath)
 % Pre-allocation of matrix with the number of ERs of every session of every
 % patient.
 new_mat = NaN([54,12]);
+subjects = cell(1,size(dataBase,2));
     
 for subj = 1:size(dataBase,2)
     Clin = dataBase(subj).agreement_parameter.ERs_stimpClin;
@@ -17,7 +18,9 @@ for subj = 1:size(dataBase,2)
             new_mat(i,clin_colm) = Clin(stimp);             % write the SPES-clin in column 1
             new_mat(i,prop_colm) = Prop(stimp);             % write the SPES-prop in column 2
             i = i+1;           
-        end               
+        end  
+
+        subjects{subj} = dataBase(subj).ccep_clin.sub_label;
 end
     
 % Create a violin plot
@@ -56,7 +59,7 @@ end
     ax.XAxis.FontWeight = 'bold';
     ax.YAxis.FontWeight = 'bold';
     ax.XTick = 1.5:2:size(new_mat,2);
-    ax.XTickLabel = [dataBase(1).ccep_clin.sub_label; dataBase(2).ccep_clin.sub_label; dataBase(3).ccep_clin.sub_label; dataBase(4).ccep_clin.sub_label; dataBase(5).ccep_clin.sub_label; dataBase(6).ccep_clin.sub_label];
+    ax.XTickLabel = subjects;
 
     title(sprintf('ERs evoked per stimulation pair'),'FontSize', 15, 'FontWeight', 'bold')
     ylabel('ERs evoked per stimulation pair','FontSize', 15, 'FontWeight', 'bold')

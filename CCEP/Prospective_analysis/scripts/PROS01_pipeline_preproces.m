@@ -5,7 +5,7 @@
 % detect N1-peaks after stimulation, visual check of detected N1s, save
 % these for further analysis and display
 
-clear; 
+% clear; 
 clc;
 
 % set paths

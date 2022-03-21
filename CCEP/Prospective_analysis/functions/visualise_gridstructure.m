@@ -41,6 +41,9 @@ end
 topo.x = x;
 topo.y = y;
 
+%% Determine bad and silocon electrodes to display them with an cross 
+
+
 
 %% Indegree of electrodes and ERs per stimulation pair, for all stims
 close all;
@@ -53,11 +56,15 @@ figure1 = figure('Name',subj,'Position',[284,4,1309,1052]);
         Ind = (agreement_parameter.indegreeN_Clin)';
         ERs = agreement_parameter.ERs_stimpClin;
         axes1 = axes('Parent',figure1,'Position',[0.04,0.5,0.9,0.4]);
+
+        legendPos = [0.050080668613166,0.511893434823977,0.089381205525628,0.025022597153991];
         
     elseif strcmp(mode{J},'Indegree & ERs per stimpair, Propofol SPES')
         Ind = (agreement_parameter.indegreeN_Prop)';
         ERs = agreement_parameter.ERs_stimpProp;
         axes1 = axes('Parent',figure1,'Position',[0.04,0.07,0.9,0.4]);
+
+        legendPos = [0.048552784732341,0.087535680304472,0.089381205525628,0.025022597153991];
         
     end
     
@@ -107,14 +114,22 @@ figure1 = figure('Name',subj,'Position',[284,4,1309,1052]);
 %     else
 %         caxis([0 max(agreement_parameter.indegreeN_Prop)]);
 %     end
-%     
+%    
+    bad_elecs = ismember(ccep_clin.tb_channels.status, 'bad');
+    p_bad = plot(topo.x(bad_elecs),topo.y(bad_elecs),'xk','Parent',axes1,'MarkerSize',15,'LineWidth',2.5);
+    
+    legend(axes1, p_bad,'Bad/silicon','Position',legendPos)
+    
     hold(axes1,'on')
     str_main = sprintf('sub-%s', subj);
     sgtitle(str_main)
     text(((topo.x)+0.2),topo.y,ccep_clin.ch, 'FontSize',8,'FontWeight','bold')
     
  end    
+ 
     
+
+
  % Save figure
 outlabel=sprintf('sub-%s_indegree_ERstimp.png',...
     subj);
@@ -166,6 +181,11 @@ for J = 1:size(mode,2)
     colorbar();
     text(((topo.x)+0.2),topo.y,ccep_clin.ch, 'FontSize',8,'FontWeight','bold')
     
+    % mark bad electrodes with an cross
+    bad_elecs = ismember(ccep_clin.tb_channels.status, 'bad');
+    plot(topo.x(bad_elecs),topo.y(bad_elecs),'xk','Parent',axes3,'MarkerSize',15,'LineWidth',2.5);
+
+
 %     % Create the same colormap limits based on the highest protocol with
 %     % the highest parameter value
 %     if max(par10)>max(par2)
@@ -174,7 +194,8 @@ for J = 1:size(mode,2)
 %         caxis([0 max(par2)]);
 %     end
     
-    % Prop stims
+   
+% Prop stims
     axes4 = axes('Parent',figure2,'Position',[0.04,0.07,0.9,0.4]);
     hold(axes4,'on');
     plot(topo.x,topo.y,'ok','Parent',axes4,'MarkerSize',15);
@@ -198,6 +219,10 @@ for J = 1:size(mode,2)
     colorbar();
     text(((topo.x)+0.2),topo.y,ccep_clin.ch, 'FontSize',8,'FontWeight','bold')
     
+    % mark bad electrodes with an cross
+    bad_elecs = ismember(ccep_clin.tb_channels.status, 'bad');
+    p_bad = plot(topo.x(bad_elecs),topo.y(bad_elecs),'xk','Parent',axes4,'MarkerSize',15,'LineWidth',2.5);
+
     % Create the same colormap limits based on the highest protocol with
     % the highest parameter value
 %     if max(par10)>max(par2)
@@ -206,6 +231,10 @@ for J = 1:size(mode,2)
 %         caxis([0 max(par2)]);
 %     end
     
+    legend(axes3,p_bad,'Bad/silicon','Position',[0.050080668613166,0.511893434823977,0.089381205525628,0.025022597153991])
+    legend(axes4,p_bad,'Bad/silicon','Position',[0.048552784732341,0.087535680304472,0.089381205525628,0.025022597153991])
+
+
     % Save figure
     outlabel=sprintf('sub-%s_%s.png',...
         subj,mode{J});

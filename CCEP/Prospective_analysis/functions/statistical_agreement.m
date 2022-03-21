@@ -136,7 +136,7 @@ for n = 1:size(measure,2)
             ERs = agreement_parameter.([measure{n} 'N_Prop']);
         end
 
-        rank.([measure{n}, mode{i}])(:,1) = 1:size(ccep.n1_peak_amplitude,1);
+        rank.([measure{n}, mode{i}])(:,1) = 1:size(ccep.n1_peak_sample,1);
         rank.([measure{n}, mode{i}])(:,2) = ERs;
         [~, order] = sort(rank.([measure{n} mode{i}])(:,2), 'descend','MissingPlacement','last');       % Use 'MissingPlacement','last', to place NaN's at the end of the ranking
         rank.(['sort_' measure{n} mode{i}]) = rank.([measure{n} mode{i}])(order, :);
