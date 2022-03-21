@@ -336,7 +336,7 @@ T_N1(Size_mat,3) = NaN;                 % not required to calculate a median of 
 
 variables = {'N1 clinical','N1 propofol','Mult-factor'};
 
-T_N1 = table(T_N1(:,1),T_N1(:,2),T_N1(:,3), 'VariableNames',variables,'RowNames',{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06','PRIOS09','Medians'});
+T_N1 = table(T_N1(:,1),T_N1(:,2),T_N1(:,3), 'VariableNames',variables,'RowNames',[pat_names','Medians']);
 disp(T_N1)
 end
     

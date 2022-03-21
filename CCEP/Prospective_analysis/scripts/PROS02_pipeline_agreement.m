@@ -153,7 +153,7 @@ for n = 1:size(measure,2)
     end
 end
 
-T = table(Mult_factor(:,1),Mult_factor(:,2),Mult_factor(:,3),Mult_factor(:,4), 'VariableNames',measure,'RowNames',{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06','PRIOS09'});
+T = table(Mult_factor(:,1),Mult_factor(:,2),Mult_factor(:,3),Mult_factor(:,4), 'VariableNames',measure,'RowNames',ccep_allPat.sub_labels);
                 
 for n=1:size(measure,2)
 
