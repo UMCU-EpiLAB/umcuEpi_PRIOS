@@ -1,4 +1,4 @@
-function boxplot_N1_peak(dataBase, myDataPath)
+function [table_latency, av_lat_elec, dataBase] = boxplot_N1_peak(dataBase, myDataPath)
 % Make boxplots of the latency of the N1 peaks.
 
 
@@ -7,17 +7,20 @@ for subj = 1:size(dataBase,2)
     ccep_clin = dataBase(subj).ccep_clin;
     ccep_prop = dataBase(subj).ccep_prop;
 
-    ts = 1/(size(ccep_prop.tt,2)/4);                             % Devide tt by four because ccep_prop.tt includes 4 seconds.
-    clin = ccep_clin.n1_peak_sample_check;
+    %ts = 1/(size(dataBase_prop.tt,2)/4);                             % Devide tt by four because ccep_prop.tt includes 4 seconds.
+    fs = 2048;
+    ts = 1/fs; 
+
+    clin = ccep_clin.n1_peak_sample;
     clin = ((clin*ts)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
-    prop = ccep_prop.n1_peak_sample_check;
+    prop = ccep_prop.n1_peak_sample;
     prop = ((prop*ts)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
 
 
-    % Create matrix with the clinical values in the first column and
+    % Create matrix with the clinical values of the latency in the first column and
     % the propofol values in the second
     i = 1;
-    for stimp = 1:size(ccep_prop.stimpnames_avg,2)                          % For each stimpair
+    for stimp = 1:size(ccep_prop.stimsets_avg,1)                          % For each stimpair
         for elec = 1:size(ccep_prop.ch,1)                                   % For each electrode
 
         % When both clinical SPES and propofol SPES show an ER
@@ -45,45 +48,111 @@ for subj = 1:size(dataBase,2)
 
     % Display the p value 
     if p<0.05
-        fprintf('Test between the N1-Latency of %s SPES-clin and SPES-prop gives p-value = %1.4f. This means that there is a significant difference between the two protocols \n',dataBase(subj).sub_label, p);
+        fprintf('Test between the N1-Latency of %s SPES-clin and SPES-prop gives p-value = %1.4f. This means that there is a significant difference between the two protocols \n',ccep_clin.sub_label, p);
     else
-        fprintf('Test between the N1-Latency of %s SPES-clin and SPES-prop gives p-value = %1.4f. This means that there is NO significant difference between the two protocols \n',dataBase(subj).sub_label, p);
+        fprintf('Test between the N1-Latency of %s SPES-clin and SPES-prop gives p-value = %1.4f. This means that there is NO significant difference between the two protocols \n',ccep_clin.sub_label, p);
     end
 end
 
+
 %% Make VIOLINPlots    
+% New_mat is a table that contains all latencies per patient. This is NOT
+% electrode specific. It is just a concatenation of all N1's detected
 new_mat = [];  
-ts = 1/(size(ccep_prop.tt,2)/4);                                        % Devide tt by four because ccep_prop.tt includes 4 seconds.
-              
+
 for subj = 1:size(dataBase,2)
     ccep_clin = dataBase(subj).ccep_clin;
     ccep_prop = dataBase(subj).ccep_prop;
 
-    clin = ccep_clin.n1_peak_sample_check;
+    clin = ccep_clin.n1_peak_sample;
     clin = ((clin*ts)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
-    prop = ccep_prop.n1_peak_sample_check;
+    prop = ccep_prop.n1_peak_sample;
     prop = ((prop*ts)-2)*1000;                                   % to convert samples to milliseconds, minus 2 becuase of the period before the stimulation artefact
+
+    dataBase(subj).lat_elec_clin = [];
+    dataBase(subj).lat_elec_prop = [];
 
      i = 1;
      clin_colm = 2*subj-1;                      % prealloction of the column number
      prop_colm = 2*subj;                        % prealloction of the column number
 
-
-    for stimp = 1:size(ccep_prop.stimpnames_avg,2)                          % For each stimpair
+    for stimp = 1:size(ccep_prop.stimsets_avg,1)                          % For each stimpair
         for elec = 1:size(ccep_prop.ch,1)                                   % For each electrode
 
         % When both clinical SPES and propofol SPES show an ER
           if ~isnan(clin(elec, stimp)) &&  ~isnan(prop(elec, stimp)) 
-                new_mat(i,clin_colm) = clin(elec, stimp);            % plot the SPES-clin amp in column 1
-                new_mat(i,prop_colm) = prop(elec, stimp);          % plot the SPES-prop amp in column 2
-                i = i+1;
+              new_mat(i,clin_colm) = clin(elec, stimp);            % plot the SPES-clin amp in column 1
+              new_mat(i,prop_colm) = prop(elec, stimp);            % plot the SPES-prop amp in column 2          
 
-          end
+              % Save latency of each response that occurs in clin and prop
+              % per patient. This is used to determine the correlation 
+              % between the distance and latency. Therefore DEPTH
+              % ELECTRODES in response and stimpair are excluded.
+              elec1_stimp = ccep_prop.stimsets_avg(stimp,1);
+              elec2_stimp = ccep_prop.stimsets_avg(stimp,2);
+
+              if ~isequal(ccep_clin.tb_channels.group{elec,:}, 'depth') && ~isequal(ccep_clin.tb_channels.group{elec1_stimp,:}, 'depth') && ~isequal(ccep_clin.tb_channels.group{elec2_stimp,:}, 'depth') 
+                  dataBase(subj).lat_elec_clin(i,1) = clin(elec, stimp);
+                  dataBase(subj).lat_elec_prop(i,1) = prop(elec, stimp);
+                  i = i+1;
+              else
+%                   dataBase(subj).lat_elec_clin(i,1) = NaN;
+%                   dataBase(subj).lat_elec_prop(i,1) = NaN;
+%                   i = i+1;
+              end
+
+               
+          end        
+
         end      
-    end             
+    end 
+
+
+    % determine the average latency per electrode per patient per session
+    % Determine N1 latency per electrode
+    % When multiple N1's are detected per electrode, take an average 
+    % Electrodes without an N1 will be NaN
+    
+    for elec = 1:size(clin,1)
+        av_lat_elec(elec,clin_colm) = median(clin(elec,:),'omitnan');
+        av_lat_elec(elec,prop_colm) = median(prop(elec,:),'omitnan');
+    end
+
 end
 
 new_mat((new_mat == 0)) = NaN;                                      % replace zero with NaN to avoid influence on the mean
+av_lat_elec((av_lat_elec== 0)) = NaN;                                      % replace zero with NaN to avoid influence on the mean
+
+
+%% Make table of new_mat
+% For easier interpretation of the matrix and this table can be saved and
+% later used in figures where latency is plotted on the brain
+
+% Perallocation
+sz = [size(new_mat,1) size(dataBase,2)*2];
+varTypes = repmat({'double'},size(dataBase,2)*2,1);
+table_latency = table('Size',sz,'VariableTypes',varTypes);
+pat_names = cell(size(dataBase,2),1);
+
+% Make an array with all patient names to use in the figures and table
+for pat = 1:size(dataBase,2)
+    pat_names{pat,:} = dataBase(pat).ccep_clin.sub_label; 
+end
+
+% Give each column the right name (patient and clin/prop)
+for col = 1:size(pat_names,1)
+    clin_colm = 2*col-1;                      
+    prop_colm = 2*col; 
+    % Add column name
+    table_latency.Properties.VariableNames{clin_colm} = [pat_names{col},'_clin'];
+    table_latency.Properties.VariableNames{prop_colm} = [pat_names{col},'_prop'];
+    % Add latency to table 
+    table_latency(:,clin_colm) = table(new_mat(:,clin_colm));
+    table_latency(:,prop_colm) = table(new_mat(:,prop_colm));
+end
+
+
+%%
 medians =  median(new_mat,'omitnan');
 
 % Create boxplot with the amplitude of SPES clin and SPES prop
@@ -100,7 +169,7 @@ end
  count = 1;
  ymax = max(max(new_mat));
  
- for subj=1:size(dataBase,2)
+for subj=1:size(dataBase,2)
         if dataBase(subj).ccep_clin.p_n1   < 0.001 
             text(count+0.5,ymax-0.2,'**','FontSize',20,'FontWeight','bold')
             plot(count+0.1:0.1:count+0.9, ymax-0.43*ones(9,1),'k','LineWidth',2)
@@ -123,7 +192,8 @@ ax.YAxis.FontWeight = 'bold';
 
 % Set double xlabel
 ax.XTick = 1.5:2:size(new_mat,2);
-ax.XTickLabel = extractAfter({dataBase(:).sub_label},'sub-');
+ax.XTickLabel  = pat_names'; %{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06'};
+
 
 ymin = min(ylim);
 y_range = diff(ylim);
@@ -149,12 +219,12 @@ legend([violins(1).ViolinPlot,violins(2).ViolinPlot], 'Clinical SPES','Propofol 
 
     
 % Save figure
-outlabel=sprintf('Latency_violin.jpg');
+outlabel=sprintf('Latency_violin.png');
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/N1_compare/');
 if ~exist(path, 'dir')
     mkdir(path);
 end
-saveas(gcf,[path,outlabel],'jpg')
+saveas(gcf,[path,outlabel],'png')
 
         
 %% Make scatter of the latency
@@ -176,14 +246,14 @@ for subj = 1:size(dataBase,2)
        
         subplot(size(dataBase,2),1,subj)
         plot(clin  , prop,'*'); 
-        title(sprintf('%s, p =  %0.3f', dataBase(subj).sub_label, p),'FontSize',12);
+        title(sprintf('%s, p =  %0.3f', dataBase(subj).ccep_clin.sub_label, p),'FontSize',12);
         % Change fontsize
         ax = gca;
         ax.XAxis.FontSize = 14;    ax.YAxis.FontSize = 14;
         if p < 0.01
-             title(sprintf('%s, p = <0.01', dataBase(subj).sub_label),'FontSize',12)
+             title(sprintf('%s, p = <0.01', dataBase(subj).ccep_clin.sub_label),'FontSize',12)
          elseif p<0.05
-             title(sprintf('%s, p = <0.05', dataBase(subj).sub_label),'FontSize',12)
+             title(sprintf('%s, p = <0.05', dataBase(subj).ccep_clin.sub_label),'FontSize',12)
         end 
                  
   
@@ -225,13 +295,13 @@ xlabel(han,{'Value SPES-clin'}, 'FontSize',17,'fontweight','bold')
 
      
 
-  % Save figure
-outlabel=sprintf('n1_scatter_Latency.jpg');
+% Save figure
+outlabel=sprintf('n1_scatter_Latency.png');
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/N1_compare/Scatter/');
 if ~exist(path, 'dir')
     mkdir(path);
 end
-saveas(gcf,[path,outlabel],'jpg')
+saveas(gcf,[path,outlabel],'png')
         
 %% Determine the multiplication factor
 
@@ -245,23 +315,28 @@ per_N1_clin = prctile(M_Clin, [25 50 75])
 per_N1_prop= prctile(M_Prop, [25 50 75])
 
 
-% Pre-allocation
+% First column contains median N1-latency per patient during clinical-SPES
+% Second column contains median N1-latency per patient during propogol-SPES
 T_N1(:,1) = medians(1:2:end);
 T_N1(:,2) = medians(2:2:end);
 
+% Third column contains the multiplication factor between propofol-SPES and
+% clinical-SPES (The number of times propofol was larger than clinical)
 for i = 1:size(T_N1,1)
     T_N1(i,3) = T_N1(i,2)/T_N1(i,1);
 end
 
-% Make a table to facilitate reading the data
+% Last ROW contains the median N1-latency during clinical SPES and propofl
+% SPES for all patients
 Size_mat = (size(T_N1,1)+1);
 T_N1(Size_mat,1) = median(M_Clin);
 T_N1(Size_mat,2) = median(M_Prop);
+T_N1(Size_mat,3) = NaN;                 % not required to calculate a median of the multiplication factor
 % T_N1(Size_mat,3) = median(T_N1(1:size(M_Clin,2),3));
 
 variables = {'N1 clinical','N1 propofol','Mult-factor'};
 
-T_N1 = table(T_N1(:,1),T_N1(:,2),T_N1(:,3), 'VariableNames',variables,'RowNames',{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06','Medians'});
+T_N1 = table(T_N1(:,1),T_N1(:,2),T_N1(:,3), 'VariableNames',variables,'RowNames',{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06','PRIOS09','Medians'});
 disp(T_N1)
 end
     

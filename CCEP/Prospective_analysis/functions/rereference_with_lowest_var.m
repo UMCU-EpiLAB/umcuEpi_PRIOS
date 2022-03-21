@@ -24,22 +24,21 @@ period_postStim = dataBase.tt >0.01 & dataBase.tt <=0.1;   % [0.01: 0.1] post-st
                 bad_and_stimp = [find(strcmp(dataBase.tb_channels.status_description,'noisy (visual assessment)')); dataBase.cc_stimsets_avg(stimp,:)'];
                 data_all(bad_and_stimp,:,:,:) = NaN;
                 
-         %%% numstim werkt waarschijnlijk niet voor PRIOS
                 for numstim = 1:size(data_all,3)                                                % for each of the trials of one stimulus pair
 
                     % Determine median of all signals except BAD and
                     % stimulated channels (common average reference: CAR)
                     raw_data_stim = squeeze(data_all(:,stimp,numstim,:));                  
-                    CAR_raw_data = median(raw_data_stim,'omitnan');
+                    CA_raw_data = median(raw_data_stim,'omitnan');
                    
                     % During PRIOS SPES there are often varying number of
                     % stims per stimulation pair, and when there are only
                     % NaNs in raw_data_stim, CAR_raw_data also contains
                     % only NaNs. This has to be ignored in the analysis.
-                    if ~isnan(sum(CAR_raw_data))
+                    if ~isnan(sum(CA_raw_data))
                      
                         % Determine variance of CAR signal PRE-stim
-                        var_preStimCAR = var(CAR_raw_data(:, period_preStim),'omitnan');
+                        var_preStimCAR = var(CA_raw_data(:, period_preStim),'omitnan');
 
                         % Determine for each separate signal if variance
                         % POST-stim is lower than variance of CAR signal

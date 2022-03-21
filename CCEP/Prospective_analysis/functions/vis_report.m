@@ -10,70 +10,85 @@ figure('Position',[407,689,939,373])
 ax1 = axes('Position',[0.074,0.11,0.9,0.82]);
 
 % Pre-allocation
-ERs_tot = zeros(size(dataBase,2),(size(dataBase,2)*2));
+ERs_tot = zeros(size(dataBase,2)*2,1);
+subjects = cell(1,size(dataBase,2));
 
 for subj = 1:size(dataBase,2)
    
     % prealloction of the column number   
-    clin_colm = 2*subj-1;                      
-    prop_colm = 2*subj; 
+    clin = 2*subj-1;                      
+    prop = 2*subj; 
     
     % Place the total number of ERs per patient in an array.
-    ERs_tot(subj,clin_colm) = sum(sum(~isnan(dataBase(subj).ccep_clin.n1_peak_amplitude_check)));
-    ERs_tot(subj,prop_colm) = sum(sum(~isnan(dataBase(subj).ccep_prop.n1_peak_amplitude_check)));
-       
-end
+    ERs_tot(clin,2) = sum(sum(~isnan(dataBase(subj).ccep_clin.n1_peak_sample)));
+    ERs_tot(prop,2) = sum(sum(~isnan(dataBase(subj).ccep_prop.n1_peak_sample)));
+    
+    % Place the number of ERs only in clin of only in prop in the second
+    % column
+    ERs_tot(clin,1) = size(dataBase(subj).elec_in_clin,1);
+    ERs_tot(prop,1) = size(dataBase(subj).elec_in_prop,1);
 
-x = {'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06'};
+    
+    subjects_1{subj} = dataBase(subj).ccep_clin.sub_label;
+    subjects{clin} = [dataBase(subj).ccep_clin.sub_label,'_c'];
+    subjects{prop} = [dataBase(subj).ccep_clin.sub_label,'_p'];
+
+end
  
+plot_tot(1:2:14,1:2) = ERs_tot(1:2:end,:);
+plot_tot(1:2:14,3:4) = 0;
+
+plot_tot(2:2:14,3:4 )= ERs_tot(2:2:end,:);
+plot_tot(2:2:14,1:2) = 0;
+
 % Create bar graph
-X = categorical(x);
-b =   bar(ax1,X,ERs_tot,1);         % bar(ax1,X,ERs_tot,1);
+X = categorical(subjects);
+b =   bar(ax1,X,plot_tot,'stacked');         % bar(ax1,X,ERs_tot,1);
 
-for i = 1:2:size(ERs_tot,2)
-        b(i).FaceColor(:) =  [0.5843 0.8157 0.9882];          %[0 0 1]
-        b(i+1).FaceColor(:) = [0.9882 0.6157 0.5843];                        %[1 0 0]
-end
+b(1).FaceColor(:) = [0.5 0 0.5];          %[0 0 1]
+b(2).FaceColor(:) =  [0.9882 0.6157 0.5843];                        %[1 0 0]
+b(3).FaceColor(:) = [0.5 0 0.5];                        %[1 0 0]
+b(4).FaceColor(:) = [0.5843 0.8157 0.9882];                        %[1 0 0]
+ax1.XTickLabel = [];
  
-
 % Place the Number of ERs next to the column
-for i = 1:2:12
+for i = 1:4%:size(dataBase,2)*2
     xtips1 = b(i).XEndPoints;
     ytips1 = b(i).YEndPoints;
     labels1 = string(b(i).YData);
     labels1(ismember(labels1, '0')) = NaN;
-    text(xtips1,ytips1,labels1,'HorizontalAlignment','right',...
-    'VerticalAlignment','bottom','FontSize',11,'fontweight','Bold') 
+    text(xtips1,ytips1,labels1,'HorizontalAlignment','center',...
+    'VerticalAlignment','bottom','FontSize',11) 
 end
 
-for i = 2:2:12
-    xtips1 = b(i).XEndPoints;
-    ytips1 = b(i).YEndPoints;
-    labels1 = string(b(i).YData);
-    labels1(ismember(labels1, '0')) = NaN;
-    text(xtips1,ytips1,labels1,'HorizontalAlignment','left',...
-    'VerticalAlignment','bottom','FontSize',11,'fontweight','Bold') 
-end
-legend('SPES-clin','SPES-Prop')
+legend('Only in one session','SPES-clin','','SPES-prop')
 ylabel('Number of ERs');
 title('Total number of ERs evoked per SPES session')
 
+ymin = min(ylim);
+y_range = diff(ylim)-450;
+x_as = 1:2:size(subjects,2);
+size_pat = size(subjects_1,2); 
+second_row_txt = subjects_1; %cellstr(strsplit(num2str(medians,'%.2f '),' '));
+text([-0.5 ;x_as(:)+0.5], ones(1,size_pat+1)*ymin-0.1*y_range, cellstr([' ',second_row_txt]),'HorizontalAlignment','center','FontSize', 10)
+
+
 
 % Save figure
-outlabel='ERs_per_stimp.jpg';
+outlabel='ERs_per_stimp.png';
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
 if ~exist(path, 'dir')
     mkdir(path);
 end
-saveas(gcf,[path,outlabel],'jpg')
+saveas(gcf,[path,outlabel],'png')
 
 %% Visualise the network characteristics in a heatmap to later plot on the MRI
 % Create a heatmap of the network characteristics with the outlay of the
 % electrodes from the matlabSjabloon in Excel.
 
-for subj = 1:size(dataBase,2)    
-    heat_map_grid(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).agreement_parameter)
-end
+% for subj = 1:size(dataBase,2)    
+%     heat_map_grid(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).agreement_parameter)
+% end
 
 %% Create Violinplot of the ranking of the number of ERs per stimulation pair. 
 

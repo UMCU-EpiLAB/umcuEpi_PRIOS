@@ -99,7 +99,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
 
             % Create a patch for the -1/5:9 ms interval in which no
             % physiological activity can be measured.
-            patch([0 0.009 0.009 0],[-800 -800 750 750],[0.6,0.2,0.2],'EdgeAlpha',0)
+            patch([0 0.009 0.009 0],[-1200 -1200 1200 1200],[0.6,0.2,0.2],'EdgeAlpha',0)
             alpha(0.2)
 
             if strcmp(cfg.reref,'y')
@@ -113,7 +113,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
             % percentage of pictures that you have scored so far
             perc = n/size(n1_peak_amplitude(:),1)*100;
 
-            fprintf('%2.1f %% --- stimpair = %s-%s chan = %s --- Is this an N1 (y/n)? [y/n] \n  If incorrect N1 detection, select correct N1 peak in right figure (zoomed) and press enter. \n',...
+            fprintf('%2.1f %% --- stimpair = %s-%s chan = %s --- Is this an N1 (y/n)? [y/n] \n  If incorrect N1 detection, select correct N1 peak in right figure (zoomed) and press ENTER. \n',...
                     perc,dataBase.cc_stimchans_avg{stimp,:},dataBase.ch{chan});
             currkey = 0;
             cp =[];
@@ -172,11 +172,11 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
                 elseif w == 1 % keyboard
                     currkey = get(gcf,'CurrentCharacter');
 
-                    if (strcmp(currkey,'y') || strcmp(currkey,'d')) && isempty(cp) % if nothing is annotated,
+                    if strcmp(currkey,'y') && isempty(cp) % if nothing is annotated,
                         ccep.n1_peak_amplitude_check(chan,stimp) = n1_peak_amplitude(chan,stimp) ;
                         ccep.n1_peak_sample_check(chan,stimp) = n1_peak_sample(chan,stimp) ;
                         hold off
-                    elseif (strcmp(currkey,'y') && ~isempty(cp) % if something is annotated
+                    elseif strcmp(currkey,'y') && ~isempty(cp) % if something is annotated
                         % do nothing because it is already saved correctly
                         % in ccep.n1_peak_sample_check and
                         % ccep.n1_peak_amplitude_check (line 145, 146 / 157, 158)
@@ -187,7 +187,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
                         % in ccep.n1_peak_sample_check and
                         % ccep.n1_peak_amplitude_check (line 151,155,160)
 
-                    elseif strcmp(currkey,'n') || currkey == char(13)
+                    elseif strcmp(currkey,'n') 
                         ccep.n1_peak_amplitude_check(chan,stimp) = NaN ;
                         ccep.n1_peak_sample_check(chan,stimp) = NaN ;
                         hold off
@@ -239,6 +239,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
     ccep.epoch_length = cfg.epoch_length;
     ccep.epoch_prestim = cfg.epoch_prestim;
     ccep.reref = cfg.reref;
+    ccep.tb_channels = dataBase.tb_channels;
 
     
     if strcmp(cfg.reref,'y')
@@ -253,7 +254,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
     end
 
     % save file during scoring in case of error
-    save(fullfile(filefolder,filename),'-struct','ccep');
+    save(fullfile(filefolder,filename),'ccep');
     save([myDataPath.CCEP_allpat,filename], 'ccep');
 end
 fprintf('CCEPs are saved for %s for subject %s \n' , dataBase(1).task_name, dataBase(1).sub_label);

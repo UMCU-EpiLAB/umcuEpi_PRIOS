@@ -2,7 +2,7 @@
 
 clear; 
 % %% Choose patient
-ccep_allPat.sub_labels = {'sub-PRIOS01','sub-PRIOS02','sub-PRIOS03','sub-PRIOS04','sub-PRIOS05','sub-PRIOS06'};
+ccep_allPat.sub_labels = {'sub-PRIOS01','sub-PRIOS02','sub-PRIOS03','sub-PRIOS04','sub-PRIOS05','sub-PRIOS06','sub-PRIOS09'};
 %ccep_allPat.name = {[input('Patient number type (PRIOSXX): ','s')]};
 
 % set paths
@@ -18,24 +18,60 @@ dataBase = interobserver_analysis(myDataPath);
 
 % An excel is saved in myDataPath.CCEP_interObVar with the different responces between R1 and R2
 
-%% Scriptje om eventueel de responses te laten zien die anders gescoord zijn door beide observers
-% hiervoor moet dus wel ccep opgeslagen worden.
+
+%% Find ERs in propofol and not in clinical
+for pat = 1:size(dataBase,2)
+    
+    elec_in_prop = [];
+    elec_in_clin = [];
+    % Add the detections of clinical and propofol spes.
+    % answere == 2 --> both ER, ==1 either one had a ER
+    ones = ~isnan(dataBase(pat).ccep_clin.n1_peak_sample) + ~isnan(dataBase(pat).ccep_prop.n1_peak_sample);
+    loc_ones = find(ones == 1);
+    
+    % Determine the value of all those 1's.
+    % When non-NAN, than the propofol-SPES had a value and clinical-SPES
+    % not
+    ones_prop = ~isnan(dataBase(pat).ccep_prop.n1_peak_sample(loc_ones));
+    ones_clin = ~isnan(dataBase(pat).ccep_clin.n1_peak_sample(loc_ones));
+
+    elec_prop = loc_ones(ones_prop);
+    elec_clin = loc_ones(ones_clin);
+    % number of channels for this subject
+    nr_ch = size(dataBase(pat).ccep_clin.ch,1);
+
+    for i = 1:size(elec_prop,1)               
+        % Determine stimulation pair
+        stimp = ceil(elec_prop(i) /nr_ch);
+        % Determine electrode
+        elec = elec_prop(i) - nr_ch * (stimp-1);
+        
+%         name_elec_in_prop(i,1) = dataBase(pat).ccep_clin.stimpnames_avg(stimp) ;
+%         name_elec_in_prop(i,2) = dataBase(pat).ccep_clin.ch(elec) ;
+        elec_in_prop(i,1) = stimp ;
+        elec_in_prop(i,2) = elec ;
+
+    end
+
+    dataBase(pat).elec_in_prop = elec_in_prop;
+
+    for i = 1:size(elec_clin,1)
+        % Determine stimulation pair
+        stimp = ceil(elec_clin(i) /nr_ch);
+        % Determine electrode
+        elec = elec_clin(i) - nr_ch * (stimp-1);
+        
+%         name_elec_in_prop(i,1) = dataBase(pat).ccep_clin.stimpnames_avg(stimp) ;
+%         name_elec_in_prop(i,2) = dataBase(pat).ccep_clin.ch(elec) ;
+        elec_in_clin(i,1) = stimp ;
+        elec_in_clin(i,2) = elec ;
+        
+    end
+
+    dataBase(pat).elec_in_clin = elec_in_clin;
 
 
-
-%% Plot electrodes position on brain with N1-latency information
-% Determine N1-latency per brain part
-
-% plot_N1_on_brain(dataBase, myDataPath)
-
-plot_electrodes_on_MRI(myDataPath)
-
-%% Determine the distance between electrodes to determine correlation between N1-latency and electrode distance
-
-
-
-
-
+end
 
 
 %% determine the agreement between runs
@@ -90,10 +126,10 @@ scatter_networkPar(dataBase,myDataPath)
 measure = {'ERs per stimp','Indegree','Outdegree','BC'};
 
 Mult_factor = zeros(size(dataBase,2), size(measure,2));
-        
-for subj = 1:size(dataBase,2)
 
-    for n = 1:size(measure,2)
+for n = 1:size(measure,2)        
+
+    for subj = 1:size(dataBase,2)
         
         if strcmp(measure{n},'ERs per stimp')
              M_Clin = prctile(dataBase(subj).agreement_parameter.ERs_stimpClin,[25 50 75]);    % prctile treats NaNs as missing values and removes them
@@ -117,7 +153,7 @@ for subj = 1:size(dataBase,2)
     end
 end
 
-T = table(Mult_factor(:,1),Mult_factor(:,2),Mult_factor(:,3),Mult_factor(:,4), 'VariableNames',measure,'RowNames',{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06'});
+T = table(Mult_factor(:,1),Mult_factor(:,2),Mult_factor(:,3),Mult_factor(:,4), 'VariableNames',measure,'RowNames',{'PRIOS01','PRIOS02','PRIOS03','PRIOS04','PRIOS05','PRIOS06','PRIOS09'});
                 
 for n=1:size(measure,2)
 
@@ -144,14 +180,23 @@ end
 
 vis_report(dataBase, myDataPath)
 
+close all;
+
 %% Make boxplots of the latency of the N1 peaks.
 % Folder Violinplot-Matlab has to be added to the path. 
-boxplot_N1_peak(dataBase, myDataPath)
+[table_latency, av_lat_elec, dataBase] = boxplot_N1_peak(dataBase, myDataPath);
+
+prctile([av_lat_elec(:,1);av_lat_elec(:,3);av_lat_elec(:,5);av_lat_elec(:,7);av_lat_elec(:,9);av_lat_elec(:,11);av_lat_elec(:,13)],[25 50 75])
+prctile([av_lat_elec(:,2);av_lat_elec(:,4);av_lat_elec(:,6);av_lat_elec(:,8);av_lat_elec(:,10);av_lat_elec(:,12);av_lat_elec(:,14)],[25 50 75])
 
 
+%% Plot electrodes position on brain with N1-latency information
+% Determine N1-latency per brain part
+close all
 
-%% Rise and Fall times N1 peak
-vis_P1(myDataPath,dataBase);
+plot_electrodes_on_MRI(myDataPath, table_latency, dataBase, av_lat_elec)
 
 
-
+%% Determine the distance between electrodes to determine correlation between N1-latency and electrode distance
+close all
+distance_elec_stimp(dataBase, myDataPath, av_lat_elec)

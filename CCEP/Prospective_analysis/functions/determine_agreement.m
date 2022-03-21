@@ -5,11 +5,11 @@ if size(runs,2) == 2
     % Preallocation
     OA = NaN; PA = NaN; NA = NaN;
     
-    if all(size(runs(1).ccep.n1_peak_amplitude) == size(runs(2).ccep.n1_peak_amplitude))   % Extra check whether size of adjacency matrix is equal
+    if all(size(runs(1).ccep.n1_peak_sample) == size(runs(2).ccep.n1_peak_sample))   % Extra check whether size of adjacency matrix is equal
 
-        AmatClin = ~isnan(runs(1).ccep.n1_peak_amplitude); % all non-NaNs are amplitudes, so N1s --> 1
-        AmatProp = ~isnan(runs(2).ccep.n1_peak_amplitude);
-        
+        AmatClin = ~isnan(runs(1).ccep.n1_peak_sample); % all non-NaNs are samples, so N1s --> 1
+        AmatProp = ~isnan(runs(2).ccep.n1_peak_sample);
+               
         compare_mat = AmatClin + AmatProp;
         truetrue = sum(compare_mat(:) == 2);
         truefalse = sum(compare_mat(:) == 1);
