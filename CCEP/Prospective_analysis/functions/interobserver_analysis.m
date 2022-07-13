@@ -3,7 +3,6 @@ function dataBase = interobserver_analysis(myDataPath)
 % Determine this with checked files of two raters/observers
 files = dir(fullfile(myDataPath.CCEP_interObVar));
 
-% Extract the run_labels to match REC2Stim to PRIOS
 names = {files.name};
 
 % Find task_labels
@@ -53,8 +52,7 @@ for subj = 1: size(uni_sublabel,2)
 % 
 %         end
             
-        
-        %% Convert sample and amplitude value to binary output.
+            %% Convert sample and amplitude value to binary output.
             rater1.ccep.check_binary = ~isnan(rater1.ccep.n1_peak_sample_check);    % cells with a value are converted to a 1, NaNs are converted to 0      
             rater2.ccep.check_binary = ~isnan(rater2.ccep.n1_peak_sample_check);
             
@@ -207,6 +205,18 @@ for pat = 1:size(dataBase,2)
             sprintf('length of N1 matrix is not equal to the number of channels in tb_channels')
         end
    end
+
+    %% Check for depth electrodes and remove them
+    idx_depth = ismember(dataBase(pat).ccep_clin.tb_channels.group, 'depth');
+
+    if sum(idx_depth) > 0
+        dataBase(pat).ccep_clin.n1_peak_sample(idx_depth,:) = NaN;
+        dataBase(pat).ccep_prop.n1_peak_sample  (idx_depth,:) = NaN;  
+               
+    end
+
+
+
 
 end
 

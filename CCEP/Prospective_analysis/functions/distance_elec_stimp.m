@@ -374,13 +374,19 @@ x_as = 1:size(violin_mat,2);
 size_pat = size(violin_mat,2); 
 second_row_txt = cellstr(strsplit(num2str(medians,'%.2f '),' '));
 text([(x_as(1)-x_as(2))*-0.5 x_as], ones(1,size_pat+1)*ymin-0.1*y_range, ['Median' second_row_txt],'HorizontalAlignment','center','FontSize', 12, 'FontWeight', 'bold')
-    
-% STATISTICS
-p_clin_all = ranksum(vertcat(lat_elec_SOZ_sec(:)), vertcat(lat_elec_nSOZ_sec(:)));
-p_prop_all = ranksum(vertcat(lat_elec_SOZ_prop_sec(:)), vertcat(lat_elec_nSOZ_prop_sec(:)));
 
-p_soz_all = signrank(vertcat(lat_elec_SOZ_sec(:)), vertcat(lat_elec_SOZ_prop_sec(:)));
-p_non_soz_all = signrank(vertcat(lat_elec_nSOZ_sec(:)), vertcat(lat_elec_nSOZ_prop_sec(:)));
+% Make array of latencies in matrix and remove NaNs
+lat_elec_SOZ_sec(isnan(lat_elec_SOZ_sec))= [];
+lat_elec_nSOZ_sec(isnan(lat_elec_nSOZ_sec)) = [];
+lat_elec_SOZ_prop_sec(isnan(lat_elec_SOZ_prop_sec)) = [];
+lat_elec_nSOZ_prop_sec(isnan(lat_elec_nSOZ_prop_sec)) = [];
+
+% STATISTICS
+p_clin_all = ranksum(lat_elec_SOZ_sec(:), lat_elec_nSOZ_sec(:));
+p_prop_all = ranksum(lat_elec_SOZ_prop_sec(:), lat_elec_nSOZ_prop_sec(:));
+
+p_soz_all = ranksum(lat_elec_SOZ_sec(:), lat_elec_SOZ_prop_sec(:));
+p_non_soz_all = ranksum(lat_elec_nSOZ_sec(:), lat_elec_nSOZ_prop_sec(:));
 
 fprintf('ELEC: P-value between SOZ and non-SOZ for for all patients during clinical = %1.3f \n',p_clin_all);
 fprintf('ELEC: P-value between SOZ and non-SOZ for for all patients during propofol = %1.3f \n',p_prop_all);
@@ -438,7 +444,7 @@ fprintf('ELEC: P-value between non-SOZ-clin and non-SOZ-prop for for all patient
     end
 
     
-    % Save figure
+% Save figure
 outlabel=sprintf('ELEC-N1-latency_soz_non-SOZ.png');
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
 if ~exist(path, 'dir')
@@ -480,73 +486,77 @@ x_as = 1:size(violin_mat,2);
 size_pat = size(violin_mat,2); 
 second_row_txt = cellstr(strsplit(num2str(medians,'%.2f '),' '));
 text([(x_as(1)-x_as(2))*-0.5 x_as], ones(1,size_pat+1)*ymin-0.1*y_range, ['Median' second_row_txt],'HorizontalAlignment','center','FontSize', 12, 'FontWeight', 'bold')
-    
-
-
+   
+% Make array of latencies in matrix and remove NaNs
+lat_SOZ_stimp_sec(isnan(lat_SOZ_stimp_sec))= [];
+lat_nSOZ_stimp_sec(isnan(lat_nSOZ_stimp_sec)) = [];
+lat_SOZ_stimp_sec_prop(isnan(lat_SOZ_stimp_sec_prop)) = [];
+lat_nSOZ_stimp_sec_prop(isnan(lat_nSOZ_stimp_sec_prop)) = [];
 
 
 
 %% plot for all patients combined
-    % Determine the correlation of latency and soz or non-soz when grouping all patients
-    p_clin_all = ranksum(vertcat(lat_SOZ_stimp_sec(:)), vertcat(lat_nSOZ_stimp_sec(:)));
-    p_prop_all = ranksum(vertcat(lat_SOZ_stimp_sec_prop(:)), vertcat(lat_nSOZ_stimp_sec_prop(:)));
-    
-    p_soz_all = signrank(vertcat(lat_SOZ_stimp_sec(:)), vertcat(lat_SOZ_stimp_sec_prop(:)));
-    p_non_soz_all = signrank(vertcat(lat_nSOZ_stimp_sec(:)), vertcat(lat_nSOZ_stimp_sec_prop(:)));
-    
-    fprintf('STIMP: P-value between SOZ and non-SOZ for for all patients during clinical = %1.3f \n',p_clin_all);
-    fprintf('STIMP: P-value between SOZ and non-SOZ for for all patients during propofol = %1.3f \n',p_prop_all);
-    fprintf('STIMP: P-value between SOZ-clin and SOZ-prop for for all patients = %1.3f \n',p_soz_all);
-    fprintf('STIMP: P-value between non-SOZ-clin and non-SOZ-prop for for all patients = %1.3f \n',p_non_soz_all);
+% Determine the correlation of latency and soz or non-soz when grouping all patients
+p_clin_all = ranksum(lat_SOZ_stimp_sec(:), lat_nSOZ_stimp_sec(:));
+p_prop_all = ranksum(lat_SOZ_stimp_sec_prop(:), lat_nSOZ_stimp_sec_prop(:));
 
-    ymax = max(max(violin_mat));
-    count = 1;
-    if p_clin_all  < 0.01 
-     text(count+0.5,ymax-10,'**','FontSize',20,'FontWeight','bold')
-     plot(count+0.01:0.1:count+0.9, ymax-10.93*ones(9,1),'k','LineWidth',2)
-    
-    
-    elseif p_clin_all  < 0.05 
-     text(count+0.5,ymax-10,'*','FontSize',20,'FontWeight','bold')
-     plot(count+0.1:0.1:count+0.9, ymax-10.93*ones(9,1),'k','LineWidth',2)
-    
-    end
-    
-    if p_soz_all  < 0.01 
-     text(count+1,ymax-5,'**','FontSize',20,'FontWeight','bold')
-     plot(count+0.1:0.1:count+1.9, ymax-5.93*ones(19,1),'k','LineWidth',2)
-    
-    
-    elseif p_soz_all  < 0.05 
-     text(count+1,ymax-5,'*','FontSize',20,'FontWeight','bold')
-     plot(count+0.1:0.1:count+1.9, ymax-5.93*ones(19,1),'k','LineWidth',2)
-    
-    end
-    
-    
-    count = 3;
-    if p_prop_all  < 0.01 
-     text(count+0.5,ymax-10,'**','FontSize',20,'FontWeight','bold')
-     plot(count+0.1:0.1:count+0.9, ymax-10.93*ones(9,1),'k','LineWidth',2)
-    
-    
-    elseif p_prop_all  < 0.05 
-     text(count+0.5,ymax-10,'*','FontSize',20,'FontWeight','bold')
-     plot(count+0.1:0.1:count+0.9, ymax-10.93*ones(9,1),'k','LineWidth',2)
-    
-    end
-    
-    count =2 ;
-    if p_non_soz_all  < 0.01 
-     text(count+1,ymax-0.1,'**','FontSize',20,'FontWeight','bold')
-     plot(count+0.1:0.1:count+1.9, ymax-0.93*ones(19,1),'k','LineWidth',2)
-    
-    
-    elseif p_non_soz_all  < 0.05 
-     text(count+1,ymax-0.1,'*','FontSize',20,'FontWeight','bold')
-     plot(count+0.1:0.1:count+1.9, ymax-0.93*ones(19,1),'k','LineWidth',2)
-    
-    end
+p_soz_all = ranksum(lat_SOZ_stimp_sec(:), lat_SOZ_stimp_sec_prop(:));
+p_non_soz_all = ranksum(lat_nSOZ_stimp_sec(:), lat_nSOZ_stimp_sec_prop(:));
+
+fprintf('STIMP: P-value between SOZ and non-SOZ for for all patients during clinical = %1.3f \n',p_clin_all);
+fprintf('STIMP: P-value between SOZ and non-SOZ for for all patients during propofol = %1.3f \n',p_prop_all);
+fprintf('STIMP: P-value between SOZ-clin and SOZ-prop for for all patients = %1.3f \n',p_soz_all);
+fprintf('STIMP: P-value between non-SOZ-clin and non-SOZ-prop for for all patients = %1.3f \n',p_non_soz_all);
+
+ymax = max(max(violin_mat));
+count = 1;
+   
+if p_clin_all  < 0.01 
+ text(count+0.5,ymax-10,'**','FontSize',20,'FontWeight','bold')
+ plot(count+0.01:0.1:count+0.9, ymax-10.93*ones(9,1),'k','LineWidth',2)
+
+
+elseif p_clin_all  < 0.05 
+ text(count+0.5,ymax-10,'*','FontSize',20,'FontWeight','bold')
+ plot(count+0.1:0.1:count+0.9, ymax-10.93*ones(9,1),'k','LineWidth',2)
+
+end
+
+if p_soz_all  < 0.01 
+ text(count+1,ymax-5,'**','FontSize',20,'FontWeight','bold')
+ plot(count+0.1:0.1:count+1.9, ymax-5.93*ones(19,1),'k','LineWidth',2)
+
+
+elseif p_soz_all  < 0.05 
+ text(count+1,ymax-5,'*','FontSize',20,'FontWeight','bold')
+ plot(count+0.1:0.1:count+1.9, ymax-5.93*ones(19,1),'k','LineWidth',2)
+
+end
+
+
+count = 3;
+if p_prop_all  < 0.01 
+ text(count+0.5,ymax-10,'**','FontSize',20,'FontWeight','bold')
+ plot(count+0.1:0.1:count+0.9, ymax-10.93*ones(9,1),'k','LineWidth',2)
+
+
+elseif p_prop_all  < 0.05 
+ text(count+0.5,ymax-10,'*','FontSize',20,'FontWeight','bold')
+ plot(count+0.1:0.1:count+0.9, ymax-10.93*ones(9,1),'k','LineWidth',2)
+
+end
+
+count =2 ;
+if p_non_soz_all  < 0.01 
+ text(count+1,ymax-0.1,'**','FontSize',20,'FontWeight','bold')
+ plot(count+0.1:0.1:count+1.9, ymax-0.93*ones(19,1),'k','LineWidth',2)
+
+
+elseif p_non_soz_all  < 0.05 
+ text(count+1,ymax-0.1,'*','FontSize',20,'FontWeight','bold')
+ plot(count+0.1:0.1:count+1.9, ymax-0.93*ones(19,1),'k','LineWidth',2)
+
+end
 
 
 % Save figure

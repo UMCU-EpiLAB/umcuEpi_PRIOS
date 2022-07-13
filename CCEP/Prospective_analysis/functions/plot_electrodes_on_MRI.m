@@ -1,4 +1,4 @@
-function plot_electrodes_on_MRI(myDataPath, table_latency, dataBase, av_lat_elec)
+function plot_electrodes_on_MRI(myDataPath, dataBase)
 
 % % This script can be used to create an MNI cortex (inflated) with
 % % electrodes in different colors for different locations for all patients
@@ -141,7 +141,7 @@ allmni_labels = [];
 all_hemi = [];
 Destrieux_label_pat = NaN(150,size(elec_coords,2)); % 150 is an extimation
 
-for kk = 1:length(elec_coords)
+for kk = 3%1:length(elec_coords)
     Destrieux_label = elec_coords(kk).elecs_tsv.Destrieux_label;
     if iscell(Destrieux_label)
         for ll = 1:size(Destrieux_label,1)
@@ -404,5 +404,3 @@ end
 % saveas(gcf,[path,outlabel],'png')
 
 
-
-end

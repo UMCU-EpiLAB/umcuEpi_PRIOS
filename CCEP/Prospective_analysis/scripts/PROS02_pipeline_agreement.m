@@ -16,7 +16,13 @@ myDataPath = setLocalDataPath(ccep_allPat);
 
 dataBase = interobserver_analysis(myDataPath);
 
+
+
 % An excel is saved in myDataPath.CCEP_interObVar with the different responces between R1 and R2
+
+
+%% Make figure of average response of all responses with N1-peak
+% fig_average_resp(dataBase, myDataPath)
 
 
 %% Find ERs in propofol and not in clinical
@@ -116,10 +122,15 @@ for subj = 1:size(dataBase,2)
     [dataBase(subj).statistics, dataBase(subj).rank] = statistical_agreement(myDataPath, dataBase(subj).agreement_parameter, dataBase(subj).ccep_clin);
 end
 
-
 %% Visualise the agreement in a scatter plots
 
 scatter_networkPar(dataBase,myDataPath)
+
+%% Make bar graph for all patients
+% Exclude patients with inter observer agreement < 0.6
+
+barGraphStims(dataBase,myDataPath)
+
 
 %% Determine multiplication factor of the network parameters    
 % Data is not normally distributed therefore the median is calculated
@@ -167,10 +178,10 @@ end
 % scale can be used for prop and clin. 
 % When using the same: the absolute values can easier be compared
 % When using specific colorscale, the ranking is easier comparable.
-
-for subj = 1:size(dataBase,2)
-    visualise_gridstructure(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).agreement_parameter);
-end
+% 
+% for subj = 1:size(dataBase,2)
+%     visualise_gridstructure(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).agreement_parameter);
+% end
 
 %% Make bar graph of number of ERs per SPES session per patient
 % Function used to group/sort all scripts only used for visualisation of
@@ -184,17 +195,17 @@ close all;
 
 %% Make boxplots of the latency of the N1 peaks.
 % Folder Violinplot-Matlab has to be added to the path. 
-[table_latency, av_lat_elec, dataBase] = boxplot_N1_peak(dataBase, myDataPath);
+[dataBase] = boxplot_N1_peak(dataBase, myDataPath);
 
-prctile([av_lat_elec(:,1);av_lat_elec(:,3);av_lat_elec(:,5);av_lat_elec(:,7);av_lat_elec(:,9);av_lat_elec(:,11);av_lat_elec(:,13)],[25 50 75])
-prctile([av_lat_elec(:,2);av_lat_elec(:,4);av_lat_elec(:,6);av_lat_elec(:,8);av_lat_elec(:,10);av_lat_elec(:,12);av_lat_elec(:,14)],[25 50 75])
+prctile([av_lat_elec(:,1);av_lat_elec(:,3);av_lat_elec(:,5);av_lat_elec(:,7);av_lat_elec(:,9);av_lat_elec(:,11)],[25 50 75])
+prctile([av_lat_elec(:,2);av_lat_elec(:,4);av_lat_elec(:,6);av_lat_elec(:,8);av_lat_elec(:,10);av_lat_elec(:,12)],[25 50 75])
 
 
 %% Plot electrodes position on brain with N1-latency information
 % Determine N1-latency per brain part
 close all
 
-plot_electrodes_on_MRI(myDataPath, table_latency, dataBase, av_lat_elec)
+plot_electrodes_on_MRI(myDataPath, dataBase)
 
 
 %% Determine the distance between electrodes to determine correlation between N1-latency and electrode distance
