@@ -1,4 +1,4 @@
-function distance_elec_stimp(dataBase, myDataPath, av_lat_elec)
+function distance_elec_stimp(dataBase, myDataPath)
 % This function is used to determine the distance between electrodes and
 % the stimulation pair.
 % Further on, we can correlate the distance with the N1-peak latency.
@@ -15,58 +15,58 @@ r_prop = 1;
 
 for pat = 1:size(dataBase,2) 
 
-        data = dataBase(pat).ccep_clin; % Does not matter whether you take clin or prop since both sessions should contain the same electrodes
+    data = dataBase(pat).ccep_clin; % Does not matter whether you take clin or prop since both sessions should contain the same electrodes
 %         r_dis = 1;  % save the distance per subject
 
-        for stimp = 1:size(data.stimpnames_avg,2)
-            % Determine the two electrodes in the stimulation pair
-            elec1 = extractBefore(data.stimpnames_avg(1,stimp),'-');
-            elec2 = extractAfter(data.stimpnames_avg(1,stimp),'-');
+    for stimp = 1:size(data.stimpnames_avg,2)
+        % Determine the two electrodes in the stimulation pair
+        elec1 = extractBefore(data.stimpnames_avg(1,stimp),'-');
+        elec2 = extractAfter(data.stimpnames_avg(1,stimp),'-');
 
-            % Find the location of the electrodes in the matrix
-            loc1 = find(ismember(table2cell(elec_coords(pat).elecs_tsv(:,1)), elec1), 1);
-            loc2 = find(ismember(table2cell(elec_coords(pat).elecs_tsv(:,1)), elec2), 1);
+        % Find the location of the electrodes in the matrix
+        loc1 = find(ismember(table2cell(elec_coords(pat).elecs_tsv(:,1)), elec1), 1);
+        loc2 = find(ismember(table2cell(elec_coords(pat).elecs_tsv(:,1)), elec2), 1);
 
-            if isempty(loc1) || isempty(loc2)
-                error('Electrode from stimulation pair is not found in coordinates matrix')
-            end
+        if isempty(loc1) || isempty(loc2)
+            error('Electrode from stimulation pair is not found in coordinates matrix')
+        end
 
-            % If electrode is an depth electrode, exclude from the analysis
-            % since the distance between depth electrodes is different from
-            % the distance between coretx electrodes
-            if ismember(elec_coords(pat).elecs_tsv.group(loc1),'depth') || ismember(elec_coords(pat).elecs_tsv.group(loc2),'depth')
-                % Skip during the distance analysis
-            else
-                % Find the coordinates of the stimpair electrodes
-                coor1 = elec_coords(pat).mni_coords(loc1,1:3);
-                coor2 = elec_coords(pat).mni_coords(loc2,1:3);
-        
-                % Find the distance between the two electrodes of the stimpair
-                coor_stimp(:,1) = (coor1(1)+coor2(1))/2;
-                coor_stimp(:,2) = (coor1(2)+coor2(2))/2;
-                coor_stimp(:,3) = (coor1(3)+coor2(3))/2;
-           
-        
-                 % Check that the middle between the two stimpair electrodes is correct
-                 if ~isequal(norm(coor1-coor_stimp), norm(coor_stimp-coor2))
-                     error('did not find the correct middle of the stimulation pair electrodes, row 59')
-                 end
-                            
-                     % Determine distance between stimpair coor and all other
-                     % electrodes with a SPES respons. EXCLUDE DEPTH
-                     % ELECTRODES   
-                     for elec = 1:size(data.ch,1)
-  
-                         % Find name of elec
-                         elec_name = data.ch(elec);
-                         % Find row number of elec in MNI coordinates matrix
-                         loc_elec = find(ismember(table2cell(elec_coords(pat).elecs_tsv(:,1)), elec_name), 1);
-        
-                         % Coordinates of elec
-                         coor_elec = elec_coords(pat).mni_coords(loc_elec,1:3);
-                          
-                         % Distance of elec to middle of the stimpair
-                         distance = norm(coor_elec-coor_stimp); 
+        % If electrode is an depth electrode, exclude from the analysis
+        % since the distance between depth electrodes is different from
+        % the distance between coretx electrodes
+        if ismember(elec_coords(pat).elecs_tsv.group(loc1),'depth') || ismember(elec_coords(pat).elecs_tsv.group(loc2),'depth')
+            % Skip during the distance analysis
+        else
+            % Find the coordinates of the stimpair electrodes
+            coor1 = elec_coords(pat).mni_coords(loc1,1:3);
+            coor2 = elec_coords(pat).mni_coords(loc2,1:3);
+    
+            % Find the distance between the two electrodes of the stimpair
+            coor_stimp(:,1) = (coor1(1)+coor2(1))/2;
+            coor_stimp(:,2) = (coor1(2)+coor2(2))/2;
+            coor_stimp(:,3) = (coor1(3)+coor2(3))/2;
+       
+    
+             % Check that the middle between the two stimpair electrodes is correct
+             if ~isequal(norm(coor1-coor_stimp), norm(coor_stimp-coor2))
+                 error('did not find the correct middle of the stimulation pair electrodes, row 59')
+             end
+                        
+                 % Determine distance between stimpair coor and all other
+                 % electrodes with a SPES respons. EXCLUDE DEPTH
+                 % ELECTRODES   
+                 for elec = 1:size(data.ch,1)
+
+                     % Find name of elec
+                     elec_name = data.ch(elec);
+                     % Find row number of elec in MNI coordinates matrix
+                     loc_elec = find(ismember(table2cell(elec_coords(pat).elecs_tsv(:,1)), elec_name), 1);
+    
+                     % Coordinates of elec
+                     coor_elec = elec_coords(pat).mni_coords(loc_elec,1:3);
+                      
+                     % Distance of elec to middle of the stimpair
+                     distance = norm(coor_elec-coor_stimp); 
 
 %                          if ~isnan(dataBase(pat).ccep_clin.n1_peak_sample(elec, stimp)) && ~isnan(dataBase(pat).ccep_prop.n1_peak_sample(elec, stimp)) && ~isequal(data.tb_channels.group{elec},'depth')                                                                         
 %                              
@@ -90,9 +90,9 @@ for pat = 1:size(dataBase,2)
 %                          end 
 
 
-                         %% For responses in clinical-SPES
-                         % Independent of the response in propofol-SPES
-                         if ~isnan(dataBase(pat).ccep_clin.n1_peak_sample(elec, stimp)) && ~isequal(data.tb_channels.group{elec},'depth')
+                     %% For responses in clinical-SPES
+                     % Independent of the response in propofol-SPES
+                     if ~isnan(dataBase(pat).ccep_clin.n1_peak_sample(elec, stimp)) && ~isequal(data.tb_channels.group{elec},'depth')
 
 %                              if distance < 20.0
 %                                  dist_clin(r_clin,pat) = {'A'};
@@ -103,22 +103,22 @@ for pat = 1:size(dataBase,2)
 %                              else
 %                                  warning(sprintf('SOmething went wrong on elec = %d and stimp = %d for pat = %d',elec, stimp, pat))
 %                              end
-                             
+                         
 
-                             % Save the absolute number of distance
-                             % between stimpair and electrode and the
-                             % latency in the second column
-                             dist_lat_clin(r_clin,1) = distance;
-                             lat_clin = dataBase(pat).ccep_clin.n1_peak_sample(elec, stimp) - (2*fs);
-                             dist_lat_clin(r_clin,2) = lat_clin *ts *1000;    % in ms
+                         % Save the absolute number of distance
+                         % between stimpair and electrode and the
+                         % latency in the second column
+                         dist_lat_clin(r_clin,1) = distance;
+                         lat_clin = dataBase(pat).ccep_clin.n1_peak_sample(elec, stimp) - (2*fs);
+                         dist_lat_clin(r_clin,2) = lat_clin *ts *1000;    % in ms
 
-                             r_clin = r_clin+1;                             
+                         r_clin = r_clin+1;                             
 
-                         end
+                     end
 
-                         % For responses in propofol-SPES
-                         if ~isnan(dataBase(pat).ccep_prop.n1_peak_sample(elec, stimp)) && ~isequal(data.tb_channels.group{elec},'depth')
-                                                          
+                     % For responses in propofol-SPES
+                     if ~isnan(dataBase(pat).ccep_prop.n1_peak_sample(elec, stimp)) && ~isequal(data.tb_channels.group{elec},'depth')
+                                                      
 %                              if distance < 20.0
 %                                  dist_prop(r_prop,:) = {'A'};
 %                              elseif distance > 20.0 && distance < 40.0
@@ -130,21 +130,21 @@ for pat = 1:size(dataBase,2)
 %                              end
 
 
-                             % Save the absolute number of distance
-                             % between stimpair and electrode and the
-                             % latency in the second column
-                             dist_lat_prop(r_prop,1) = distance;
-                             lat_prop = dataBase(pat).ccep_prop.n1_peak_sample(elec, stimp) - (2*fs);
-                             dist_lat_prop(r_prop,2) = lat_prop *ts *1000;    % in ms
-                             
-                             r_prop = r_prop +1;                                                   
-    
-                         end 
+                         % Save the absolute number of distance
+                         % between stimpair and electrode and the
+                         % latency in the second column
+                         dist_lat_prop(r_prop,1) = distance;
+                         lat_prop = dataBase(pat).ccep_prop.n1_peak_sample(elec, stimp) - (2*fs);
+                         dist_lat_prop(r_prop,2) = lat_prop *ts *1000;    % in ms
+                         
+                         r_prop = r_prop +1;                                                   
 
-                     end
+                     end 
 
-            end
+                 end
+
         end
+    end
 
 end
 

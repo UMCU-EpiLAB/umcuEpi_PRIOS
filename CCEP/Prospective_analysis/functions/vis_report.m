@@ -23,15 +23,13 @@ dataBase(:,loc_remove) = [];
 
 
 %% Visualise the number of ERs per SPES session per patient with bar graphs
-% TODO: total number of ERs does not make much sense, because it depends on
-% the number of stimulus pairs and number of channels. Normalizing it to
-% ERs per stimulus pairs would make more sense. 
 figure('Position',[407,689,939,373])
 ax1 = axes('Position',[0.074,0.11,0.9,0.82]);
 
 % Pre-allocation
 ERs_tot = zeros(size(dataBase,2)*2,1);
 subjects = cell(1,size(dataBase,2));
+combin = zeros(size(dataBase,2),3);
 
 for subj = 1:size(dataBase,2)
    
@@ -58,31 +56,17 @@ for subj = 1:size(dataBase,2)
     combin(subj,3)= ERs_tot(prop,1);                    % Only in prop
 
 
-
-
-    %%
-    
-    subjects_1{subj} = dataBase(subj).ccep_clin.sub_label;
-    subjects{clin} = [dataBase(subj).ccep_clin.sub_label,'_c'];
-    subjects{prop} = [dataBase(subj).ccep_clin.sub_label,'_p'];
+    subjects{subj} = dataBase(subj).ccep_clin.sub_label;
 
 end
- 
-% plot_tot(1:2:12,1:2) = ERs_tot(1:2:end,:);
-% plot_tot(1:2:12,3:4) = 0;
-% 
-% plot_tot(2:2:12,3:4 )= ERs_tot(2:2:end,:);
-% plot_tot(2:2:12,1:2) = 0;
 
-% Create bar graph
-X = categorical(subjects_1);
+%% Create bar graph
+X = categorical(subjects);
 b =   bar(ax1,X,combin,'stacked');         % Order: only in clin, in both, only in prop
 
 b(1).FaceColor(:) = [194/255 228/255 255/255];            % only in clinical-SPES
-b(2).FaceColor(:) =  [17/255 145/255 250/255];          % Both
-b(3).FaceColor(:) = [0/255 66/255 133/255];            % only in propofol-SPES
-% b(4).FaceColor(:) = [194/255 228/255 255/255];           % propofol-SPES
-% ax1.XTickLabel = [];
+b(2).FaceColor(:) =  [17/255 145/255 250/255];            % Both
+b(3).FaceColor(:) = [0/255 66/255 133/255];               % only in propofol-SPES
  
 % Place the Number of ERs next to the column
 for i = 1:3%:size(dataBase,2)*2
@@ -98,15 +82,6 @@ legend('Only in Clinical-SPES','Both sessions','Only in Propofol-SPES')
 ylabel('Number of ERs');
 title('Total number of CCEPs evoked per SPES session')
 
-ymin = min(ylim);
-y_range = diff(ylim)-450;
-x_as = 1:2:size(subjects,2);
-size_pat = size(subjects_1,2); 
-second_row_txt = subjects_1; %cellstr(strsplit(num2str(medians,'%.2f '),' '));
-text([-0.5 ;x_as(:)+0.5], ones(1,size_pat+1)*ymin-0.1*y_range, cellstr([' ',second_row_txt]),'HorizontalAlignment','center','FontSize', 10)
-
-
-
 % Save figure
 outlabel='CCEPs_per_session.png';
 path = fullfile(myDataPath.CCEPpath,'Visualise_agreement/');
@@ -115,17 +90,11 @@ if ~exist(path, 'dir')
 end
 saveas(gcf,[path,outlabel],'png')
 
-%% Visualise the network characteristics in a heatmap to later plot on the MRI
-% Create a heatmap of the network characteristics with the outlay of the
-% electrodes from the matlabSjabloon in Excel.
 
-% for subj = 1:size(dataBase,2)    
-%     heat_map_grid(myDataPath, dataBase(subj).ccep_clin, dataBase(subj).agreement_parameter)
-% end
 
 %% Create Violinplot of the ranking of the number of ERs per stimulation pair. 
 
-ERs_perStimp_violin(dataBase,myDataPath) 
+ERs_perStimp_violin(dataBase,myDataPath,subjects) 
     
     
 end

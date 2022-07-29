@@ -23,7 +23,7 @@ for pat = 1:size(dataBase,2)
         start_row(pat,:) = size(dataBase(pat-1).agreement_parameter.ERs_elecClin,2) + start_row(pat-1,:);
     end
 end
-start_row(end,:) = size(new_els,1);
+start_row(end,:) = size(new_els,1)+start_row(end-1,:);
 
 for m = 1:size(mode,2)
     
