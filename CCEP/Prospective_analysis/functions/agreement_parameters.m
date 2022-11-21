@@ -1,4 +1,4 @@
-function agreement_parameter = agreement_parameters(agreement, dataBase_clin, dataBase_prop)
+function agreement_parameter = agreement_parameters(Amat, dataBase_clin, dataBase_prop)
 % Determine the network characteristics/network parameters per
 % electrode/stimulation pair. 
 % The rewritten adjacency matrix of function rewrite_Amat.m is used to
@@ -10,8 +10,8 @@ agreement_parameter = struct;
 
 % Original adjacency matrix with stimultion pairs in rows and electrodes in
 % columns
-wantedAmatClin = agreement.AmatClin'; 
-wantedAmatProp = agreement.AmatProp';
+wantedAmatClin = Amat.AmatClin'; 
+wantedAmatProp = Amat.AmatProp';
 
 % Determine the total number of ERs per stimulation pair (row)
 ERs_stimpClin = sum(wantedAmatClin,2);

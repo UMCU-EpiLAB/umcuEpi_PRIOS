@@ -52,7 +52,7 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
                 plot(tt,squeeze(dataBase.cc_epoch_sorted_select_reref_avg(chan,stimp,:)),'k','linewidth',2);  % plot the rereference signal in a solid line
 
             else
-                plot(tt,squeeze(dataBase.cc_epoch_sorted_select(chan,stimp,:,:)),'r:');                % plot the 10 separate stimulations
+                plot(tt,squeeze(dataBase.cc_epoch_sorted_select(chan,stimp,:,:)),'b:');                % plot the 10 separate stimulations
                 hold on
                 plot(tt,squeeze(dataBase.cc_epoch_sorted_avg(chan,stimp,:)),'k','linewidth',2);
 
@@ -243,9 +243,9 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
 
     
     if strcmp(cfg.reref,'y')
-        filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_label,'_N1sChecked.mat'];
+        filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_label,'_N1sChecked2.mat'];
     else
-        filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_label,'_N1sNorerefChecked.mat'];
+        filename = [dataBase.sub_label,'_',dataBase.ses_label,'_',dataBase.task_label,'_N1sNorerefChecked2.mat'];
     end
 
     filefolder = fullfile(myDataPath.CCEPpath, dataBase.sub_label, dataBase.ses_label, dataBase.task_label,'/');
@@ -254,8 +254,8 @@ for stimp = endstimp+1:size(dataBase.cc_epoch_sorted_avg,2)
     end
 
     % save file during scoring in case of error
-    save(fullfile(filefolder,filename),'ccep');
-    save([myDataPath.CCEP_allpat,filename], 'ccep');
+    save(fullfile(filefolder,filename),'ccep2');
+    save([myDataPath.CCEP_allpat,filename], 'ccep2');
 end
 fprintf('CCEPs are saved for %s for subject %s \n' , dataBase(1).task_name, dataBase(1).sub_label);
 
