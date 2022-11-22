@@ -1,6 +1,7 @@
 %% detection and visual scoring of ERs
 % author: Dorien van Blooijs, Sifra Blok
 % date: September 2019, April 2020
+
 % load ECoG data, split into stimulation trials, re-reference the data,
 % detect N1-peaks after stimulation, visual check of detected N1s, save
 % these for further analysis and display
