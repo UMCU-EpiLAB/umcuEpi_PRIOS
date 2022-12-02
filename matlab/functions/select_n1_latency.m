@@ -1,152 +1,105 @@
 % Observers are able to select another N1-peak than found by the detector. 
 % When two observers have selected two different points, take the mean of the two observed points when the difference is <
-% 0.03 seconds. When the difference is more, than perform an visual check and
-% select the right point. 
+% 0.0024 seconds. When the difference is more, than perform a visual check and
+% select the correct N1-peak. 
             
-function dataBase = select_n1_latency(rater1, rater2, myDataPath, sublabel, tasklabel, subj)
+function select_n1_latency(rater1, rater2, myDataPath)
       
-% load CCEP's to plot later
-files_in_folder = dir([myDataPath.dataPath,'derivatives','/CCEPs']);
-file_name = [['sub-',sublabel],'_',['task-',tasklabel],'_CCEP.mat'];
+%% load CCEPs to plot later
+% this could take more than 2 minutes
 
-for i = 1:size(files_in_folder,1)
-    if contains(files_in_folder(i).name,file_name)
-        
-        if isequal(tasklabel , 'SPESclin')
-            tic
-            load([[myDataPath.dataPath,'derivatives','/CCEPs/'],files_in_folder(i).name]); % this could take more than 2 minutes, only do ones and save.
-            toc
-            ccep = dataBase_clin;
-        elseif  isequal(tasklabel , 'SPESprop')
-            tic
-            load([[myDataPath.dataPath,'derivatives','/CCEPs/'],files_in_folder(i).name]); % this could take more than 2 minutes, only do ones and save.
-            toc
-            ccep = dataBase_prop;
-        end
+files_in_folder = dir(fullfile(myDataPath.dataPath,'derivatives','CCEPs'));
+[~,filename] = fileparts(rater1.dataName);
+replaceRun = strfind(filename,'run');
+filename = [filename(1:replaceRun-1), 'CCEP.mat'];
 
-       
-    end
+idx_file = contains({files_in_folder(:).name},filename);
+ccep = load(fullfile(myDataPath.dataPath,'derivatives','CCEPs',files_in_folder(idx_file).name)); 
 
-end
-% preallocate
-mean_N1_lat = NaN(size(ccep.ch,1), size(ccep.cc_stimsets_avg,1));
+%% correct N1-latencies
 
-for stimp = 1:size(rater1.ccep.n1_peak_sample_check,2)
+% preallocation
+n1_peak_sample_check_comb = NaN(size(ccep.ch,1), size(ccep.cc_stimsets_avg,1));
 
-    for elec = 1:size(rater1.ccep.n1_peak_sample_check,1)
-        if ~isnan(rater1.ccep.n1_peak_sample_check(elec,stimp)) && ~isnan(rater2.ccep.n1_peak_sample_check(elec,stimp))
-            % rater 1 and rater 2 should have the same nan and non-nan
-            % because in script interobserver_analysis only responses with
-            % an N1 scored by both observers are saved, when only 1
-            % observer scored an N1 then it is replaced with NaN for both
-            % observers.
-
-            lat_R1 = rater1.ccep.n1_peak_sample_check(elec,stimp);
-            lat_R2 = rater2.ccep.n1_peak_sample_check(elec,stimp);
-
-            if abs(lat_R1 - lat_R2) > 5 
+for stimp = 1:size(rater1.n1_peak_sample_check,2)
+    for elec = 1:size(rater1.n1_peak_sample_check,1)
+        if ~isnan(rater1.n1_peak_sample_check(elec,stimp)) && ~isnan(rater2.n1_peak_sample_check(elec,stimp))
+            
+            if abs(rater1.n1_peak_sample_check(elec,stimp) - rater2.n1_peak_sample_check(elec,stimp)) > 5 
+                
                 % plot figure to determine whether observer 1 or 2 was right
-                H=figure(1);
+                H = figure(1);
                 H.Units = 'normalized';
                 H.Position = [0.14,0.0625,0.77,0.7];
     
                 plot(ccep.tt, squeeze(ccep.cc_epoch_sorted_select_reref_avg(elec,stimp,:)),'k','linewidth',2);  % plot the rereference signal in a solid line
                 hold on
                 
-                plot(ccep.tt(rater1.ccep.n1_peak_sample_check(elec,stimp)), rater1.ccep.n1_peak_amplitude_check(elec,stimp),'o','MarkerFaceColor','r','MarkerEdgeColor','r','MarkerSize',4)
-                plot(ccep.tt(rater2.ccep.n1_peak_sample_check(elec,stimp)), rater2.ccep.n1_peak_amplitude_check(elec,stimp),'o','MarkerFaceColor','b','MarkerEdgeColor','b','MarkerSize',4)
+                plot(ccep.tt(rater1.n1_peak_sample_check(elec,stimp)), rater1.n1_peak_amplitude_check(elec,stimp),'o','MarkerFaceColor','r','MarkerEdgeColor','r','MarkerSize',4)
+                plot(ccep.tt(rater2.n1_peak_sample_check(elec,stimp)), rater2.n1_peak_amplitude_check(elec,stimp),'o','MarkerFaceColor','b','MarkerEdgeColor','b','MarkerSize',4)
                 plot(ccep.tt,squeeze(ccep.cc_epoch_sorted_select_reref(elec,stimp,:,:)),'r:');                % plot the 10 separate stimulations
 
-                % Create a patch for the -1/5:9 ms interval in which no
-                % physiological activity can be measured.
-                patch([0 0.009 0.009 0],[-800 -800 750 750],[0.6,0.2,0.2],'EdgeAlpha',0)
+                % Create a patch for the 0-9 ms interval post-stimulation
+                % in which no physiological activity can be measured.
+                patch([0 19/2048 19/2048 0],[-800 -800 750 750],[0.6,0.2,0.2],'EdgeAlpha',0)
                 alpha(0.2)
                 
                 hold off
     
                 xlim([-0.05 0.2])
-                ymin = floor(1.1*rater1.ccep.n1_peak_amplitude(elec,stimp));
+                ymin = floor(1.1*rater1.n1_peak_amplitude(elec,stimp));
                 ylim([ymin 600])
                 xlabel('Time(s)')
                 ylabel('Potential (\muV)')
                 title(sprintf('Electrode %s, stimulating %s',ccep.ch{elec},ccep.stimpnames_avg{stimp}))
                 legend(' ','Rater1','Rater2',' ')
 
+                % Decide which of the two N1-peaks is the correct one
+                answer = input('Which N1-peak is correct selected? Rater1(red) or Rater2(blue) [1/2]: ');
 
-                % Decide which of the two N1-peaks is the right one
-                prompt = 'Which N1-peak is correct selected? Rater1(red) or Rater2(blue) 1/2: ';
-                str = input(prompt,'s');
+                if answer == 1
+                    n1_peak_sample_check_comb(elec,stimp) = rater1.n1_peak_sample_check(elec,stimp);
 
-                if isequal(str,'1')
-                    mean_N1_lat(elec,stimp) = rater1.ccep.n1_peak_sample_check(elec,stimp);
-
-                elseif isequal(str,'2')
-                    mean_N1_lat(elec,stimp) = rater2.ccep.n1_peak_sample_check(elec,stimp);
+                elseif answer == 2 
+                    n1_peak_sample_check_comb(elec,stimp) = rater2.n1_peak_sample_check(elec,stimp);
 
                 end
 
-            else % when latencies for both observers was (almost) equal  
-                mean_N1_lat(elec,stimp) = round(mean([rater1.ccep.n1_peak_sample_check(elec,stimp),rater2.ccep.n1_peak_sample_check(elec,stimp)]));
+            else % when latencies for both observers were (almost) equal  
+                n1_peak_sample_check_comb(elec,stimp) = round(mean([rater1.n1_peak_sample_check(elec,stimp),rater2.n1_peak_sample_check(elec,stimp)]));
 
             end
-
         end
-
     end
-
 end
 
+%% save file
+% save struct in which visual checks of the N1-latencies of both observers are combined
 
-    
-if isequal(tasklabel,'SPESclin')  
-  
-    dataBase.ccep_clin.n1_peak_sample = mean_N1_lat;        
-    dataBase.ccep_clin.sub_label = sublabel;
-    dataBase.ccep_clin.task_label= tasklabel;
-    dataBase.ccep_clin.stimsets_avg = rater1.ccep.stimsets_avg;
-    dataBase.ccep_clin.stimpnames_avg = rater1.ccep.stimpnames_avg;
-    dataBase.ccep_clin.ch = rater1.ccep.ch;
+raterComb.n1_peak_sample_check  = n1_peak_sample_check_comb;
+raterComb.ch                    = rater1.ch;
+raterComb.dataName              = rater1.dataName;
+raterComb.n1_peak_sample        = rater1.n1_peak_sample;
+raterComb.stimchans_avg         = rater1.stimchans_avg;
+raterComb.stimpnames_avg        = rater1.stimpnames_avg;
+raterComb.stimsets_avg          = rater1.stimsets_avg;
+raterComb.tb_channels           = rater1.tb_channels;
+raterComb.tt                    = rater1.tt;
 
-    % Save file in inter_observer folder REPLACE
-    % Keep the original in the original patient sub folders.
-    filefolder = fullfile(myDataPath.CCEP_interObVar);
-    filename = [['sub-',dataBase.ccep_clin.sub_label],'_ses-1_',['task-',dataBase.ccep_clin.task_label],'_meanN1Lat.mat'];
-    if ~exist(filefolder,'dir')
-        mkdir(filefolder)
-    end
+filefolder = fullfile(myDataPath.CCEPpath,'checkedN1s');
+[~,filename] = fileparts(rater1.dataName);
+replaceRun = strfind(filename,'run');
+filename = [filename(1:replaceRun-1), 'N1sChecked_comb.mat'];
 
-    % Save to make sure that you do not have to select the right N1-peaks
-    % when two observers selected different peaks
-    save(fullfile(filefolder,filename),'dataBase');
-
-elseif isequal(tasklabel,'SPESprop')
-    
-    dataBase.ccep_prop.n1_peak_sample = mean_N1_lat;        
-    dataBase.ccep_prop.sub_label = sublabel;
-    dataBase.ccep_prop.task_label= tasklabel;
-    dataBase.ccep_prop.stimsets_avg = rater1.ccep.stimsets_avg;
-    dataBase.ccep_prop.stimpnames_avg = rater1.ccep.stimpnames_avg;
-    dataBase.ccep_prop.ch = rater1.ccep.ch;
-
-
-    % Save file in inter_observer folder REPLACE
-    % Keep the original in the original patient sub folders.
-    filefolder = fullfile(myDataPath.CCEP_interObVar);
-    filename = [['sub-',dataBase.ccep_prop.sub_label],'_ses-1_',['task-',dataBase.ccep_prop.task_label],'_meanN1Lat.mat'];
-    if ~exist(filefolder,'dir')
-        mkdir(filefolder)
-    end
-    
-    % Save to make sure that you do not have to select the right N1-peaks
-    % when two observers selected different peaks
-    save(fullfile(filefolder,filename),'dataBase');
-
-
+if ~exist(filefolder,'dir')
+    mkdir(filefolder)
 end
 
+save(fullfile(filefolder,filename),'-struct','raterComb','-v7.3');
 
+fprintf('N1-latencies are checked and saved as: \n%s \n',fullfile(filefolder,filename))
 
-end
+end % end function
 
 
 

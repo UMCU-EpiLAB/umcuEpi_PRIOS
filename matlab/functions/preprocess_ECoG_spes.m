@@ -9,14 +9,15 @@ else
     minstim = cfg.minstim;
 end
 
-% if cfg.dir_avg is not defined in config_CCEP.m, default is 'no'
-if sum(contains(fieldnames(cfg),'dir_avg'))<1
-    cfg.dir_avg = 'no';
-end
+% % if cfg.dir_avg is not defined in PRIOS00_config.m, default is 'no'
+% if sum(contains(fieldnames(cfg),'dir_avg'))<1
+%     cfg.dir_avg = 'no'; %FIXTHIS: wat is dir_avg??? --> kan volgens mij
+%     weg want wordt nergens meer gebruikt.
+% end
 
 for subj = 1:size(dataBase,2)
     
-    %% Determine Burst suppression periods to be later removed
+    %% Determine Burst suppression periods to enable removing stimuli in these periods (test in PRIOS03(?))
     BS_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
     BS_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'burst_suppression'));
 
@@ -27,14 +28,17 @@ for subj = 1:size(dataBase,2)
         BS_stop = str2double(BS_stop);
     end
 
-    BS_sig = zeros(1,100);          % Preallocation with a guess of the size, structs with empty cells are removed.
-    for i=1:size(BS_start,1)
-        BS_sig = [BS_sig, BS_start(i):BS_stop(i)];  %#ok<AGROW>
+    BS_sample_tmp = cell(1,size(BS_start,1));          
+    for iBS = 1:size(BS_start,1)
+        BS_sample_tmp{1,iBS} = BS_start(iBS):BS_stop(iBS);  
     end
 
-    dataBase(subj).Burstsup = BS_sig;
+    BS_sample = horzcat(BS_sample_tmp{:});
+    dataBase(subj).Burstsup = BS_sample;
 
-    %% Determine seizure periods to be later removed
+    clear BS_sample_tmp
+
+    %% Determine seizure periods to enable removing stimuli in these periods (test in PRIOS01)
     % This is yet no electrode specific
     SZ_start = dataBase(subj).tb_events.sample_start(strcmp(dataBase(subj).tb_events.trial_type,'seizure'));
     SZ_stop = dataBase(subj).tb_events.sample_end(strcmp(dataBase(subj).tb_events.trial_type,'seizure'));
@@ -46,30 +50,33 @@ for subj = 1:size(dataBase,2)
         SZ_stop = str2double(SZ_stop);
     end
 
-    SZ_sig = zeros(1,100);                  % Preallocation with a guess of the size, structs with empty cells are removed.
-    for i=1:size(SZ_start,1)
-        SZ_sig  = [SZ_sig, SZ_start(i):SZ_stop(i)];              %#ok<AGROW> % When there are multiple SZ, then the times samples are concatenaded in the same array
+    SZ_sample_tmp = cell(1,size(SZ_start,1));
+    for iSZ = 1:size(SZ_start,1)
+        SZ_sample_tmp{1,iSZ}  = SZ_start(iSZ):SZ_stop(iSZ);              
     end
 
-    dataBase(subj).Seizure = SZ_sig;
+    SZ_sample = horzcat(SZ_sample_tmp{:});
+    dataBase(subj).Seizure = SZ_sample;
 
+    clear SZ_sample_tmp
 
     %% Remove stimulus pairs with less than minimal interstim time
     % Stimulations with too little interstimulus time need to be removed
     % since it cannot be guaranteed that the signal went back to baseline
     % before the next stimulus was given.
 
-    idx_tbelec = contains(dataBase.tb_events.trial_type,'electrical_stimulation');
-    tb_stim = dataBase.tb_events(idx_tbelec,:);
+    idx_tbstim = contains(dataBase.tb_events.trial_type,'electrical_stimulation');
+    tb_stim = dataBase.tb_events(idx_tbstim,:);
 
     % Keep stimulations that are at least 3 seconds apart (because of
     % mechanical problems with the stimulator
     idx_keep5s = [true(1); diff([tb_stim.onset])>=3];
     dataBase.tb_events = tb_stim(idx_keep5s,:);
 
-
     %% Unique stimulation pairs
-    stimpair = dataBase(subj).tb_events.electrical_stimulation_site(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a')) ;
+    stimpair = dataBase(subj).tb_events.electrical_stimulation_site( ...
+        contains(dataBase(subj).tb_events.sub_type,'SPES') & ...
+        ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a'));
 
     stimnum = NaN(size(stimpair,1),2);
     for stimp = 1:size(stimpair,1)
@@ -80,21 +87,21 @@ for subj = 1:size(dataBase,2)
     end
 
     % these are set in config_CCEP
-    if strcmp(cfg.dir,'yes') && strcmp(cfg.amp,'yes') % take into account the direction (C1-C2 and C2-C1 separately) and the stimulation current
-        stimcur = dataBase(subj).tb_events.electrical_stimulation_current(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a'));
-        stimelek = [stimnum stimcur];
-
-    elseif strcmp(cfg.dir,'yes') && strcmp(cfg.amp,'no') % take into account only the direction
+%     if strcmp(cfg.dir,'yes') && strcmp(cfg.amp,'yes') % take into account the direction (C1-C2 and C2-C1 separately) and the stimulation current
+%         stimcur = dataBase(subj).tb_events.electrical_stimulation_current(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a'));
+%         stimelek = [stimnum stimcur];
+% 
+%     elseif strcmp(cfg.dir,'yes') && strcmp(cfg.amp,'no') % take into account only the direction
         stimelek = stimnum;
 
-    elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'yes') % take into account only the stimulation current
-        stimcur = dataBase(subj).tb_events.electrical_stimulation_current(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a'));
-        stimelek = [sort(stimnum,2) stimcur];
-
-    elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'no') % do not take stimulation current or direction into account
-        stimelek = sort(stimnum,2);
-
-    end
+%     elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'yes') % take into account only the stimulation current
+%         stimcur = dataBase(subj).tb_events.electrical_stimulation_current(contains(dataBase(subj).tb_events.sub_type,'SPES') & ~contains(dataBase(subj).tb_events.electrical_stimulation_site,'n/a'));
+%         stimelek = [sort(stimnum,2) stimcur];
+% 
+%     elseif strcmp(cfg.dir,'no') && strcmp(cfg.amp,'no') % do not take stimulation current or direction into account
+%         stimelek = sort(stimnum,2);
+% 
+%     end
 
     [cc_stimsets_all,~,IC_all] = unique(stimelek,'rows');
 
@@ -103,13 +110,17 @@ for subj = 1:size(dataBase,2)
 
     if any(diff(n) ~= 0) % if any pair is stimulated a different amount
 
-        if n<minstim
+        if n < minstim
             stimremove = n<minstim;
             % remove stim pairs in both directions
             remove_elec = cc_stimsets_all(stimremove,:);
-            remove_stimp = find(cc_stimsets_all(:,2)==remove_elec(:,2) & cc_stimsets_all(:,1)==remove_elec(:,1) |  cc_stimsets_all(:,2)==remove_elec(:,1) &  cc_stimsets_all(:,1)==remove_elec(:,2));
+            remove_stimp = find(cc_stimsets_all(:,2) == remove_elec(:,2) & ...
+                cc_stimsets_all(:,1)==remove_elec(:,1) | ...
+                cc_stimsets_all(:,2)==remove_elec(:,1) &  ...
+                cc_stimsets_all(:,1)==remove_elec(:,2));
 
-            warning('%s: stimulation pair(s) are stimulated less than all others, these are removed\n',dataBase(subj).sub_label);
+            warning('%s: stimulation pair(s) are stimulated less than all others, these are removed\n', ...
+                dataBase(subj).sub_label);
 
             for i = 1:length(remove_stimp)-1
                 stimelek(IC_all==remove_stimp(i),:)= NaN;
@@ -122,24 +133,26 @@ for subj = 1:size(dataBase,2)
             [cc_stimsets_all,~,IC_all] = unique(stimelek,'rows');
             n = histcounts(IC_all,'BinMethod','integers');
         end
-        warning('%s: a stimulation pair is probably stimulated more than others, often no problem \n',dataBase(subj).sub_label)
+
+        warning('%s: a stimulation pair is probably stimulated more than others, often no problem \n', ...
+            dataBase(subj).sub_label)
     end
 
     %% Number of stimulations per stimulus pair
     % find the amount of time most stimulus pairs are stimulated and set
     % that as maximal number of stimulus pairs
-    max_stim = max(n);                    %max_stim = max(n);               % The max stim per stimulation pair DIRECTION!
+    max_stim = max(n); % The max stim per stimulation pair DIRECTION!
 
     sort_cc_stimsets = sort(cc_stimsets_all,2);
     [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
 
-    if 2*length(cc_stimsets_avg) ~= length(cc_stimsets_all)                 % When not all stimulation pairs are stimulated in both directions
-        Ncount = find(histcounts(IC_avg,length(cc_stimsets_avg))~=2)';      % stimpairs which are stimulated in one direction
+    if 2*length(cc_stimsets_avg) ~= length(cc_stimsets_all) % When not all stimulation pairs are stimulated in both directions
+        Ncount = find(histcounts(IC_avg,length(cc_stimsets_avg))~=2)'; % stimpairs which are stimulated in one direction
 
         % Allocation
         remove_rows = zeros(length(Ncount),1);
-        for i = 1:length(Ncount)
-            remove_rows(i,:) = find(IC_avg==Ncount(i,:));                    % Row in which the 'single' stimpair is located
+        for iRemove = 1:length(Ncount)
+            remove_rows(iRemove,:) = find(IC_avg==Ncount(iRemove,:)); % Row in which the 'single' stimpair is located
         end
 
         % Remove rows with 'single' stimpairs
@@ -148,7 +161,6 @@ for subj = 1:size(dataBase,2)
         % recalculate IC_avg
         [cc_stimsets_avg, ~, IC_avg] = unique(sort_cc_stimsets,'rows');
     end
-
 
     %% Determine stimulation pair names
     % pre-allocation
@@ -204,11 +216,11 @@ for subj = 1:size(dataBase,2)
                     % do nothing, because epoch starts before the start of
                     % a file (and gives an error)
 
-                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),BS_sig)
+                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),BS_sample)
                     % do nothing because stimulation is part of burst
                     % suppression period and therefore not thrustworthy
 
-                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),SZ_sig)
+                elseif ismember(dataBase(subj).tb_events.sample_start(eventnum(n)),SZ_sample)
                     % do nothing because stimulation is part of a seizure
                     % seizure periods can therefore not be scored
 
@@ -218,9 +230,7 @@ for subj = 1:size(dataBase,2)
 
                 end
             end
-
         end
-
     end
 
     %% Average epochs
@@ -292,7 +302,6 @@ for subj = 1:size(dataBase,2)
     dataBase(subj).cc_stimchans_avg = cc_stimchans_avg;
     dataBase(subj).stimpnames_avg = cc_stimpnames_avg;
     dataBase(subj).stimpnames_all = cc_stimpnames_all;
-
 
     dataBase(subj).cc_epoch_sorted = cc_epoch_sorted_all;
     dataBase(subj).tt_epoch_sorted = tt_epoch_sorted_all;

@@ -1,103 +1,131 @@
-% function to read data into dataBase
+% function to read BIDS-data into dataBase
 % author: Dorien van Blooijs
 % date: June 2019
+
+% INPUTS:
+% cfg: 
+%   is a struct with the following fields:
+% - sub_labels
+%   cell{1 x subjects} containing the names of the subjects
+% - ses_label
+%   string containing the name of the session
+% - task_label
+%   string containing the name of the task
+% - run_label
+%   cell{1 x runs} containing the names of the runs
+% 
+% myDataPath: 
+%   is a struct with the following fields:
+% - dataPath
+%   string containing the folder path where the BIDS files are located
+
+% OUTPUTS:
+% dataBase: 
+%   is a struct that is created in this function. To the database structure
+%   the following matrices will be added:
+% - sub_label
+%   string containing the name of the subject
+% - ses_label
+%   string containing the name of the session
+% - task_label
+%   string containg the name of the task
+% - run_label
+%   string containing the name of the run(s)
+% - dataName
+%   name of the eeg-file from which data is extracted
+% - ccep_header
+%   struct containing, among other things, the field: Fs (sample frequency)
+% - tb_events
+%   table containing information regarding events in the eeg-file (see BIDS
+%   structure)
+% - tb_channels
+%   table containing information regarding the recording channels (see BIDS
+%   structure)
+% - tb_electrodes
+%   table containing information regarding the hardware electrodes (see
+%   BIDS structure)
+% - ch
+%   cell[channels x 1] containing the channel names 
+% - raw_data
+%   matrix[channels x samples] containg the raw eeg-signals 
 
 function dataBase = load_ECoGdata(cfg,myDataPath)
 
 dataPath = myDataPath.dataPath;
 sub_labels = cfg.sub_labels;
 ses_label = cfg.ses_label;
-task_label = cfg.task_label;
-
-if isfield(cfg,'run_label')
-
-    if size(cfg.run_label{:},2)>4               % if label is more than run-
-        run_label = cfg.run_label;
-    else
-        run_label(1:size(sub_labels,2)) = {'run-*'};
-    end
-else
-    run_label(1:size(sub_labels,2)) = {'run-*'};
-end
+run_label = cfg.run_label;
 
 dataBase = struct([]);
-for i=1:size(run_label,2)
+for iRun = 1:size(run_label,2)
     D = dir(fullfile(dataPath,[sub_labels{1}],ses_label,'ieeg',...
-        [sub_labels{1} '_' ses_label '_' task_label ,'_',run_label{i}, '_ieeg.eeg']));
-    
+        [sub_labels{1} '_' ses_label '_' cfg.task_label ,'_',run_label{iRun}, '_ieeg.eeg']));
+
     if size(D,1) == 0
         error('%s does not exist',fullfile(dataPath,sub_labels{:},ses_label,'ieeg',...
-        [sub_labels '_' ses_label '_' task_label ,'_',run_label{i}, '_ieeg.eeg']))
+            [sub_labels{:} '_' ses_label '_' cfg.task_label ,'_',run_label{iRun}, '_ieeg.eeg']))
     end
-    
+
     % determine run_label
-   if ~isfield(cfg,'run_label') || size(cfg.run_label{:},2)<=4            
-        if size(D,1) == 1
-            run_label{i} = D(1).name(strfind(D(1).name,'run-'):strfind(D(1).name,'_ieeg')-1);
-        else
-            run_label{i} = D(1).name(strfind(D(1).name,'run-'):strfind(D(1).name,'_ieeg')-1);
-            fprintf('WARNING: More runs were available for %s_%s_%s, so determine run_label! \n',sub_labels{i},ses_label,task_label)
-        end
-        
-        dataName = fullfile(D(1).folder, D(1).name);
-    else
-        dataName = fullfile(D(1).folder, D(1).name);
-    end
-    
-    % use real task label instead of task_SPES*
+    dataName = fullfile(D(1).folder, D(1).name);
+
+    % use real ses label instead of ses-*
+    ses_temp = extractBetween(dataName,'ses-','/');
+    ses_label = ['ses-',ses_temp{1}];
+
+    % use real task label instead of task-SPES*
     task_temp = extractBetween(dataName,'task-','_');
     task_label = ['task-',task_temp{1}];
 
     % load data
     ccep_data = ft_read_data(dataName,'dataformat','brainvision_eeg');
     ccep_header = ft_read_header(dataName);
-    
+
     % load events
     D = dir(fullfile(dataPath,[sub_labels{1}],ses_label,'ieeg',...
-        [sub_labels{1} '_' ses_label '_' task_label ,'_',run_label{i},'_events.tsv']));
-    
+        [sub_labels{1} '_' ses_label '_' task_label ,'_',run_label{iRun},'_events.tsv']));
+
     eventsName = fullfile(D(1).folder, D(1).name);
-    
+
     tb_events = readtable(eventsName,'FileType','text','Delimiter','\t');
-    
+
     % load electrodes
     D = dir(fullfile(dataPath,[sub_labels{1}],ses_label,'ieeg',...
         [sub_labels{1} '_' ses_label ,'_electrodes.tsv']));
-    
+
     elecsName = fullfile(D(1).folder, D(1).name);
-    
+
     tb_electrodes = readtable(elecsName,'FileType','text','Delimiter','\t');
-    log_elec_incl = ~strcmp(tb_electrodes.group,'other');
-    tb_electrodes = tb_electrodes(log_elec_incl,:);                         % remove all the electrodes with comment other in column group
-    
+    idx_elec_incl = ~strcmp(tb_electrodes.group,'other');
+    tb_electrodes = tb_electrodes(idx_elec_incl,:);                         % remove all the electrodes with comment other in column group
+
     % load channels
     D = dir(fullfile(dataPath,[sub_labels{1}], ses_label,'ieeg',...
-        [sub_labels{1} '_' ses_label '_' task_label '_' run_label{i} '_channels.tsv']));
-    
-    channelsName = fullfile(D(1).folder, D(1).name);
-    
-    tb_channels = readtable(channelsName,'FileType','text','Delimiter','\t');
-    log_ch_incl = strcmp(tb_channels.type,'ECOG')|strcmp(tb_channels.type,'SEEG'); % remove all the electrodes without comment ECOG or SEEG
-    % log_ch_incl =strcmp(tb_channels.type,'ECOG');             % remove all electrodes without ECOG
+        [sub_labels{1} '_' ses_label '_' task_label '_' run_label{iRun} '_channels.tsv']));
 
-    
-    tb_channels = tb_channels(log_ch_incl,:);
+    channelsName = fullfile(D(1).folder, D(1).name);
+
+    tb_channels = readtable(channelsName,'FileType','text','Delimiter','\t');
+    idx_ch_incl = strcmp(tb_channels.type,'ECOG')|strcmp(tb_channels.type,'SEEG'); % remove all the electrodes without comment ECOG or SEEG
+% FIXTHIS: ook depth moet ik eruit halen!
+
+    tb_channels = tb_channels(idx_ch_incl,:);
     ch_incl = tb_channels.name;
 
-    data = ccep_data(log_ch_incl,:);
-    
-    dataBase(i).sub_label = sub_labels{1};
-    dataBase(i).ses_label = ses_label;
-    dataBase(i).task_label = task_label;
-    dataBase(i).run_label = run_label{i};
-    dataBase(i).dataName = dataName;
-    dataBase(i).ccep_header = ccep_header;
-    dataBase(i).tb_events = tb_events;
-    dataBase(i).tb_channels = tb_channels;
-    dataBase(i).tb_electrodes = tb_electrodes;
-    dataBase(i).ch = ch_incl;
-    dataBase(i).raw_data = data;
-    dataBase(i).data = data;
+    data = ccep_data(idx_ch_incl,:);
+
+    dataBase(iRun).sub_label = sub_labels{1};
+    dataBase(iRun).ses_label = ses_label;
+    dataBase(iRun).task_label = task_label;
+    dataBase(iRun).run_label = run_label{iRun};
+    dataBase(iRun).dataName = dataName;
+    dataBase(iRun).ccep_header = ccep_header;
+    dataBase(iRun).tb_events = tb_events;
+    dataBase(iRun).tb_channels = tb_channels;
+    dataBase(iRun).tb_electrodes = tb_electrodes;
+    dataBase(iRun).ch = ch_incl;
+    dataBase(iRun).raw_data = data;
+    dataBase(iRun).data = data;
 
 end
 end
