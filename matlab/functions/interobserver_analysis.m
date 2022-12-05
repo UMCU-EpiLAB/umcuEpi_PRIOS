@@ -60,6 +60,8 @@ filefolder = fullfile(myDataPath.CCEPpath,'checkedN1s');
 replaceRun = strfind(filename,'run');
 filename = [filename(1:replaceRun-1), 'N1sChecked_comb.mat'];
 
+% only run this if the file
+% sub-PRIOSXX_ses-X_task-SPESXXXX_N1sChecked_comb.mat does not exist yet.
 if ~exist(fullfile(filefolder,filename),'file')
     
     select_n1_latency(rater1, rater2, myDataPath);

@@ -19,7 +19,7 @@ ccep = load(fullfile(myDataPath.dataPath,'derivatives','CCEPs',files_in_folder(i
 %% correct N1-latencies
 
 % preallocation
-n1_peak_sample_check_comb = NaN(size(ccep.ch,1), size(ccep.cc_stimsets_avg,1));
+n1_peak_sample_check_comb = NaN(size(rater1.n1_peak_amplitude_check));
 
 for stimp = 1:size(rater1.n1_peak_sample_check,2)
     for elec = 1:size(rater1.n1_peak_sample_check,1)
@@ -32,12 +32,12 @@ for stimp = 1:size(rater1.n1_peak_sample_check,2)
                 H.Units = 'normalized';
                 H.Position = [0.14,0.0625,0.77,0.7];
     
-                plot(ccep.tt, squeeze(ccep.cc_epoch_sorted_select_reref_avg(elec,stimp,:)),'k','linewidth',2);  % plot the rereference signal in a solid line
+                plot(ccep.tt, squeeze(ccep.cc_epoch_sorted_reref_avg(elec,stimp,:)),'k','linewidth',2);  % plot the rereference signal in a solid line
                 hold on
                 
                 plot(ccep.tt(rater1.n1_peak_sample_check(elec,stimp)), rater1.n1_peak_amplitude_check(elec,stimp),'o','MarkerFaceColor','r','MarkerEdgeColor','r','MarkerSize',4)
                 plot(ccep.tt(rater2.n1_peak_sample_check(elec,stimp)), rater2.n1_peak_amplitude_check(elec,stimp),'o','MarkerFaceColor','b','MarkerEdgeColor','b','MarkerSize',4)
-                plot(ccep.tt,squeeze(ccep.cc_epoch_sorted_select_reref(elec,stimp,:,:)),'r:');                % plot the 10 separate stimulations
+                plot(ccep.tt,squeeze(ccep.cc_epoch_sorted_reref(elec,stimp,:,:)),'r:');                % plot the 10 separate stimulations
 
                 % Create a patch for the 0-9 ms interval post-stimulation
                 % in which no physiological activity can be measured.
@@ -51,7 +51,7 @@ for stimp = 1:size(rater1.n1_peak_sample_check,2)
                 ylim([ymin 600])
                 xlabel('Time(s)')
                 ylabel('Potential (\muV)')
-                title(sprintf('Electrode %s, stimulating %s',ccep.ch{elec},ccep.stimpnames_avg{stimp}))
+                title(sprintf('Electrode %s, stimulating %s-%s',ccep.ch{elec},ccep.cc_stimchans{stimp,:}))
                 legend(' ','Rater1','Rater2',' ')
 
                 % Decide which of the two N1-peaks is the correct one
@@ -80,10 +80,8 @@ raterComb.n1_peak_sample_check  = n1_peak_sample_check_comb;
 raterComb.ch                    = rater1.ch;
 raterComb.dataName              = rater1.dataName;
 raterComb.n1_peak_sample        = rater1.n1_peak_sample;
-raterComb.stimchans_avg         = rater1.stimchans_avg;
-raterComb.stimpnames_avg        = rater1.stimpnames_avg;
-raterComb.stimsets_avg          = rater1.stimsets_avg;
-raterComb.tb_channels           = rater1.tb_channels;
+raterComb.cc_stimchans          = rater1.cc_stimchans;
+raterComb.cc_stimsets           = rater1.cc_stimsets;
 raterComb.tt                    = rater1.tt;
 
 filefolder = fullfile(myDataPath.CCEPpath,'checkedN1s');
