@@ -24,42 +24,29 @@
 % - tb_channels
 %   table containing information regarding the recording channels (see BIDS
 %   structure)
-% - cc_stimsets_all
-%   matrix[stim pairs x 2] containing all electrode numbers that are
-%   stimulated
-% - cc_stimsets_avg
+% - cc_stimsets
 %   matrix[stim pairs x 2] containing all the electrode numbers that are
-%   stimulated (but now C1-C2 and C2-C1 are averaged)
-% - cc_stimchans_all
-%   cell[stim pairs x 2] containing all electrode names that are
-%   stimulated
-% - cc_stimchans_avg
+%   stimulated (C1-C2 and C2-C1 are combined)
+% - cc_stimchans
 %   cell[stim pairs x 2] containing all the electrode names that are
-%   stimulated (but now C1-C2 and C2-C1 are averaged)
-% - stimpnames_all
-%   cell[1 x stim pairs] containing the combined stimulus names ('C01-C02')
-% - stimpnames_avg
-%   cell[1 x stim pairs] containing the combined stimulus names for the
-%   averaged signals ('C01-C02' means both C01-C02 and C02-C01)
+%   stimulated (C1-C2 and C2-C1 are combined)
 % - cc_epoch_sorted
 %   matrix[channels x trials x stimulus pairs x samples] containing
-%   responses to stimulation of all stimulus pairs (so C01-C02 and C02-C01
-%   separately)
+%   responses to stimulation of all stimulus pairs (C01-C02 and C02-C01
+%   combined)
+% - cc_epoch_sorted_avg
+%   matrix[channels x stimulus pairs x samples] containing averaged
+%   responses to stimulation (averaged from cc_epoch_sorted)
 % - tt_epoch_sorted
 %   matrix[trials x stimulus pairs x samples] containing epoched time
 %   points
-% - cc_epoch_sorted_avg
-%   matrix[channels x stimulus pairs x samples] containing averaged
-%   responses to stimulation (averaged from cc_epoch_sorted_select)
-% - cc_epoch_sorted_select
-%   matrix[channels x stimulus pairs x trials x samples] containing all
-%   responses to stimluation of all stimulus pairs (but now C01-C02 and
-%   C02-C01 are combined).
 
 % OUTPUT:
 % - dataBase_merge:
 %   struct containing the same fields as the input struct dataBase, but now
-%   the runs are merged into one.
+%   the runs are merged into one. Some fields are empty, but this enables
+%   automatically removal of fields before saving the data for further
+%   analyses. 
 
 function dataBase_merge = merge_runs(dataBase)
 
@@ -69,8 +56,7 @@ function dataBase_merge = merge_runs(dataBase)
    dataBase_merge.run_label = {dataBase(:).run_label};    
    dataBase_merge.dataName = dataBase(1).dataName;
    dataBase_merge.ccep_header = dataBase(1).ccep_header;
-   dataBase_merge.ch = dataBase(1).ch;
-   dataBase_merge.tt = dataBase(1).tt;
+   dataBase_merge.tb_events = [];
    
    % Check whether the two tb_channels are the same, since these might be
    % different for different runs because electrodes can turn bad etc.
@@ -94,15 +80,17 @@ function dataBase_merge = merge_runs(dataBase)
         end
    end
       
+   dataBase_merge.tb_electrodes = dataBase(1).tb_electrodes;
+   dataBase_merge.ch = dataBase(1).ch;
+   dataBase_merge.data = [];
+   dataBase_merge.Burstsup = [];
+   dataBase_merge.Seizure = [];
+
    % Concatenate the stimpairs in the two runs
-   dataBase_merge.cc_stimsets_all = cat(1,dataBase(:).cc_stimsets_all);         
-   dataBase_merge.cc_stimsets_avg = cat(1,dataBase(:).cc_stimsets_avg);         
-   dataBase_merge.cc_stimchans_all = cat(1,dataBase(:).cc_stimchans_all);         
-   dataBase_merge.cc_stimchans_avg = cat(1,dataBase(:).cc_stimchans_avg);         
-   dataBase_merge.stimpnames_all = cat(2,dataBase(:).stimpnames_all); 
-   dataBase_merge.stimpnames_avg = cat(2,dataBase(:).stimpnames_avg);         
-   dataBase_merge.cc_epoch_sorted = cat(3,dataBase(:).cc_epoch_sorted);     
-   dataBase_merge.tt_epoch_sorted = cat(2,dataBase(:).tt_epoch_sorted);         
+   dataBase_merge.cc_stimsets = cat(1,dataBase(:).cc_stimsets);
+   dataBase_merge.cc_stimchans = cat(1,dataBase(:).cc_stimchans);         
+   dataBase_merge.cc_epoch_sorted = cat(2,dataBase(:).cc_epoch_sorted);     
    dataBase_merge.cc_epoch_sorted_avg = cat(2,dataBase(:).cc_epoch_sorted_avg);         
-   dataBase_merge.cc_epoch_sorted_select = cat(2,dataBase(:).cc_epoch_sorted_select);         
+   dataBase_merge.tt_epoch_sorted = cat(2,dataBase(:).tt_epoch_sorted);         
+   dataBase_merge.tt = dataBase(1).tt;
 end

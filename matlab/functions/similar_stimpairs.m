@@ -1,141 +1,100 @@
-function [dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop)
 % This script is used to check whether SPES-clin and SPES-prop have the
 % same electrode-stimulation pair combinations. 
-% First check for equal electrode names 
-% Then consider SPES-clin to have more stimpairs compared to SPES-prop,
-% then consider SPES-prop to have more stimpairs compared to SPES-clin. 
+% First check for equal electrode names, then compare the stimulus pairs
+% between SPES-clin and SPES-prop.
+
+% INPUTS:
+% - dataBase_clin and dataBase_prop
+%   both structs with the same fields:
+%   - ch
+%   cell[channels x 1] containing the channel names 
+%   - cc_stimchans
+%   cell[stim pairs x 2] containing all the electrode names that are
+%   stimulated (C1-C2 and C2-C1 are combined)
+%   - cc_stimsets
+%   matrix[stim pairs x 2] containing all the electrode numbers that are
+%   stimulated (C1-C2 and C2-C1 are combined)
+%   - cc_epoch_sorted
+%   matrix[channels x trials x stimulus pairs x samples] containing
+%   responses to stimulation of all stimulus pairs (C01-C02 and C02-C01
+%   combined)
+%   - cc_epoch_sorted_avg
+%   matrix[channels x stimulus pairs x samples] containing averaged
+%   responses to stimulation (averaged from cc_epoch_sorted)
+%   - cc_epoch_sorted_reref
+%   matrix[channels x trials x stimulus pairs x samples] containing
+%   responses to stimulation of all stimulus pairs (C01-C02 and C02-C01
+%   combined) --> re-referenced
+%   - cc_epoch_sorted_reref_avg
+%   matrix[channels x stimulus pairs x samples] containing averaged
+%   responses to stimulation (averaged from cc_epoch_sorted) -->
+%   re-referenced
+%   - tt_epoch_sorted
+%   matrix[trials x stimulus pairs x samples] containing epoched time
+%   points
+
+% OUTPUTS:
+% - dataBase:
+%   the fields in this struct, mentioned in INPUTS, are adapted so that
+%   only the stimulus pairs that are stimulated in both SPES-clin and
+%   SPES-prop remain.
+
+function [dataBase_clin, dataBase_prop] = similar_stimpairs(dataBase_clin, dataBase_prop)
 
 %% Check for same channels
-% If arrays are still not equal, check the order of the electrodes
 if ~isequal(dataBase_clin.ch, dataBase_prop.ch) 
     diff_order = find(~cellfun(@isequal, dataBase_prop.ch, dataBase_clin.ch));
     diff_clin = dataBase_clin.ch(diff_order);
     diff_prop = dataBase_prop.ch(diff_order);
 
-    str_diff = [repmat('%s, ',1,size(diff_order,1)-1),'%s'];
-    str_loc = [repmat('%d, ',1,size(diff_order,1)-1),'%d'];
-    
-    error(sprintf(['On row *' str_loc '* in the channels array is a difference between the two runs. \nIn SPESclin it is called ' str_diff, ...
-        '\n' 'In SPESprop it is called ' str_diff], diff_order, diff_clin{:}, diff_prop{:}))
+    error(['For example: On row %d, %d in the channels array, a ',...
+        'difference is found between the two runs. \nIn SPESclin, ',...
+        'it is called %s, %s, in SPESprop %s, %s. \n',...
+        'CHECK FILES FOR OTHER DIFFERENCES!\n'], ...
+        diff_order(1), diff_order(2), diff_clin{1}, ...
+        diff_clin{2}, diff_prop{1}, diff_prop{2})
+
 end
 
+%% Check whether the same stimulation pairs are stimulated, and otherwise
+% delete stimulation pairs that are only stimulated in either propofol or
+% clinical SPES
 
-%% Check whether the number of the stimulation pairs is equal
-if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)                    
-    [x_all,~ ] = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0); % Find the stimulation pairs extra in SPES-clin 
-    [x_avg,~] = find(ismember(dataBase_clin.stimpnames_avg' , dataBase_prop.stimpnames_avg' )==0) ;
-   
-    names = dataBase_clin.stimpnames_all(x_all);
+stimPropPresent = zeros(size(dataBase_prop.cc_stimchans,1),1);
+stimClinPresent = zeros(size(dataBase_clin.cc_stimchans,1),1);
 
-    stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-    fprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
-
-    % Remove the stimulation pairs that are only present in SPES-clin
-    dataBase_clin.cc_stimsets_all(x_all,:) = [];
-    dataBase_clin.cc_stimchans_all(x_all,:) = [];
-    dataBase_clin.stimpnames_all(:,x_all) = [];
-    dataBase_clin.cc_epoch_sorted(:,:,x_all,:) = [];
-    dataBase_clin.tt_epoch_sorted(:,x_all,:) = [];
+for iStim = 1:size(dataBase_clin.cc_stimchans,1)
+    iStimProp = find(strcmpi(dataBase_prop.cc_stimchans(:,1),dataBase_clin.cc_stimchans{iStim,1}) & ...
+        strcmpi(dataBase_prop.cc_stimchans(:,2),dataBase_clin.cc_stimchans{iStim,2}));
     
-    
-    dataBase_clin.cc_stimsets_avg(x_avg,:) = [];
-    dataBase_clin.cc_stimchans_avg(x_avg,:) = [];
-    dataBase_clin.stimpnames_avg(x_avg) = [];
-    dataBase_clin.cc_epoch_sorted_avg(:,x_avg,:) = [];
-    dataBase_clin.cc_epoch_sorted_select_reref(:,x_avg,:,:) = [];
-    dataBase_clin.cc_epoch_sorted_select_reref_avg(:,x_avg,:) = [];
-    dataBase_clin.cc_epoch_sorted_select(:,x_avg,:,:) = [];
-    
-    % Check again if previous step was enough.
-    if length(dataBase_clin.stimpnames_all) ~=  length(dataBase_prop.stimpnames_all) 
-        if length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_all)
-           [x_all,~] = find(ismember(dataBase_prop.stimpnames_all' , dataBase_clin.stimpnames_all' )==0);     % if SPESprop contains more stimpairs
-           [x_avg,~] = find(ismember(dataBase_prop.stimpnames_avg' , dataBase_clin.stimpnames_avg' )==0);     
-           
-           names = dataBase_prop.stimpnames_all(x_all);
-           stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-           fprintf(['Stimpairs only stimulated in SPESprop and not in SPESclin: \n' stringsz '\n'],names{:})
-            
-           % Remove the stimulation pairs that are only present in SPES-prop
-           dataBase_prop.cc_stimsets_all(x_all,:) = [];
-           dataBase_prop.cc_stimchans_all(x_all,:) = [];
-           dataBase_prop.stimpnames_all(:,x_all) = [];
-           dataBase_prop.cc_epoch_sorted(:,:,x_all,:) = [];
-           dataBase_prop.tt_epoch_sorted(:,x_all,:) = [];
-
-           dataBase_prop.cc_stimsets_avg(x_avg,:) = [];
-           dataBase_prop.cc_stimchans_avg(x_avg,:) = [];
-           dataBase_prop.stimpnames_avg(x_avg) = [];
-           dataBase_prop.cc_epoch_sorted_avg(:,x_avg,:) = [];
-           dataBase_prop.cc_epoch_sorted_select_reref(:,x_avg,:,:) = [];
-           dataBase_prop.cc_epoch_sorted_select_reref_avg(:,x_avg,:) = [];
-           dataBase_prop.cc_epoch_sorted_select(:,x_avg,:,:) = [];
-            
-        end
-    end
-        % When the stimulation pairs are still unequal, print warning
-        if sum(ismember(dataBase_clin.stimpnames_all, dataBase_prop.stimpnames_all)) ~= size(dataBase_clin.stimpnames_all,2)  || sum(ismember(dataBase_clin.stimpnames_all, dataBase_prop.stimpnames_all)) ~= size(dataBase_prop.stimpnames_all,2)
-            warning('%s still has unequal stimulation pairs.. \n',dataBase_clin.sub_label)
-        end
-        
-elseif length(dataBase_prop.stimpnames_all) > length(dataBase_clin.stimpnames_all)
-   [x_all,~] = find(ismember(dataBase_prop.stimpnames_all' , dataBase_clin.stimpnames_all' )==0);     % if SPESprop contains more stimpairs
-   [x_avg,~] = find(ismember(dataBase_prop.stimpnames_avg' , dataBase_clin.stimpnames_avg' )==0);     % if SPESprop contains more stimpairs
- 
-   names = dataBase_prop.stimpnames_all(x_all);
-   stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-   sprintf(['Stimpairs only stimulated in SPESprop and not in SPESclin: \n' stringsz '\n'],names{:})
-   
-   % Remove the stimulation pairs that are only present in SPES-prop    
-   dataBase_prop.cc_stimsets_all(x_all,:) = [];
-   dataBase_prop.cc_stimchans_all(x_all,:) = [];
-   dataBase_prop.stimpnames_all(:,x_all) = [];
-   dataBase_prop.cc_epoch_sorted(:,:,x_all,:) = [];
-   dataBase_prop.tt_epoch_sorted(:,x_all,:) = [];
-   
-   dataBase_prop.cc_stimsets_avg(x_avg,:) = [];
-   dataBase_prop.cc_stimchans_avg(x_avg,:) = [];
-   dataBase_prop.stimpnames_avg(x_avg) = [];
-   dataBase_prop.cc_epoch_sorted_avg(:,x_avg,:) = [];
-   dataBase_prop.cc_epoch_sorted_select_reref(:,x_avg,:,:) = [];
-   dataBase_prop.cc_epoch_sorted_select_reref_avg(:,x_avg,:) = [];
-   dataBase_prop.cc_epoch_sorted_select(:,x_avg,:,:) = [];
-    
-    % Check if the same number of stimpairs are used now.
-    if length(dataBase_clin.stimpnames_all) ==  length(dataBase_prop.stimpnames_all) 
-        if length(dataBase_clin.stimpnames_all) > length(dataBase_prop.stimpnames_all)
-             [x_all,~ ] = find(ismember(dataBase_clin.stimpnames_all' , dataBase_prop.stimpnames_all' )==0); 
-            [x_avg,~] = find(ismember(dataBase_clin.stimpnames_avg' , dataBase_prop.stimpnames_avg' )==0) ;
-
-            names = dataBase_clin.stimpnames_all(x_all);
-
-            stringsz = [repmat('%s, ',1,size(names,2)-1),'%s'];
-            sprintf(['Stimpairs only stimulated in SPESclin and not in SPESprop: \n' stringsz '\n'],names{:})
-            
-            % Remove the stimulation pairs that are only present in SPES-clin
-            dataBase_clin.cc_stimsets_all(x_all,:) = [];
-            dataBase_clin.cc_stimchans_all(x_all,:) = [];
-            dataBase_clin.stimpnames_all(:,x_all) = [];
-            dataBase_clin.stimpnames(:,x_all) = [];
-            dataBase_clin.cc_epoch_sorted(:,:,x_all,:) = [];
-            dataBase_clin.tt_epoch_sorted(:,x_all,:) = [];
-
-            dataBase_clin.cc_stimsets_avg(x_avg,:) = [];
-            dataBase_clin.cc_stimchans_avg(x_avg,:) = [];
-            dataBase_clin.stimpnames_avg(x_avg) = [];
-            dataBase_clin.cc_epoch_sorted_avg(:,x_avg,:) = [];
-            dataBase_clin.cc_epoch_sorted_select_reref(:,x_avg,:,:) = [];
-            dataBase_clin.cc_epoch_sorted_select_reref_avg(:,x_avg,:) = [];
-            dataBase_clin.cc_epoch_sorted_select(:,x_avg,:,:) = [];
-    
-        end
+    if ~isempty(iStimProp)
+        stimClinPresent(iStim) = 1;
+        stimPropPresent(iStimProp) = 1;
     end
 
-        % When the stimulation pairs are still unequal, print warning
-        if sum(ismember(dataBase_clin.stimpnames_all, dataBase_prop.stimpnames_all)) ~= size(dataBase_clin.stimpnames_all,2)  || sum(ismember(dataBase_clin.stimpnames_all, dataBase_prop.stimpnames_all)) ~= size(dataBase_prop.stimpnames_all,2)
-            warning('%s still has unequal stimulation pairs.. \n',dataBase_clin.sub_label)
-        end
-        
+end
+
+% Remove the stimulation pairs that are only present in SPES-clin
+dataBase_clin.cc_stimsets(stimClinPresent == 0,:) = [];
+dataBase_clin.cc_stimchans(stimClinPresent == 0,:) = [];
+dataBase_clin.cc_epoch_sorted(:,stimClinPresent == 0,:,:) = [];
+dataBase_clin.cc_epoch_sorted_avg(:,stimClinPresent == 0,:) = [];
+dataBase_clin.cc_epoch_sorted_reref(:,stimClinPresent == 0,:,:) = [];
+dataBase_clin.cc_epoch_sorted_reref_avg(:,stimClinPresent == 0,:) = [];
+dataBase_clin.tt_epoch_sorted(:,stimClinPresent == 0,:) = [];
+
+% Remove the stimulation pairs that are only present in SPES-prop
+dataBase_prop.cc_stimsets(stimPropPresent == 0,:) = [];
+dataBase_prop.cc_stimchans(stimPropPresent == 0,:) = [];
+dataBase_prop.cc_epoch_sorted(:,stimPropPresent == 0,:,:) = [];
+dataBase_prop.cc_epoch_sorted_avg(:,stimPropPresent == 0,:) = [];
+dataBase_prop.cc_epoch_sorted_reref(:,stimPropPresent == 0,:,:) = [];
+dataBase_prop.cc_epoch_sorted_reref_avg(:,stimPropPresent == 0,:) = [];
+dataBase_prop.tt_epoch_sorted(:,stimPropPresent == 0,:) = [];
+
+% When the stimulation pairs are still unequal, print warning
+if ~isequal(dataBase_clin.cc_stimsets,dataBase_prop.cc_stimsets)
+    warning('%s still has unequal stimulation pairs.. \n',dataBase_clin.sub_label)
 end
 
 end

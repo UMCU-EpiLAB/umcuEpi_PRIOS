@@ -46,8 +46,8 @@
 %   BIDS structure)
 % - ch
 %   cell[channels x 1] containing the channel names 
-% - raw_data
-%   matrix[channels x samples] containg the raw eeg-signals 
+% - data
+%   matrix[channels x samples] containg the eeg-signals 
 
 function dataBase = load_ECoGdata(cfg,myDataPath)
 
@@ -124,7 +124,6 @@ for iRun = 1:size(run_label,2)
     dataBase(iRun).tb_channels = tb_channels;
     dataBase(iRun).tb_electrodes = tb_electrodes;
     dataBase(iRun).ch = ch_incl;
-    dataBase(iRun).raw_data = data;
     dataBase(iRun).data = data;
 
 end

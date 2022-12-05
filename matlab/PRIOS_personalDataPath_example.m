@@ -2,7 +2,7 @@
 %% THIS IS AN EXAMPLE FILE
 % copy this one and fill in your own
 
-function localDataPath = personalDataPath_pros_example(varargin)
+function localDataPath = PRIOS_personalDataPath_example(varargin)
 
 % function that contains local data path, is ignored in .gitignore
 localDataPath.elec_input = '/folder/to/electrodes/excels/Metadata/Electrodes/';
