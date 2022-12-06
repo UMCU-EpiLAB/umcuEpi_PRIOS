@@ -16,9 +16,9 @@
 
 % OUTPUT:
 % - elecAmat
-%   matrix [respElec x stimElec] containing the 0's and 1's (= 1 when a
-%   CCEP is observed in a response electrode after stimulating another
-%   electrode).
+%   matrix [respElec x stimElec] containing the 0's and 1's (= 1 or higher
+%   when a CCEP is observed in a response electrode after stimulating
+%   another electrode).
 
 
 function elecAmat = rewrite_Amat(spes)

@@ -1,99 +1,97 @@
+% Calculate the network measures "indegree", "outdegree" and "betweenness
+% centrality" per electrode. The betweenness centrality (BC) is a measure
+% of how often an electrode is a bridge between other electrodes.
+% Electrodes with a high BC are often important controllers of signals,
+% because it connects multiple areas of the brain. The indegree is a
+% measure for the number of responses in a response channel evoked after
+% stimulating other electrodes. The outdegree is a measure of the number of
+% responses evoked after stimulating that electrode.
+%
+% NORMALISATION: We normalised the network measures to enable comparison
+% between several subjects. We divided the outdegree by the possible number
+% of CCEPs that can be evoked by the stimulated electrode (outgoing
+% connections). We dividied the indegree by the possible number of
+% stimulated electrodes that could have evoked a CCEP in the response
+% electrode (ingoing connections). We divided the BC by the multiplication
+% of the total number of possible outgoing and ingoing connections. 
+% 
+% More information can be found here: van Blooijs D, Leijten FSS, van Rijen
+% PC, Meijer HGE, Huiskamp GJM. Evoked directional network characteristics
+% of epileptogenic tissue derived from single pulse electrical stimulation.
+% Hum Brain Mapp. 2018 Nov;39(11):4611-4622. doi: 10.1002/hbm.24309. 
+
+% INPUT:
+% - spes
+%   this is a structure, containing the following fields:
+% - elecAmat
+%   matrix [respElec x stimElec] containing the 0's and 1's (= 1 or higher
+%   when a CCEP is observed in a response electrode after stimulating
+%   another electrode). 
+% - cc_stimsets matrix[stim pairs x 2] containing all
+%   the electrode numbers that are stimulated (C1-C2 and C2-C1 are
+%   combined) - ch cell[channels x 1] containing the channel names
+
+% OUTPUT:
+% - spes
+%   a structure to which the following fields are added in this function:
+% - indegreeNorm
+% - outdegreeNorm
+% - bcNorm
+
 function spes = calcNetworkMeasures(spes)
-% Determine the network characteristics/network parameters per
-% electrode/stimulation pair. 
-% The rewritten adjacency matrix of function rewrite_Amat.m is used to
-% generate an adjacency matrix with electrodes in columns and rows used for
-% the in-degree, out-degree and BC per electrode.
 
-% Pre-allocation
-% agreement_parameter = struct;   
+%% Process adjacency matrix
+% make a binary matrix which does not show how often a CCEP is evoked in a
+% certain response Channel after stimulating another channel, but whether a
+% CCEP is evoked. 
 
-% Original adjacency matrix with stimultion pairs in rows and electrodes in
-% columns
-% wantedAmatClin = Amat.AmatClin'; 
-% wantedAmatProp = Amat.AmatProp';
+elecAmat = spes.elecAmat;
+elecAmat(elecAmat >= 1) = 1;
 
-% Determine the total number of ERs per stimulation pair (row)
-% ERs_stimpClin = sum(wantedAmatClin,2);
-% ERs_stimpProp = sum(wantedAmatProp,2);    
+%% Calculate network measures
+% make a graph (G) and calculate the indegree, outdegree en betweenness
+% centrality (BC)
 
-% Total number of ERs evoked in an electrode 
-% (later the outdegree is determined which is also a measure for number of ERs evoked per electrode)
-% ERs_elecClin = sum(wantedAmatClin,1);
-% ERs_elecProp = sum(wantedAmatProp,1);
-    
-      
-%% Work with the electrodes in the columns and rows 
-% The rewritten adjacency matrix of function rewrite_Amat.m is used.
-% The betweenness centrality is a measure of how often an electrode is a
-% bridge between other electrodes. Electrodes with a high BC are often 
-% important controllers of signals because it connects multiple areas of the brain.
-% In-degree is a measure for the number of responses detected on an electrode evoked by other electrodes. 
-% Out-degree is a measure of the number of responses evoked by that electrode.
+G = digraph(elecAmat);                     
 
-elec_mat = spes.elec_Amat;
-
-% The network parameters are normalised later (line 58), it is therefore not
-% necessary to know whether an electrode evoked ERs when present in
-% both stimulation pairs. 
-elec_mat(elec_mat == 2) = 1;
-
-% Digraph finds where each row is connected with a column (where a 1 is filled in)
-G = digraph(elec_mat);                     
+indegree = centrality(G,'indegree');   
+outdegree = centrality(G,'outdegree'); 
 bc = centrality(G,'betweenness');                            
-indegree = centrality(G,'indegree');   % Equal to connections per column of elec_matClin 
-outdegree = centrality(G,'outdegree'); % Equal to connections per row of elec_matClin 
 
-
-%% Normalisation %%
-% The parameters are normalised by considering the number of stimulation 
-% pairs an electrode is part of in each electrode, as suggested van Blooijs (2018)
+%% Normalisation
 
 % Total number of electrodes
-elec_tot = size(spes.n1_peak_sample,1);
+nChanTot = size(spes.ch,1);
 % Total number of stimpairs
-stimp_tot = size(spes.n1_peak_sample,2);
+nStimPairTot = size(spes.cc_stimsets,1);
 
 % Number of times an electrode is part of a stimulation pair  
-times_elec_in_stimp = zeros(1,elec_tot);
-for el = 1:elec_tot
-    times_elec_in_stimp(el) = size(find(spes.stimsets_avg==el),1);
+timesChanInStimp = zeros(nChanTot,1);
+for nChan = 1:nChanTot
+    timesChanInStimp(nChan,:) = size(find(spes.cc_stimsets == nChan),1);
 end
 
-% Totaal number of possible connections
-n_outtot = zeros(1,elec_tot);
-n_intot = zeros(1,elec_tot);
-for el = 1:elec_tot
-    % Total possible outgoing responses for electrode (el)
-    % Each electrode that is part of 2 stimulation pairs (times_elec_in_stimp = 2) could, in theory,
-    % evoke twice as many reponses
-    n_outtot(el) = times_elec_in_stimp(el)*(elec_tot-2);        % Minus 2 because a stim-pair has 2 electrodes that cannot receive a response
+% Total possible outgoing connections for each stimulated electrode: Each
+% electrode that is part of 2 stimulation pairs (timesChanInStimp = 2, for
+% example C02 in C01-C02 and C02-C03) could, in theory, evoke twice as many
+% reponses
+nOutTot = timesChanInStimp*(nChanTot-2); % Minus 2 because a stim-pair has 2 electrodes in which a response cannot be evoked
+
+% Total possible ingoing connections for each response electrode: In
+% theory, all stimulation pairs minus the pairs in which the specific
+% response electrode is stimulated, could evoke a response in the response
+% electrode.
+nInTot = 2*(nStimPairTot - timesChanInStimp); % Times 2 because each stim-pair had 2 electrodes and each electrode could have led to a response
+
+% Apply the normalisation
+outdegreeNorm = outdegree./nOutTot;
+indegreeNorm = indegree./nInTot;
+bcNorm = bc./(nInTot.*nOutTot);
     
-    % Total possible incoming responses for electrode (el).
-    % In theory, all stimulation pairs minus the ones that electrode (el)
-    % is part of, could evoke a response on electrode (el). 
-    n_intot(el) = 2*(stimp_tot - times_elec_in_stimp(el));      % Times 2 because each stim-pair had 2 electrodes and each electrode could have led to a response
-end
-
-% Pre-allocation Network characteristics  
-outdegreenorm = zeros(1,elec_tot); indegreenorm = zeros(1,elec_tot); BCnorm = zeros(1,elec_tot); 
-
-% Perform the normalisation
-for el = 1:elec_tot
-
-    outdegreenorm(el) = outdegree(el)/n_outtot(el);
-    indegreenorm(el) = indegree(el)/n_intot(el);
-    BCnorm(el) = bc(el)/(n_intot(el)*n_outtot(el));
-    
-end
-
-% Save the values in an struct
-spes.indegreeN = indegreenorm;
-spes.outdegreeN = outdegreenorm;
-spes.BCN = BCnorm;
-spes.ERs_stimp = ERs_stimpClin;
-spes.ERs_elec = ERs_elecClin;
-
+%% Write variable back to struct
+spes.indegreeNorm = indegreeNorm;
+spes.outdegreeNorm = outdegreeNorm;
+spes.bcNorm = bcNorm;
 
 end
 
