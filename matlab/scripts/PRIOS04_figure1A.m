@@ -123,7 +123,7 @@ hold off
 
 ieeg_viewLight(v_d(1),v_d(2))
 
-figureName = sprintf('%sfig1a_brain_%s',...
+figureName = sprintf('%sfig1A_brain_%s',...
     myDataPath.Figures,sub_label);
 
 if ~exist(myDataPath.Figures,"dir")
