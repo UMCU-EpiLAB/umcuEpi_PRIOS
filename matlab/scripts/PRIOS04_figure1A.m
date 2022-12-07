@@ -29,7 +29,7 @@ clear rootPath RepoPath matlabFolder
 %% select subject
 
 sub_label = 'sub-PRIOS03'; % in Fig1a of the article, subject PRIOS03 is used
-stimChan = {'F01','F02'};
+stimChan = {'F02','F03'};
 respChan = {'F18'};
 
 %% add electrodes.tsv

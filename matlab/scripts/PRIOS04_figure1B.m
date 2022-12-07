@@ -73,7 +73,7 @@ clear foldername filenameClin filenameProp
 close all
 
 % select one of the stimulus pair - response electrode combinations
-nElec = 4;
+nElec = 21;
 respElec = respElecs(nElec);
 stimElec = stimElecs(nElec);
 
