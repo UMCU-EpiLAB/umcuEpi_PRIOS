@@ -10,5 +10,4 @@ desktop.ini
 *.asv
 
 # No personalDataPath
-personalDataPath.m
-personalDataPath_pros.m
+PRIOS_personalDataPath.m
