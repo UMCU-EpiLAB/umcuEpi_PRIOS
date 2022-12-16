@@ -107,24 +107,9 @@ for subj = 1:size(all_sublabel,2)
         %% Combine the visually annotated CCEPs of the two observers
         % Exclude responses that were scored differently between observers
         % and correct the N1-peak if observers annotated a peak with >5
-        % samples difference.
+        % samples difference. --> save this in derivatives/checkedN1s/
 
         interobserver_analysis(rater1, rater2, myDataPath)
 
     end % for-loop tasks
 end % for-loop subjects
-
-
-
-
-%% moet weg
-% FIXTHIS: dit moet nog weg
-% %% Plot electrodes position on brain with N1-latency information
-% % Determine N1-latency per brain part
-% close all
-% 
-% plot_electrodes_on_MRI(myDataPath, dataBase)
-% 
-% %% Determine the distance between electrodes to determine correlation between N1-latency and electrode distance
-% close all
-% distance_elec_stimp(dataBase, myDataPath, av_lat_elec)
