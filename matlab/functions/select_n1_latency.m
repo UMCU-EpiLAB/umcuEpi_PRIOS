@@ -20,6 +20,7 @@ ccep = load(fullfile(myDataPath.dataPath,'derivatives','CCEPs',files_in_folder(i
 
 % preallocation
 n1_peak_sample_check_comb = NaN(size(rater1.n1_peak_amplitude_check));
+n1_peak_amplitude_check_comb = NaN(size(rater1.n1_peak_amplitude_check));
 
 for stimp = 1:size(rater1.n1_peak_sample_check,2)
     for elec = 1:size(rater1.n1_peak_sample_check,1)
@@ -59,14 +60,17 @@ for stimp = 1:size(rater1.n1_peak_sample_check,2)
 
                 if answer == 1
                     n1_peak_sample_check_comb(elec,stimp) = rater1.n1_peak_sample_check(elec,stimp);
+                    n1_peak_amplitude_check_comb(elec,stimp) = rater1.n1_peak_amplitude_check(elec,stimp);
 
                 elseif answer == 2 
                     n1_peak_sample_check_comb(elec,stimp) = rater2.n1_peak_sample_check(elec,stimp);
+                    n1_peak_amplitude_check_comb(elec,stimp) = rater2.n1_peak_amplitude_check(elec,stimp);
 
                 end
 
             else % when latencies for both observers were (almost) equal  
                 n1_peak_sample_check_comb(elec,stimp) = round(mean([rater1.n1_peak_sample_check(elec,stimp),rater2.n1_peak_sample_check(elec,stimp)]));
+                n1_peak_amplitude_check_comb(elec,stimp) = ccep.cc_epoch_sorted_reref_avg(elec,stimp,n1_peak_sample_check_comb(elec,stimp));
 
             end
         end
@@ -76,13 +80,15 @@ end
 %% save file
 % save struct in which visual checks of the N1-latencies of both observers are combined
 
-raterComb.n1_peak_sample_check  = n1_peak_sample_check_comb;
+raterComb.n1_peak_sample_check  = n1_peak_sample_check_comb; % checked the automatically detected N1s
 raterComb.ch                    = rater1.ch;
 raterComb.dataName              = rater1.dataName;
-raterComb.n1_peak_sample        = rater1.n1_peak_sample;
+raterComb.n1_peak_sample        = rater1.n1_peak_sample; % detected N1s
 raterComb.cc_stimchans          = rater1.cc_stimchans;
 raterComb.cc_stimsets           = rater1.cc_stimsets;
 raterComb.tt                    = rater1.tt;
+raterComb.n1_peak_amplitude     = rater1.n1_peak_amplitude; % detected N1s
+raterComb.n1_peak_amplitude_check = n1_peak_amplitude_check_comb; % checked the automatically detected N1s
 
 filefolder = fullfile(myDataPath.CCEPpath,'checkedN1s');
 [~,filename] = fileparts(rater1.dataName);
