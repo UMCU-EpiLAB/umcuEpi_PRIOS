@@ -61,9 +61,11 @@ for subj = 1:size(all_sublabel,2)
 
         %% load ECoG files
 
+        % find files with PRIOSXX and SPESclin/SPESprop and _SB or _DvB
         idx_rater1 = contains(names,all_sublabel{subj}) & contains(names,all_tasklabel{task}) & contains(names,'_SB');
         idx_rater2 = contains(names,all_sublabel{subj}) & contains(names,all_tasklabel{task}) & contains(names,'_DvB');
 
+        % load N1s checked by DvB or SB
         rater1 = load(fullfile(files(idx_rater1).folder, files(idx_rater1).name));
         rater2 = load(fullfile(files(idx_rater2).folder, files(idx_rater2).name));
         
